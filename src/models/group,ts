@@ -1,0 +1,99 @@
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from '../configs/sql'; // adjust the path
+
+class Group extends Model {
+    public id!: string;
+    public name?: string;
+    public hastag?: string;
+    public admin?: string;
+}
+
+Group.init({
+    id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    name: {
+        type: DataTypes.STRING,
+        unique: true,
+    },
+    hastag: {
+        type: DataTypes.STRING,
+    },
+    admin: {
+        type: DataTypes.STRING,
+    },
+},
+    {
+
+        sequelize,
+        modelName: 'Group',
+        timestamps: false,
+        tableName: 'Groups'
+    }
+);
+
+export { Group };
+
+
+type methods = {
+    create: any,
+    edit: any,
+    destroy: any
+}
+
+import { Request, Response } from 'express';
+
+async function check(req: Request, res: Response): Promise<any> {
+    const { name } = req.body;
+    if (! await Group.findOne({ where: { phoneNumber: name } })) {
+        return res.status(400).json({ message: 'Name already registered' });
+    };
+}
+let methods: methods = {
+
+    create: async (req: Request, res: Response): Promise<any> => {
+
+        try {
+            await check(req.body, res);
+            const { name, hastag, admin } = req.body;
+            const newGroup = await Group.create({ name, hastag, admin });
+
+            return res.status(201).json({ message: 'group created' });
+        }
+        catch (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to create group' });
+        }
+    },
+    edit: async (req: Request, res: Response): Promise<any> => {
+
+        try {
+            await check(req.body, res);
+            const { name, hastag, admin } = req.body;
+            const newGroup = await Group.create({ name, hastag, admin });
+
+            return res.status(201).json({ message: 'group created' });
+        }
+        catch (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to create group' });
+        }
+    },
+    destroy: async (req: Request, res: Response): Promise<any> => {
+
+        try {
+            await check(req.body, res);
+            const { name, hastag, admin } = req.body;
+            const newGroup = await Group.create({ name, hastag, admin });
+
+            return res.status(201).json({ message: 'group created' });
+        }
+        catch (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to create group' });
+        }
+    },
+}

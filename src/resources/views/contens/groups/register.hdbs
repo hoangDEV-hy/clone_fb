@@ -1,0 +1,9 @@
+<form action="/">
+    <div>
+        <input type="text" name="name" placeholder="Tên group">
+    </div>
+    <div>
+        <input type="text" name="hastag" placeholder="Chủ đề group">
+    </div>
+    <button type="submit">Tạo nhóm</button>
+</form>

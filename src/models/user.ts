@@ -1,0 +1,189 @@
+import {
+    DataTypes,
+    Op,
+    Model
+} from 'sequelize';
+import { sequelize as db } from '../configs/sql';
+
+interface UserAttributes {
+    id: string;
+    name?: string;
+    alias?: string;
+    hometown?: string;
+    school?: string;
+    phoneNumber?: string;
+    password: string;
+    avatar?: any;
+    thumbnai?: any;
+}
+
+// 2. Interface cho khi tạo (bỏ id vì hook sẽ tự sinh)
+interface UserCreationAttributes extends Omit<UserAttributes, 'id'> { }
+
+// 3. Khai báo class model với generic Model<UserAttributes, UserCreationAttributes>
+class User extends Model<UserAttributes, UserCreationAttributes>
+    implements UserAttributes {
+    declare id: string;
+    declare name?: string;
+    declare alias?: string;
+    declare hometown?: string;
+    declare school?: string;
+    declare phoneNumber?: string;
+    declare password: string;
+    declare avatar?: any;
+    declare thumbnai?: any;
+}
+
+
+User.init({
+    id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
+    },
+    name: {
+        type: DataTypes.STRING,
+    },
+    alias: {
+        type: DataTypes.STRING,
+    },
+    hometown: {
+        type: DataTypes.STRING,
+    },
+    school: {
+        type: DataTypes.STRING,
+    },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        unique: true,
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    avatar: {
+        type: DataTypes.BLOB('long'),
+        allowNull: true,
+        defaultValue: '../../../public/picture/avatar'
+    },
+    thumbnai: {
+        type: DataTypes.BLOB('long'),
+        allowNull: true,
+        defaultValue: '../../../public/picture/avatar'
+    }
+}, {
+    sequelize: db,
+    modelName: 'user',
+    freezeTableName: true,
+    hooks: {
+        beforeValidate: async (user: User) => {
+            if (!user.id) {
+                const id = await getNextUsername();
+                user.id = id;
+            }
+            if (!user.name) user.name = user.id + 'person';
+            if (!user.alias) user.alias = user.id + 'person';
+        }
+    }
+});
+
+async function getNextUsername() {
+    const lastUser = await User.findOne({
+        where: {
+            id: {
+                [Op.like]: 'user %'
+            }
+        },
+        order: [['id', 'DESC']],
+    });
+
+    let nextNumber = 1;
+    if (lastUser?.id) {
+        const match = lastUser.id.match(/user (\d+)/);
+        if (match) {
+            nextNumber = parseInt(match[1], 10) + 1;
+        }
+    }
+    return `user ${nextNumber}`;
+}
+
+export { User };
+import { Request, Response } from 'express';
+
+
+const methods = {
+
+    checkUser: async (phone: string, password: string, res: Response): Promise<any> => {
+        try {
+
+            const user = await User.findOne({
+                where: {
+                    phoneNumber: phone,
+                    password: password
+                }
+            });
+
+            if (!user) {
+                return res.status(401).json({ message: 'Invalid phone number or password' });
+            }
+
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send({ error: 'Internal Server Error' });
+        }
+    },
+
+    getPass: async (req: Request, res: Response): Promise<any> => {
+        const inputPhone = req.query.phone as string;
+        const user = await User.findOne({ where: { phoneNumber: inputPhone } });
+
+        if (!user) {
+            return res.send({ error: "Account does not exist." });
+        } else {
+            res.render('contens/login_dangKi/setPass', { inputPhone });
+        }
+    },
+
+    setPass: async (req: Request, res: Response): Promise<any> => {
+        const inputPhone = req.query.phone as string;
+        try {
+            const user = await User.findOne({ where: { phoneNumber: inputPhone } });
+            const { password } = req.body;
+
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            user.password = password;
+            await user.save();
+
+            return res.status(200).json({ message: 'Password updated' });
+
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to update password' });
+        }
+    },
+
+    createUser: async (req: Request, res: Response): Promise<any> => {
+        const { phone, password } = req.body;
+        try {
+            const existingUser = await User.findOne({ where: { phoneNumber: phone } });
+
+            if (existingUser) {
+                return res.status(400).json({ message: 'Phone number already registered' });
+            }
+
+            const newUser = await User.create({ phoneNumber: phone, password });
+
+            return res.status(201).json({ message: 'User created', user: newUser });
+
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to create user' });
+        }
+    }
+
+};
+
+export { methods };

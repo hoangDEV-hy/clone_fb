@@ -1,0 +1,19 @@
+@charset "UTF-8";
+/* Ghi đè font mặc định bằng Inter */
+body {
+  font-family: "Inter", sans-serif;
+}
+
+/* Loại bỏ mũi tên tăng/giảm cho input type number trên các trình duyệt WebKit (Chrome, Safari) */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Loại bỏ mũi tên tăng/giảm cho input type number trên Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/*# sourceMappingURL=app.css.map */

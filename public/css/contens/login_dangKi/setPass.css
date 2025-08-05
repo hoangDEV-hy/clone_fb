@@ -1,0 +1,7 @@
+@charset "UTF-8";
+/* Ghi đè font mặc định của trang bằng Inter */
+body {
+  font-family: "Inter", sans-serif;
+}
+
+/*# sourceMappingURL=app.css.map */

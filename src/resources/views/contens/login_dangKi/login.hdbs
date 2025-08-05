@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập</title>
+    <!-- Tích hợp Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tích hợp font Inter từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Liên kết đến tệp CSS bên ngoài -->
+    <link rel="stylesheet" href="../../../../../public/css/contens/login_dangKi/login.css">
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Container chính, căn giữa nội dung -->
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md mx-4">
+
+            <!-- Tiêu đề form -->
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Chào mừng trở lại!</h2>
+
+            <!-- Form đăng nhập -->
+            <form action="/login" method="post">
+
+                <!-- Nhóm input cho số điện thoại -->
+                <div class="mb-4">
+                    <label for="phone" class="block text-gray-700 text-sm font-semibold mb-2">Số điện thoại</label>
+                    <input type="number" id="phone" name="phone" placeholder="Nhập số điện thoại của bạn"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow duration-200">
+                </div>
+
+                <!-- Nhóm input cho mật khẩu -->
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Mật khẩu</label>
+                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu của bạn"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow duration-200">
+                </div>
+
+                <!-- Nút Đăng nhập -->
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300">
+                    Đăng Nhập
+                </button>
+
+                <!-- Phần link Quên mật khẩu và Đăng ký -->
+                <div class="flex justify-between items-center mt-6">
+                    <a id="setPass" href="#" class="text-sm text-blue-600 hover:underline">Quên mật khẩu?</a>
+                    <a href="/login/dk" class="text-sm text-blue-600 hover:underline">Đăng Ký</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Đoạn script của bạn được giữ nguyên
+        document.querySelector('#setPass').addEventListener('click', function (event) {
+            event.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ a
+
+            // Lấy giá trị từ input có name="phone"
+            let phoneInput = document.getElementsByName('phone')[0];
+            let phone = phoneInput.value;
+
+            if (phone) {
+                // Nếu có số điện thoại, chuyển hướng đến trang đặt lại mật khẩu
+                window.location.href = "/login/setPass?phone=" + encodeURIComponent(phone);
+            } else {
+                // Nếu không, hiển thị thông báo (có thể thay bằng một modal đẹp hơn)
+                alert('Vui lòng nhập số điện thoại để lấy lại mật khẩu.');
+                phoneInput.focus(); // Focus vào ô nhập liệu
+            }
+        });
+    </script>
+
+</body>
+
+</html>
