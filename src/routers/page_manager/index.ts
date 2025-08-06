@@ -1,8 +1,7 @@
 import express from 'express'
-let route=express.Router();
+import { route as user } from './user'
+let route = express.Router();
 
-route.get('/user', (req: any, res:any)=>{
-    res.render('../../../resources/views/contens/page_manager/user');
-})
+route.use('/user', user);
 
-export {route}
+export { route }

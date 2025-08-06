@@ -1,7 +1,7 @@
 import express from 'express';
 import { method as methods } from '../../constrollers/login/login';
 type MethodType = {
-    check: (a: string, b: string, res: any) => void;
+    check: ({ }, res: any) => void;
     getPass: (req: any, res: any) => void;
     setPass: (req: any, res: any) => void;
     createUser: (req: any, res: any) => void;

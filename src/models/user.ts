@@ -14,7 +14,7 @@ interface UserAttributes {
     phoneNumber?: string;
     password: string;
     avatar?: any;
-    thumbnai?: any;
+    thumbnail?: any;
 }
 
 // 2. Interface cho khi tạo (bỏ id vì hook sẽ tự sinh)
@@ -31,7 +31,7 @@ class User extends Model<UserAttributes, UserCreationAttributes>
     declare phoneNumber?: string;
     declare password: string;
     declare avatar?: any;
-    declare thumbnai?: any;
+    declare thumbnail?: any;
 }
 
 
@@ -62,14 +62,12 @@ User.init({
         allowNull: false,
     },
     avatar: {
-        type: DataTypes.BLOB('long'),
+        type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: '../../../public/picture/avatar'
     },
-    thumbnai: {
-        type: DataTypes.BLOB('long'),
+    thumbnail: {
+        type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: '../../../public/picture/avatar'
     }
 }, {
     sequelize: db,
@@ -111,20 +109,18 @@ export { User };
 import { Request, Response } from 'express';
 
 
+
 const methods = {
 
-    checkUser: async (phone: string, password: string, res: Response): Promise<any> => {
+    checkUser: async (conditions: { [key: string]: any }, res: Response): Promise<any> => {
         try {
 
             const user = await User.findOne({
-                where: {
-                    phoneNumber: phone,
-                    password: password
-                }
+                where: conditions
             });
 
             if (!user) {
-                return res.status(401).json({ message: 'Invalid phone number or password' });
+                return res.status(401).json({ message: 'Invalid ' });
             }
 
         } catch (err) {
@@ -174,7 +170,9 @@ const methods = {
                 return res.status(400).json({ message: 'Phone number already registered' });
             }
 
-            const newUser = await User.create({ phoneNumber: phone, password });
+            const avatar: string = 'pictures/avatar.jpg';
+            const thumbnail: string = 'pictures/avatar.jpg'
+            const newUser = await User.create({ phoneNumber: phone, password, avatar: avatar, thumbnail: thumbnail });
 
             return res.status(201).json({ message: 'User created', user: newUser });
 
@@ -182,6 +180,17 @@ const methods = {
             console.error(err);
             return res.status(500).json({ error: 'Failed to create user' });
         }
+    },
+
+    updateUser: async (data: { [key: string]: string }, id: any, res: Response): Promise<any> => {
+        await User.update(
+            data,
+            {
+                where: {
+                    id: id
+                }
+            }
+        )
     }
 
 };
