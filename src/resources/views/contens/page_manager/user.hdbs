@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="../../../../../css/contens/page_manager/user.css">
     <style>
 
     </style>
@@ -13,7 +13,7 @@
 
 <body>
     <div class="head">
-        <img src="{{user.avatar}}" alt="ảnh thumbnai">
+        <img src="{{user.thumbnail}}" alt="ảnh thumbnai">
 
         <table>
             <tr>
@@ -21,7 +21,8 @@
                     <table>
 
                         <th style="width: 10%;">
-                            <form action="/page_manager/user/upload" method="post" enctype="multipart/form-data">
+                            <form action="/page_manager/user/upload/thumbnail" method="post"
+                                enctype="multipart/form-data">
                                 <input type="file" name="image" accept="image/*" required>
                                 <button type="submit">Tải lên</button>
                                 <img src={{user.avatar}} alt="avt">
@@ -29,7 +30,7 @@
 
                         </th>
                         <th style="width: 90%;">
-                            <form action="/page_manager/user/update" method="post">
+                            <form action="/page_manager/user/update/avatar" method="post">
                                 <input type="text" name="name" value="{{user.name}}">
                                 <input type="text" name="hastag" value="{{user.hastag}}">
                                 <button type="submit">xác nhận</button>

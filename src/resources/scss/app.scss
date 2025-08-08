@@ -1,15 +1,408 @@
-/* Ghi đè font mặc định bằng Inter */
-body {
-    font-family: 'Inter', sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Loại bỏ mũi tên tăng/giảm cho input type number */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    line-height: 1.4;
+}
+
+body.nenMo {
+    overflow: hidden;
+}
+
+body.nenMo::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 999;
+    display: block;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    background-color: transparent;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    text-align: left;
+    font-weight: normal;
+    vertical-align: top;
+    padding: 2px 5px;
+    white-space: nowrap;
+}
+
+h3,
+h4 {
     margin: 0;
 }
 
-input[type=number] {
-    -moz-appearance: textfield;
+/* --- Header Section --- */
+.head {
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 15px;
+}
+
+.head>img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    background-color: #ddd;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+/* Sử dụng Flexbox để căn chỉnh các phần tử trong header một cách hiệu quả */
+.head-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.head-info {
+    display: flex;
+    align-items: center;
+}
+
+.head img[alt="avt"] {
+    width: 120px;
+    height: 120px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    display: block;
+    margin-right: 15px;
+    /* Thêm khoảng cách bên phải */
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-details h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.user-details h4 {
+    font-size: 0.9rem;
+    color: #65676b;
+}
+
+/* Form styles inside the head section */
+.head form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.head form input[type="file"] {
+    flex-grow: 1;
+    color: #65676b;
+    font-size: 0.9rem;
+}
+
+.head form input[type="text"] {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+    margin-bottom: 5px;
+}
+
+.head form input[type="text"]:focus {
+    border-color: #1877f2;
+}
+
+.head form button {
+    padding: 8px 15px;
+    background-color: #1877f2;
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.head form button:hover {
+    background-color: #166fe5;
+}
+
+.head-button {
+    text-align: right;
+}
+
+.head-button button {
+    padding: 8px 15px;
+    background-color: #e4e6eb;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #050505;
+}
+
+.head-button button:hover {
+    background-color: #d8dadf;
+}
+
+/* --- Body Section --- */
+.body {
+    width: 60%;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+/* --- Think Box --- */
+#think {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#think textarea {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    resize: none;
+    font-size: 1rem;
+    background-color: #f0f2f5;
+    min-height: 40px;
+    outline: none;
+}
+
+#think textarea::placeholder {
+    color: #65676b;
+}
+
+#think button {
+    padding: 8px 15px;
+    background-color: #1877f2;
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#think button:hover {
+    background-color: #166fe5;
+}
+
+/* --- News Post --- */
+.news {
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.bd_ct_news_nguoiDang {
+    padding: 12px 16px 0 16px;
+}
+
+.bd_ct_news_nguoiDang table {
+    width: auto;
+}
+
+.bd_ct_news_nguoiDang th {
+    padding: 0 8px 0 0;
+    vertical-align: middle;
+}
+
+.bd_ct_news_nguoiDang img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.bd_ct_news_nguoiDang h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.bd_ct_news_nguoiDang h4 {
+    font-size: 0.8rem;
+    color: #65676b;
+}
+
+.bd_ct_news_title {
+    padding: 8px 0 12px 0;
+}
+
+.bd_ct_news_title h3 {
+    padding: 0 16px;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.bd_ct_news_title img {
+    width: 100%;
+    height: auto;
+    margin-top: 8px;
+    background-color: #eee;
+}
+
+.bd_ct_news_commend {
+    padding: 4px 16px 4px 16px;
+}
+
+/* --- Like Count (Combined for news1 & news2) --- */
+#bd_ct_news_commend_thongKe_news1,
+#bd_ct_news_commend_thongKe_news2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: #65676b;
+    border-bottom: 1px solid #e4e6eb;
+}
+
+#bd_ct_news_commend_thongKe_news1 img,
+#bd_ct_news_commend_thongKe_news2 img {
+    width: 18px;
+    height: 18px;
+    background-color: #1877f2;
+    /* Placeholder icon color */
+    border-radius: 50%;
+    padding: 2px;
+}
+
+/* --- Action Buttons (Like, Comment, Share) --- */
+.bd_ct_news_commend_tuongTac {
+    display: flex;
+    justify-content: space-around;
+    padding: 4px 0;
+}
+
+.bd_ct_news_commend_tuongTac button {
+    flex-grow: 1;
+    color: #606770;
+    font-weight: 600;
+    padding: 8px 6px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.bd_ct_news_commend_tuongTac button:hover {
+    background-color: #f0f2f5;
+}
+
+/* --- Liked State Styles (Combined for news1 & news2) --- */
+#bd_ct_news_cmd_tuongTac_like_news1[style*="background-color: blue"],
+#bd_ct_news_cmd_tuongTac_like_news2[style*="background-color: blue"] {
+    color: #1877f2;
+    background-color: transparent !important;
+    /* Override inline JS style for consistency */
+}
+
+#bd_ct_news_cmd_tuongTac_like_news1[style*="background-color: blue"]:hover,
+#bd_ct_news_cmd_tuongTac_like_news2[style*="background-color: blue"]:hover {
+    background-color: #e7f3ff !important;
+    /* Light blue hover when liked */
+}
+
+/* --- Popup --- */
+.bd_ct_news_cmd_tuongTac_pop {
+    display: none;
+    /* Controlled by JS */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    max-width: 80%;
+    max-height: 85vh;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* Ensures flex display is applied when JS makes it visible */
+.bd_ct_news_cmd_tuongTac_pop[style*="display: block"] {
+    display: flex !important;
+}
+
+.bd_ct_news_cmd_tuongTac_pop>button {
+    /* Close button */
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #e4e6eb;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
+    color: #606770;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    z-index: 1001;
+}
+
+.bd_ct_news_cmd_tuongTac_pop>button:hover {
+    background: #d8dadf;
+}
+
+#bd_ct_news_cmd_tuongTac_ifP {
+    /* Popup iframe */
+    flex-grow: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* --- Hide unused elements --- */
+#bodyright_mesifP {
+    display: none;
 }

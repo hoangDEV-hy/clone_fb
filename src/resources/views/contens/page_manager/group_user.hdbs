@@ -1,0 +1,42 @@
+<div style="display: flex;">
+    <div>
+        <div>
+            <a href="/page_manager/group_user/joined"> các nhóm tham gia</a>
+        </div>
+        <div>
+            <a href="/page_manager/group_user/waited"> các nhóm chờ duyệt</a>
+        </div>
+    </div>
+    <div>
+        {{#each group}}
+        <div class="the card">
+            <span id="some-element" data-id="{{this.id}}" style="display: none;"></span>
+            <img src="" alt="">
+            <input type="text" name="name" value="{{this.name}}">
+            <div style="display: flex;">
+                <button>thêm</button>
+                <div name="more" style="visibility: hidden;">
+                    <a href="">truy cập</a>
+                    <a href="">rời nhóm</a>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let button = document.getElementsByTagName("button")[0];
+        let moreElement = document.getElementsByName('more')[0];
+
+        button.addEventListener("click", function () {
+            if (moreElement.style.visibility === 'visible') {
+                moreElement.style.visibility = 'hidden';
+            } else {
+                moreElement.style.visibility = 'visible';
+            }
+        });
+    });
+</script>

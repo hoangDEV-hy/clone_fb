@@ -5,24 +5,10 @@ import {
 } from 'sequelize';
 import { sequelize as db } from '../configs/sql';
 
-interface UserAttributes {
-    id: string;
-    name?: string;
-    alias?: string;
-    hometown?: string;
-    school?: string;
-    phoneNumber?: string;
-    password: string;
-    avatar?: any;
-    thumbnail?: any;
-}
 
-// 2. Interface cho khi tạo (bỏ id vì hook sẽ tự sinh)
-interface UserCreationAttributes extends Omit<UserAttributes, 'id'> { }
 
 // 3. Khai báo class model với generic Model<UserAttributes, UserCreationAttributes>
-class User extends Model<UserAttributes, UserCreationAttributes>
-    implements UserAttributes {
+class User extends Model {
     declare id: string;
     declare name?: string;
     declare alias?: string;
@@ -32,6 +18,7 @@ class User extends Model<UserAttributes, UserCreationAttributes>
     declare password: string;
     declare avatar?: any;
     declare thumbnail?: any;
+    declare idGroup?: any;
 }
 
 
@@ -68,10 +55,14 @@ User.init({
     thumbnail: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    idGroup: {
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 }, {
     sequelize: db,
-    modelName: 'user',
+    modelName: 'users',
     freezeTableName: true,
     hooks: {
         beforeValidate: async (user: User) => {

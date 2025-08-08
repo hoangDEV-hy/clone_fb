@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { User, methods } from '../../models/user'; // đường dẫn model tùy theo dự án của bạn
 
 export let method = {
@@ -31,21 +31,31 @@ export let method = {
             return res.status(500).json({ error: 'Update failed', detail: error });
         }
     },
-    handleUpload: async (req: Request, res: Response): Promise<void> => {
+    handleUpload: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (!req.file) {
             res.status(400).send('No file uploaded.');
             return;
         }
+        next();
 
-        const imagePath = `/pictures/${req.file.filename}`;
-        res.json({ message: 'uploaded' });
+
     },
-    updateThumnailUser: async (req: any, res: Response): Promise<any> => {
+    updateAvatarUser: async (req: any, res: Response): Promise<any> => {
         try {
-
-            const {  } = req.body;
             const id = req.admin.id;
-            await methods.updateUser({ name: name, hastag: hastag }, id, res);
+            const imagePath = `/pictures/${req.file.filename}`;
+            await methods.updateUser({ avatar: imagePath }, id, res);
+            return res.json({ message: 'updated' })
+        } catch (error) {
+            console.error('Update error:', error);
+            return res.status(500).json({ error: 'Update failed', detail: error });
+        }
+    },
+    updateThumbnailUser: async (req: any, res: Response): Promise<any> => {
+        try {
+            const id = req.admin.id;
+            const imagePath = `/pictures/${req.file.filename}`;
+            await methods.updateUser({ thumbnail: imagePath }, id, res);
             return res.json({ message: 'updated' })
         } catch (error) {
             console.error('Update error:', error);

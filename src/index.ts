@@ -26,6 +26,7 @@ sql.connect();
 
 //sync
 import { sequelize } from './configs/sql';
+
 sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
     .then(() => console.log('Database synced'))
     .catch(console.error);
@@ -33,6 +34,8 @@ sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
 //make the data of body
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+
 
 router(app); // ✅ không còn lỗi vì đúng kiểu
 

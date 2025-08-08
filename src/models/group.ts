@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../configs/sql'; // adjust the path
 
 class Group extends Model {
-    public id!: string;
+    public id!: number;
     public name?: string;
     public hastag?: string;
     public admin?: string;
@@ -10,7 +10,7 @@ class Group extends Model {
 
 Group.init({
     id: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
@@ -31,7 +31,7 @@ Group.init({
         sequelize,
         modelName: 'Group',
         timestamps: false,
-        tableName: 'Groups'
+        tableName: 'groups'
     }
 );
 

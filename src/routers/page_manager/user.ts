@@ -23,6 +23,8 @@ route.get('/', authenticate, async (req: any, res: any) => {
 });
 
 route.post('/update', authenticate, method.updateUser);
-route.post('/upload', upload.single('image'), method.handleUpload);
+route.post('/upload/avatar', upload.single('image'), method.handleUpload, authenticate, method.updateAvatarUser);
+route.post('/upload/thumbnail', upload.single('image'), method.handleUpload, authenticate, method.updateThumbnailUser);
+
 
 export { route }
