@@ -182,6 +182,15 @@ const methods = {
                 }
             }
         )
+    },
+    selectUser: async (req: Request): Promise<any> => {
+        const id = req.body;
+        let user = await User.findOne(
+            {
+                where: id
+            }
+        )
+        return user;
     }
 
 };

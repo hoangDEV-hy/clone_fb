@@ -6,6 +6,15 @@ import router from './routers'; // phải là export default từ routers/index.
 
 const app: Express = express();
 const port = 3000;
+// //function timestamps
+// const hbs = expressHandlebars.create({
+//     helpers: {
+//         time: (a:any) => {
+
+//         },
+//         sum: (a, b) => a + b
+//     }
+// });
 
 // Cấu hình view engine
 app.engine('hdbs', expressHandlebars.engine({
@@ -20,6 +29,18 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 //cấu hình cookie
 import cookieParser from 'cookie-parser';
 app.use(cookieParser());
+
+//cấu hình session
+import session from 'express-session';
+app.use(session({
+    secret: 'hoang1', // Chuỗi bí mật để mã hóa session
+    resave: false, // không lưu lại session nếu không thay đổi
+    saveUninitialized: true, // không lưu session khi chưa set gì
+    cookie: {
+        secure: false, // true nếu chạy HTTPS
+        maxAge: 1000 * 60 * 60 // 1 giờ
+    }
+}));
 
 // Kết nối CSDL nếu cần
 sql.connect();
