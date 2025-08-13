@@ -1,23 +1,35 @@
 <form action="">
     <div>
         <div style="display:flex">
-            <input type="hidden" id="groupId" value="{{group_id}}">
-            <input type="hidden" id="userId" value="{{user.id}}">
+            <input type="hidden" id="essayId" value="{{essay.id}}">
+            {{!-- for update --}}
+            <input type="hidden" id="groupId" value="{{group_id}}{{essay.group_id}}">
+            <input type="hidden" id="userId" value="{{user.id}}{{essay.user_id}}">
+            {{#if user.id}}
             <img src="{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
             <h3>{{user.name}}</h3>
+            {{/if}}
+            <select id="scope">
+                <option value="">-- Chọn phạm vi truy cập --</option>
+                <option value="only_me">only_me</option>
+                <option value="public">public</option>
+                <option value="group">group</option>
+            </select>
         </div>
 
         <!-- Khung chứa background + textarea -->
         <div style="position: relative; width: 300px; height: 200px;">
             <img name="background" src="" alt=""
                 style="position: absolute; z-index: 1; width: 100%; height: 100%; object-fit: cover;">
+            <input name="dataImage" type="text" type="hidden" value={{conten.image}}>
             <textarea name="contens" id="contens"
-                style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;"></textarea>
+                style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;">{{conten.text}}</textarea>
         </div>
 
         <!-- Select background -->
         <div>
             <select id="ground">
+                <option value="">-- Chọn Picture --</option>
                 <option value="/pictures/avatar.jpg">img 1</option>
                 <option value="/pictures/image-1754515454077-261962452.png">img 2</option>
                 <option value="/pictures/image-1754516183050-615377140.png">img 3</option>
@@ -50,7 +62,9 @@
         let backgrounds = document.querySelector('img[name="background"]');
         let text = document.getElementById('contens');
         let emoji = document.getElementById('emoji');
-
+        let data = document.querySelector('input[name="dataImage"]');
+        let imgData = JSON.parse(data.value);
+        backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
         // Đổi background
         ground.onchange = function () {
             backgrounds.src = this.value;
@@ -116,11 +130,16 @@
                     base64: base64
                 }
             }
-            console.log('abc', conten);
+            console.log('user_id', document.getElementById('userId').value);
+            console.log('groupId', document.getElementById('groupId').value);
+
 
             const formData = new FormData();
+            formData.append('essayId', document.getElementById('essayId').value)
             formData.append('userId', document.getElementById('userId').value);
             formData.append('groupId', document.getElementById('groupId').value);
+            formData.append('scope', document.getElementById('scope').value);
+
             formData.append('conten', JSON.stringify(conten));
 
             fetch('http://localhost:3000/essay/save', {

@@ -6,7 +6,7 @@ import { Op } from "sequelize";
 import { user_user } from "../../models/user_user";
 let route = express.Router();
 
-route.get('/joined', authenticate, async (req: any, res: any) => {
+route.get('/joined', authenticate.user_auth, async (req: any, res: any) => {
     try {
 
         const friended = await methods.show_friended(req); // đây là mảng group_user
@@ -30,7 +30,7 @@ route.get('/joined', authenticate, async (req: any, res: any) => {
     }
 });
 
-route.get('/waited', authenticate, async (req: any, res: any) => {
+route.get('/waited', authenticate.user_auth, async (req: any, res: any) => {
     try {
 
         const friended = await methods.show_waited(req); // đây là mảng group_user

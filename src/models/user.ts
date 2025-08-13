@@ -183,11 +183,10 @@ const methods = {
             }
         )
     },
-    selectUser: async (req: Request): Promise<any> => {
-        const id = req.body;
+    selectUser: async (id: string): Promise<any> => {
         let user = await User.findOne(
             {
-                where: id
+                where: { id }
             }
         )
         return user;

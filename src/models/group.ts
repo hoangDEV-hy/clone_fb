@@ -99,6 +99,6 @@ let methods: methods = {
     },
     select: async (id: number) => {
         return await Group.findOne({ where: { id } });
-    }
+    },
 }
 export { methods };

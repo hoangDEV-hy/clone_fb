@@ -5,10 +5,10 @@ import { Response, Request } from "express";
 
 let route = express.Router();
 
-route.get('/', authenticate, async (req: any, res: Response) => {
+route.get('/', authenticate.user_auth, async (req: any, res: Response) => {
     const user = await methods.selectUser(req.admin.id);
     const group_id = req.session.currentGroupId;
-    console.log(user)
+    console.log(group_id)
     res.render('contens/essay', { user: user.toJSON(), group_id: group_id });
 })
 import multer from 'multer';
@@ -38,10 +38,13 @@ let uploadForm = multer({
 route.post('/save', uploadForm.none(), async (req: Request, res: Response): Promise<any> => {
     try {
 
-        const { userId, groupId, conten } = req.body;
+        const { essayId, userId, groupId, conten, scope } = req.body;
         const contenObj = JSON.stringify(conten);
-        await model_essays.create({ user_id: userId, group_id: groupId, contens: contenObj })
-
+        if (!essayId) await model_essays.create({ user_id: userId, group_id: groupId, contens: contenObj, scope: scope })
+        else {
+            await model_essays.up({ contens: contenObj, scope: scope }, { id: essayId })
+            console.log("updated done")
+        }
         return res.json({ status: 'ok' });
     }
     catch (error) {

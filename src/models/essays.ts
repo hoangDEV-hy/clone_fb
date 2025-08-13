@@ -6,6 +6,7 @@ class Essays extends Model {
     declare group_id: number;
     declare user_id: string;
     declare contens: string;
+    declare scope: string;
 }
 
 Essays.init({
@@ -16,7 +17,7 @@ Essays.init({
         autoIncrement: true
     },
     user_id: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true
     },
     group_id: {
@@ -25,24 +26,30 @@ Essays.init({
     },
     contens: {
         type: DataTypes.TEXT
+    },
+    scope: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'only_me'
     }
 }, {
     sequelize,
     timestamps: true
 });
+export { Essays }
 import { Response } from 'express';
 export let methods = {
-    // create: async (value: { [key: string]: string }, res: Response): Promise<any> => {
-    //     try {
-
-    //         await Essays.create({ value });
-    //     } catch (error) {
-    //         console.log(error);
-    //         return res.json(error);
-    //     }
-
-    // }
     create: async (value: { [key: string]: string }) => {
         return await Essays.create(value);
+    },
+    select: async (value: { [key: string]: any }) => {
+        return await Essays.findAll({ where: value });
+    },
+    des: async (value: { [key: string]: any }) => {
+        return await Essays.destroy({ where: value });
+    },
+    up: async (value: { [key: string]: any }, conditions: { [key: string]: any }) => {
+        return await Essays.update(value, { where: conditions });
     }
 }
+

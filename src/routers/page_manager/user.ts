@@ -5,7 +5,7 @@ import { User } from '../../models/user';
 import { upload } from '../../middware/updateImage';
 let route = express.Router();
 
-route.get('/', authenticate, async (req: any, res: any) => {
+route.get('/', authenticate.user_auth, async (req: any, res: any) => {
     const id = req.admin?.id;
     try {
         const user = await User.findOne({ where: { id } });
@@ -22,9 +22,9 @@ route.get('/', authenticate, async (req: any, res: any) => {
     }
 });
 
-route.post('/update', authenticate, method.updateUser);
-route.post('/upload/avatar', upload.single('image'), method.handleUpload, authenticate, method.updateAvatarUser);
-route.post('/upload/thumbnail', upload.single('image'), method.handleUpload, authenticate, method.updateThumbnailUser);
+route.post('/update', authenticate.user_auth, method.updateUser);
+route.post('/upload/avatar', upload.single('image'), method.handleUpload, authenticate.user_auth, method.updateAvatarUser);
+route.post('/upload/thumbnail', upload.single('image'), method.handleUpload, authenticate.user_auth, method.updateThumbnailUser);
 
 
 export { route }

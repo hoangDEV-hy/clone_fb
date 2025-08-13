@@ -6,21 +6,32 @@ import router from './routers'; // phải là export default từ routers/index.
 
 const app: Express = express();
 const port = 3000;
-// //function timestamps
-// const hbs = expressHandlebars.create({
-//     helpers: {
-//         time: (a:any) => {
-
-//         },
-//         sum: (a, b) => a + b
-//     }
-// });
-
-// Cấu hình view engine
-app.engine('hdbs', expressHandlebars.engine({
+//function timestamps
+const hbs = expressHandlebars.create({
     extname: '.hdbs',
-}));
-app.set('view engine', '.hdbs');
+    helpers: {
+        time: (dateTime: string) => {
+            if (!dateTime) return '';
+            const current_time = new Date(dateTime.toString());
+            const now_time = new Date();
+            const diffMs = now_time.getTime() - current_time.getTime();
+
+            //doi ra day, hour, minu, sec
+            const diffSeconds = Math.floor(diffMs / 1000);
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffDays > 0) return `${diffDays} day ago`
+            else if (diffHours > 0) return `${diffHours} hours ago`
+            else if (diffMinutes > 0) return `${diffMinutes} minutes ago`
+            else return `${diffSeconds} seconds ago`
+        }
+    }
+});
+// Cấu hình view engine
+app.engine('.hdbs', hbs.engine);
+app.set('view engine', 'hdbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
 
 // Cấu hình static files
@@ -47,6 +58,7 @@ sql.connect();
 
 //sync
 import { sequelize } from './configs/sql';
+import { DATE } from 'sequelize';
 
 sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
     .then(() => console.log('Database synced'))
@@ -55,6 +67,11 @@ sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
 //make the data of body
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+//add delete, update methods
+import methodOverride from 'method-override';
+
+app.use(methodOverride('_method'));
 
 
 
