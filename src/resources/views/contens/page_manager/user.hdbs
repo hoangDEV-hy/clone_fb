@@ -7,13 +7,12 @@
     <title>Document</title>
     <link rel="stylesheet" href="../../../../../css/contens/page_manager/user.css">
     <style>
-
     </style>
 </head>
 
 <body>
     <div class="head">
-        <img src="{{user.thumbnail}}" alt="ảnh thumbnai">
+        <img src="/{{user.thumbnail}}" alt="ảnh thumbnai">
 
         <table>
             <tr>
@@ -25,7 +24,7 @@
                                 enctype="multipart/form-data">
                                 <input type="file" name="image" accept="image/*" required>
                                 <button type="submit">Tải lên</button>
-                                <img src={{user.avatar}} alt="avt">
+                                <img src="/{{user.avatar}}" alt="avt">
                             </form>
 
                         </th>
@@ -46,10 +45,6 @@
                 </th>
             </tr>
         </table>
-
-
-
-
     </div>
 
     <div class="body">
@@ -57,15 +52,14 @@
             <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
             <button>Tạo tin</button>
         </div>
+        {{#each essays}}
         <div class="news">
-            <!-- giao diện ô phải làm giống facebook có like, commend, share -->
-            <div class="bd_ct_news_nguoiDang" style="">
+            <div class="bd_ct_news_nguoiDang">
                 <table>
-
                     <tr>
-                        <th> <img style="width: 50px;height: 50px;" src="./img/avt1.jpg" alt="ảnh con"></th>
+                        <th> <img style="width: 50px;height: 50px;" src="/{{users.avatar}}" alt="ảnh con"></th>
                         <th>
-                            <h3>Schanel</h3>
+                            <h3>{{users.name}}</h3>
                         </th>
                         <th></th>
                     </tr>
@@ -73,15 +67,18 @@
                     <tr>
                         <th></th>
                         <th>
-                            <h4>24 Tháng 4, 2024</h4>
+                            <h4>{{time updatedAt}}</h4>
                         </th>
 
                     </tr>
                 </table>
             </div>
             <div class="bd_ct_news_title">
-                <h3>Chân thành cảm ơn cha đẻ của UNIKEY</h3>
-                <img src="./img/conten1.jpg" alt="ảnh news">
+                <h3>{{contens.text}}</h3>
+                <!-- input ẩn lưu ảnh -->
+                <input type="hidden" class="image_src_input" value='{{contens.image}}'>
+                <!-- ảnh hiển thị -->
+                <img class="image_src_img" alt="ảnh news">
             </div>
             <div class="bd_ct_news_commend">
                 <div id="bd_ct_news_commend_thongKe_news1" style="display: flex;">
@@ -100,104 +97,39 @@
                         <iframe id="bd_ct_news_cmd_tuongTac_ifP"></iframe>
                     </div>
 
-
                 </div>
 
             </div>
         </div>
-        <div class="news">
-            <!-- giao diện ô phải làm giống facebook có like, commend, share -->
-            <div class="bd_ct_news_nguoiDang" style="">
-                <table>
-
-                    <tr>
-                        <th> <img style="width: 50px;height: 50px;" src="./img/avt4.jpg" alt="ảnh con"></th>
-                        <th>
-                            <h3>Tào Phớ đây</h3>
-                        </th>
-                        <th></th>
-                    </tr>
-
-                    <tr>
-                        <th></th>
-                        <th>
-                            <h4>24 Tháng 4, 2024</h4>
-                        </th>
-
-                    </tr>
-                </table>
-            </div>
-            <div class="bd_ct_news_title">
-                <h3>Làm tý git gì chưa người đẹp</h3>
-                <img src="./img/github logic.png" alt="ảnh news">
-            </div>
-            <div class="bd_ct_news_commend">
-                <div id="bd_ct_news_commend_thongKe_news2" style="display: flex;">
-
-                    <img src="" alt="icon tim">
-                    <p id="bd_ct_news_cmd_tk_text_news2" value="230">230 người khác</p>
-                </div>
-                <div class="bd_ct_news_commend_tuongTac">
-                    <button id="bd_ct_news_cmd_tuongTac_like_news2" onclick="like('news2')">thích</button>
-                    <button onclick="binhLuan()">Bình luận</button>
-                    <button onclick="chiaSe()">chia sẻ</button>
-                    <iframe id="bodyright_mesifP"></iframe>
-
-
-
-
-                </div>
-
-            </div>
-        </div>
-
+        {{/each}}
     </div>
+
     <script>
-        function binhLuan() {
-            document.getElementsByTagName("BODY")[0].classList.add("nenMo");
-            let popup = document.querySelector(".bd_ct_news_cmd_tuongTac_pop");
-            popup.style.display = "block";
-            document.getElementById("bd_ct_news_cmd_tuongTac_ifP").src = "binhluan.html";
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input.image_src_input').forEach(hiddenInput => {
+                try {
+                    let data = hiddenInput.value;
+                    if (typeof data === 'string') {
+                        try {
+                            data = JSON.parse(data); // parse lần 1
+                            if (typeof data === 'string') {
+                                data = JSON.parse(data); // parse lần 2 nếu vẫn là string
+                            }
+                        } catch (e) {
+                            console.error("Không parse được ảnh:", e);
+                            return;
+                        }
+                    }
 
-        }
-        function chiaSe() {
-            document.getElementsByTagName("BODY")[0].classList.add("nenMo");
-            let popup = document.querySelector(".bd_ct_news_cmd_tuongTac_pop");
-            popup.style.display = "block";
-            document.getElementById("bd_ct_news_cmd_tuongTac_ifP").src = "chiase.html";
-        }
-        let dem = 0;
-        let check = false;
-        function like(id) {
-            // Biến đếm phải được đặt bên ngoài để giữ trạng thái
-            // Biến trạng thái cũng cần được đặt bên ngoài
-            let text = "bd_ct_news_cmd_tk_text" + "_" + id;
-            console.log(text);
-            id = "bd_ct_news_cmd_tuongTac_like" + "_" + id;
-            let button = document.getElementById(id);
-
-
-            let thongKeText = document.getElementById(text);
-
-
-            dem++;
-            check = dem % 2 !== 0;
-
-            if (check) {
-                button.style.backgroundColor = "blue";
-                thongKeText.innerText = `Bạn và ${parseInt(thongKeText.getAttribute("value")) + 1} người khác thích`;
-            } else {
-                button.style.backgroundColor = ""; // Reset màu mặc định
-                thongKeText.innerText = `${thongKeText.getAttribute("value")} người thích`; // Chỉ hiển thị số người thích
-            }
-
-        }
-        function closeNewPage() {
-            let popup = document.querySelector(".bd_ct_news_cmd_tuongTac_pop");
-            popup.style.display = "none";
-            document.getElementsByTagName("BODY")[0].classList.remove("nenMo");
-        }
-
+                    let imgElement = hiddenInput.parentElement.querySelector('img.image_src_img');
+                    if (imgElement && data.mimeType && data.base64) {
+                        imgElement.src = `data:${data.mimeType};base64,${data.base64}`;
+                    }
+                } catch (e) {
+                    console.error("Lỗi xử lý ảnh:", e);
+                }
+            });
+        });
     </script>
 </body>
 

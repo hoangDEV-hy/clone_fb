@@ -112,7 +112,6 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
             index === self.findIndex(e => e.id === essay.id)
         );
         const tranAllEssays = allEssays.map((b: any) => b.toJSON());
-        console.log(tranAllEssays)
         tranAllEssays.map((f: any) => {
             f.contens = JSON.parse(f.contens);
             f.contens = JSON.parse(f.contens);
@@ -122,7 +121,6 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
                 image: JSON.stringify(f.contens.image)
             }
         })
-        console.log(tranAllEssays);
         res.render('contens/main', { allEssays: tranAllEssays })
 
     } catch (error) {
