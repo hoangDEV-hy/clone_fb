@@ -12,7 +12,7 @@ class user_user extends Model {
 
 user_user.init({
     id: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
@@ -36,8 +36,8 @@ user_user.init({
 })
 export { user_user };
 import { User } from "./user";
-user_user.hasMany(User, { foreignKey: 'id_userA' })
-User.belongsTo(user_user, { foreignKey: 'id_userA' })
+User.hasMany(user_user, { foreignKey: 'id_userA' })
+user_user.belongsTo(User, { foreignKey: 'id_userA' })
 
 
 export let methods = {

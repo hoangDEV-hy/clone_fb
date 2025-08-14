@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Giả Lập Facebook</title>
+    <link rel="stylesheet" href="main.css">
+
+</head>
+
+<body>
+    <div id="bd_ct_news_cmd_tuongTac_nenMo"></div>
+    <div class="header">
+        <ul class="navbar">
+            <li><img src="./img/Facebook_Logo_(2019).png" alt="logo"></li>
+            <li><input type="text" placeholder="Tìm kiếm..."></li>
+            <li><a href="">Trang chủ</a></li>
+            <li><a href="./friend.html">Bạn bè</a></li>
+            <li><a href="./video.html">Phim</a></li>
+
+
+            <li onclick="hienMenu('mes')">Tin nhắn
+                <ul class="mes menu">
+                    <li>Tin Nhắn</li>
+                    <li>-------------</li>
+                    <li><a href="">Nguyễn Hoàng</a></li>
+                    <li><a href="">Bùi Huy</a></li>
+                    <li><a href="">Văn Hiệu</li>
+                    <li><a href="">Quảng Nam</a></li>
+                </ul>
+            </li>
+            <li onclick="hienMenu('thongBao')">Thông Báo
+                <ul class="thongBao menu">
+                    <li>Thông Báo</li>
+                    <li>-------------</li>
+                    <li class="avt"> Nguyễn Hoàng: gửi tin nhắn</li>
+                    <li class="avt"> Nguyễn Hoàng: mời bạn tham gia nhóm</li>
+                </ul>
+            </li>
+            <li onclick="hienMenu('submenu')">Tài khoản
+                <ul class="submenu menu">
+                    <li><a href="profile.htm"><img src="./img/426309418_1440256106901425_3011488708200489727_n.jpg"
+                                alt="ảnh nền">
+                            Nguyễn Hoàng</a></li>
+                    <li onclick="hienMenu('subsubmenu')">Cài đặt
+                        <ul class="subsubmenu menu">Ngôn Ngữ</ul>
+                    </li>
+                    <li><a href="#">Trợ giúp và hỗ trợ</a></li>
+                    <li><a href="#">Màn hình và trợ năng</a></li>
+                    <li><a href="#">Đóng góp ý kiến</a></li>
+                    <li><a href="#">Đăng xuất</a></li>
+                </ul>
+            </li>
+
+        </ul>
+
+    </div>
+    <div class="body">
+        <div class="body_center">
+            <div id="think">
+                <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
+                <button>Tạo tin</button>
+            </div>
+            {{#each allEssays}}
+            <div id="news{{id}}">
+                <div class="bd_ct_news_nguoiDang">
+                    <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
+                        <div style="top:0%">
+                            <img src="{{users.avatar}}" alt="avatar">
+                        </div>
+                    </div>
+                    <div class="bd_ct_n_nguoiDang_name">
+                        {{#if group_id}}
+                        <h3>{{groups.name}}</h3>
+                        {{/if}}
+                        <h4>{{users.name}} · {{time updatedAt}}</h4>
+                    </div>
+
+                    <div class="bd_ct_news_title">
+                        <input type="hidden" class="image_src_input" value="{{contens.image}}">
+                        <h3>{{contens.text}}</h3>
+                        <img class="image_src_img" src="" alt="ảnh news">
+                    </div>
+
+                    <div class="bd_ct_news_commend">
+                        <div id="bd_ct_news_commend_thongKe_news{{id}}">
+                            <p id="bd_ct_news_cmd_tk_text_news{{id}}" value="230">230 người khác</p>
+                        </div>
+                        <div id="bd_ct_news_commend_tuongTac">
+                            <button onclick="like('news{{id}}')">Thích</button>
+                            <button onclick="binhLuan('news{{id}}')">Bình luận</button>
+                            <button onclick="chiaSe()">Chia sẻ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+
+
+        </div>
+        <div class="body_right">
+
+            <h2>Người liên hệ</h2>
+            <ul>
+                <li><a href="#" onclick="openMes()">Hiệu Phạm</a></li>
+                <li><a href="#" onclick="openMes()">Bùi Huy</a></li>
+                <li>Đặng Thiên</li>
+                <li>Huy Trần Gia</li>
+                <li>Văn Khiêm</li>
+                <li>Việt Dũng</li>
+                <li>Thảo Lê</li>
+                <li>Linh Phương</li>
+                <li>Đàm</li>
+                <li>Phạm Văn Thành</li>
+            </ul>
+            <iframe id="bodyright_mesifP"></iframe>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('input.image_src_input').forEach(hiddenInput => {
+                    try {
+                        let data = hiddenInput.value;
+                        if (typeof data === 'string') {
+                            try {
+                                data = JSON.parse(data); // parse lần 1
+                                if (typeof data === 'string') {
+                                    data = JSON.parse(data); // parse lần 2 nếu vẫn là string
+                                }
+                            } catch (e) {
+                                console.error("Không parse được ảnh:", e);
+                                return;
+                            }
+                        }
+
+                        let imgElement = hiddenInput.parentElement.querySelector('img.image_src_img');
+                        if (imgElement && data.mimeType && data.base64) {
+                            imgElement.src = `data:${data.mimeType};base64,${data.base64}`;
+                        }
+                    } catch (e) {
+                        console.error("Lỗi xử lý ảnh:", e);
+                    }
+                });
+            });
+
+        </script>
+</body>
+
+</html>

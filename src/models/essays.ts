@@ -17,7 +17,7 @@ Essays.init({
         autoIncrement: true
     },
     user_id: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         allowNull: true
     },
     group_id: {
@@ -36,8 +36,24 @@ Essays.init({
     sequelize,
     timestamps: true
 });
+import { User } from './user';
+import { Group } from './group';
+import { user_user } from './user_user';
+import { group_user } from './group_user';
+Essays.belongsTo(User, { as: 'users', foreignKey: 'user_id' })
+Essays.belongsTo(Group, { as: 'groups', foreignKey: 'group_id' })
+user_user.hasMany(Essays, {
+    foreignKey: 'user_id', // cột bất kỳ trong Essays, Sequelize không thực sự kiểm tra ở DB
+    as: 'essays'
+});
+group_user.hasMany(Essays, {
+    foreignKey: 'user_id', // cột bất kỳ trong Essays, Sequelize không thực sự kiểm tra ở DB
+    as: 'essays'
+});
+
 export { Essays }
 import { Response } from 'express';
+
 export let methods = {
     create: async (value: { [key: string]: string }) => {
         return await Essays.create(value);
