@@ -7,19 +7,19 @@
 
             <img src="" alt="">
             {{#if isAdmin}}
-            <div><a href="/admin"></a></div>
+            <div><a href="essay/admin">Trang quản lý</a></div>
             {{/if}}
         </div>
-        {{#each essay}}
+        {{#each essays}}
         <div id="news{{id}}">
             <div class="bd_ct_news_nguoiDang">
                 <div id="bd_ct_n_nguoiDang_anh" style="position: relative;">
                     <div style="top:0%">
-                        <img src="{{../user.avatar}}" alt="ảnh con">
+                        <img src="/{{users.avatar}}" alt="ảnh con">
                     </div>
                 </div>
                 <div id="bd_ct_n_nguoiDang_name">
-                    <h4>{{../user.name}} . {{time essay.updatedAt}}</h4>
+                    <h4>{{users.name}} . {{time updatedAt}}</h4>
                     <div>
 
                         <form action="/page_manager/essay/del?_method=DELETE" method="post" style="display:inline">
@@ -32,8 +32,8 @@
 
                 <div class="bd_ct_news_title">
                     <input type="hidden" value="{{id}}">
-                    <h3>{{text}}</h3>
-                    <input class="image_src" type="hidden" value="{{image}}">
+                    <h3>{{contens.text}}</h3>
+                    <input class="image_src" type="hidden" value="{{contens.image}}">
                     <img class="image_src" src="" alt="ảnh news">
                 </div>
                 <div class="bd_ct_news_commend">
@@ -65,5 +65,6 @@
                 console.error("Lỗi parse ảnh:", e);
             }
         });
+
     });
 </script>
