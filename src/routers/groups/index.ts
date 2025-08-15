@@ -1,6 +1,7 @@
 import express from 'express'
 import { authenticate } from '../../middware/auth'
 import { methods } from '../../models/group';
+import { methods as group } from '../../constrollers/group/group'
 const router = express.Router();
 
 router.get('/create', authenticate.user_auth, (req: any, res: any) => {
@@ -18,6 +19,40 @@ router.get('/', authenticate.user_auth, authenticate.adminGroup_auth, async (req
     }
     //const id=req.body;
 });
+
+router.get('/main', authenticate.user_auth, async (req: any, res: any) => {
+    try {
+        const id = req.admin.id;
+
+        let joinGroup = await group.joinGroup_list(id);
+        joinGroup = joinGroup.map((f: any) => f.toJSON());
+        const essaysAll = await group.essaysAll_group(id);
+
+
+
+        // Lấy toàn bộ bài viết từ essaysAll (flatten)
+        const allEssays = essaysAll.flatMap((f: any) => f.essays || []);
+
+        // Chuyển từng instance Sequelize thành object thuần và xử lý contens
+        const tranAllEssays = allEssays.map((essay: any) => {
+            const obj = essay.toJSON();
+            obj.contens = JSON.parse(obj.contens);
+            obj.contens = JSON.parse(obj.contens);
+            obj.contens = {
+                text: obj.contens.text,
+                image: JSON.stringify(obj.contens.image)
+            };
+            return obj;
+        });
+        console.log(joinGroup)
+
+
+        res.render('contens/groups/main', { groups: joinGroup, essays: tranAllEssays })
+
+    } catch (error) {
+        console.log(error);
+    }
+})
 
 
 export { router };

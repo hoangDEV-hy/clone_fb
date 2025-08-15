@@ -68,7 +68,7 @@
                 <div class="bd_ct_news_nguoiDang">
                     <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
                         <div style="top:0%">
-                            <img src="{{users.avatar}}" alt="avatar">
+                            <img src="/{{users.avatar}}" alt="avatar">
                         </div>
                     </div>
                     <div class="bd_ct_n_nguoiDang_name">
@@ -81,7 +81,7 @@
                     <div class="bd_ct_news_title">
                         <input type="hidden" class="image_src_input" value="{{contens.image}}">
                         <h3>{{contens.text}}</h3>
-                        <img class="image_src_img" src="" alt="ảnh news">
+                        <img class="image_src_img" src="">
                     </div>
 
                     <div class="bd_ct_news_commend">

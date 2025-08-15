@@ -38,8 +38,8 @@ group_user.init({
     })
 
 //setup association
-Group.hasMany(group_user, { foreignKey: 'id_group' });
-group_user.belongsTo(Group, { foreignKey: 'id_group' });
+Group.hasMany(group_user, { foreignKey: 'id_group', as: 'groups' });
+group_user.belongsTo(Group, { foreignKey: 'id_group', as: 'groups' });
 
 export { group_user };
 
