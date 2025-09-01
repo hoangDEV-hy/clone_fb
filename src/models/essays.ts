@@ -7,6 +7,8 @@ class Essays extends Model {
     declare user_id: string;
     declare contens: string;
     declare scope: string;
+    declare think: string;
+    declare essayId_origin: number
 }
 
 Essays.init({
@@ -31,6 +33,14 @@ Essays.init({
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'only_me'
+    },
+    think: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    essayId_origin: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 }, {
     sequelize,
@@ -41,7 +51,12 @@ import { Group } from './group';
 import { user_user } from './user_user';
 import { group_user } from './group_user';
 Essays.belongsTo(User, { as: 'users', foreignKey: 'user_id' })
-Essays.belongsTo(Group, { as: 'groups', foreignKey: 'group_id' })
+Essays.belongsTo(Group, {
+    as: 'groups', foreignKey: {
+        name: 'group_id',
+        allowNull: true
+    }
+})
 user_user.hasMany(Essays, {
     foreignKey: 'user_id', // cột bất kỳ trong Essays, Sequelize không thực sự kiểm tra ở DB
     as: 'essays'

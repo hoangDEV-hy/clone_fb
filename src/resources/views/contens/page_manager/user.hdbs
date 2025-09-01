@@ -41,7 +41,7 @@
                 <th>
                     <div id="head_button">
                         <button>chỉnh sửa trang cá nhân</button>
-                    </div>
+                    </div>y
                 </th>
             </tr>
         </table>
@@ -54,6 +54,15 @@
         </div>
         {{#each essays}}
         <div class="news">
+            <form action="/essay/interactions/share/delete=DELETE" method="post" style="display:inline">
+                <input type="hidden" name="id" value="{{id}}">
+                <button type="submit">delete</button>
+            </form>
+            <form action="/essays/update" method="post" style="display:inline">
+                <input type="hidden" name="essayId_curtain" value="{{id}}">
+                <input type="hidden" name="essayId_original" value="{{essayId_original}}">
+                <button type="submit">update</button>
+            </form>
             <div class="bd_ct_news_nguoiDang">
                 <table>
                     <tr>
@@ -74,11 +83,17 @@
                 </table>
             </div>
             <div class="bd_ct_news_title">
-                <h3>{{contens.text}}</h3>
-                <!-- input ẩn lưu ảnh -->
-                <input type="hidden" class="image_src_input" value='{{contens.image}}'>
-                <!-- ảnh hiển thị -->
-                <img class="image_src_img" alt="ảnh news">
+                {{#if think}}
+                <textarea name="contens" id="contens" placeholder="vui long nhap noi dung">{{think}}</textarea>
+                {{/if}}
+                <div>
+
+                    <h3>{{contens.text}}</h3>
+                    <!-- input ẩn lưu ảnh -->
+                    <input type="hidden" class="image_src_input" value='{{{contens.image}}}'>
+                    <!-- ảnh hiển thị -->
+                    <img class="image_src_img" alt="ảnh news">
+                </div>
             </div>
             <div class="bd_ct_news_commend">
                 <div id="bd_ct_news_commend_thongKe_news1" style="display: flex;">

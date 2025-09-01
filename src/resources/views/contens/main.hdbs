@@ -39,20 +39,21 @@
                     <li class="avt"> Nguyễn Hoàng: mời bạn tham gia nhóm</li>
                 </ul>
             </li>
-            <li onclick="hienMenu('submenu')">Tài khoản
-                <ul class="submenu menu">
-                    <li><a href="profile.htm"><img src="./img/426309418_1440256106901425_3011488708200489727_n.jpg"
-                                alt="ảnh nền">
-                            Nguyễn Hoàng</a></li>
-                    <li onclick="hienMenu('subsubmenu')">Cài đặt
-                        <ul class="subsubmenu menu">Ngôn Ngữ</ul>
-                    </li>
-                    <li><a href="#">Trợ giúp và hỗ trợ</a></li>
-                    <li><a href="#">Màn hình và trợ năng</a></li>
-                    <li><a href="#">Đóng góp ý kiến</a></li>
-                    <li><a href="#">Đăng xuất</a></li>
-                </ul>
+            <li><a href="profile.htm"><img src="./img/426309418_1440256106901425_3011488708200489727_n.jpg" <li
+                        onclick="hienMenu('submenu')">Tài khoản
+                    <ul class="submenu menu">
+                        alt="ảnh nền">
+                        Nguyễn Hoàng
+                </a></li>
+            <li onclick="hienMenu('subsubmenu')">Cài đặt
+                <ul class="subsubmenu menu">Ngôn Ngữ</ul>
             </li>
+            <li><a href="#">Trợ giúp và hỗ trợ</a></li>
+            <li><a href="#">Màn hình và trợ năng</a></li>
+            <li><a href="#">Đóng góp ý kiến</a></li>
+            <li><a href="#">Đăng xuất</a></li>
+        </ul>
+        </li>
 
         </ul>
 
@@ -61,7 +62,7 @@
         <div class="body_center">
             <div id="think">
                 <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
-                <button>Tạo tin</button>
+                <a href="/essays">tạo tin</a>
             </div>
             {{#each allEssays}}
             <div id="news{{id}}">
@@ -78,10 +79,13 @@
                         <h4>{{users.name}} · {{time updatedAt}}</h4>
                     </div>
 
-                    <div class="bd_ct_news_title">
-                        <input type="hidden" class="image_src_input" value="{{contens.image}}">
-                        <h3>{{contens.text}}</h3>
-                        <img class="image_src_img" src="">
+                    <div>
+                        <h2>{{think}}</h2>
+                        <div class="bd_ct_news_title">
+                            <input type="hidden" class="image_src_input" value='{{json contens.image}}'>
+                            <h3>{{contens.text}}</h3>
+                            <img class="image_src_img" src="">
+                        </div>
                     </div>
 
                     <div class="bd_ct_news_commend">
@@ -89,9 +93,12 @@
                             <p id="bd_ct_news_cmd_tk_text_news{{id}}" value="230">230 người khác</p>
                         </div>
                         <div id="bd_ct_news_commend_tuongTac">
-                            <button onclick="like('news{{id}}')">Thích</button>
+                            <input type="checkbox" class="like-checkbox" data-id="{{id}}">like
                             <button onclick="binhLuan('news{{id}}')">Bình luận</button>
-                            <button onclick="chiaSe()">Chia sẻ</button>
+                            <form action="/essay/share" method="post">
+                                <input type="hidden" name="id_essay" value={{id}}>
+                                <button type="submit">Chia sẻ</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -119,28 +126,51 @@
         </div>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('input.image_src_input').forEach(hiddenInput => {
+                document.querySelectorAll('.bd_ct_news_title').forEach(container => {
                     try {
-                        let data = hiddenInput.value;
-                        if (typeof data === 'string') {
-                            try {
-                                data = JSON.parse(data); // parse lần 1
-                                if (typeof data === 'string') {
-                                    data = JSON.parse(data); // parse lần 2 nếu vẫn là string
-                                }
-                            } catch (e) {
-                                console.error("Không parse được ảnh:", e);
-                                return;
-                            }
-                        }
+                        // Lấy hidden input trong div
+                        let hiddenInput = container.querySelector('.image_src_input');
+                        if (!hiddenInput) return;
 
-                        let imgElement = hiddenInput.parentElement.querySelector('img.image_src_img');
+                        // Lấy JSON string từ value
+                        let data = hiddenInput.value;
+                        console.log("Raw hidden value:", data);
+
+                        // Parse sang object
+                        data = JSON.parse(data);
+
+                        // Gắn src cho img
+                        let imgElement = container.querySelector('.image_src_img');
                         if (imgElement && data.mimeType && data.base64) {
                             imgElement.src = `data:${data.mimeType};base64,${data.base64}`;
                         }
                     } catch (e) {
                         console.error("Lỗi xử lý ảnh:", e);
                     }
+                });
+                const checkbox = document.getElementById("like");
+
+
+                document.querySelectorAll('.like-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', async (e) => {
+                        const isCheck = e.target.checked;
+                        const id_essay = e.target.dataset.id;
+                        const url = '/essay/like';
+                        const method = isCheck ? "POST" : "DELETE";
+                        const formData = new FormData();
+                        formData.append('id_essays', id_essay);
+                        formData.append('classify', 'like');
+
+                        try {
+                            await fetch(url, {
+                                method,
+                                body: formData
+                            });
+                            console.log(isCheck ? "Added" : "Deleted");
+                        } catch (err) {
+                            console.error("API failed:", err);
+                        }
+                    });
                 });
             });
 

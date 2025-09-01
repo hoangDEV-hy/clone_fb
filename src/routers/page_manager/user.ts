@@ -15,61 +15,60 @@ let route = express.Router();
 route.get('/', authenticate.user_auth, async (req: any, res: any) => {
     const id = req.admin?.id;
     try {
-        const user = await User.findOne({ where: { id: id } });
-        interface GroupUserWithEssays extends group_user {
-            essays: Essays[];
-        }
+        const user = await User.findOne({ where: { id } });
 
-        const essays = await group_user.findAll({
-            where: { id_userA: id },
+        const essays = await Essays.findAll({
+            where: { user_id: id },
             include: [
-                {
-                    model: Essays,
-                    as: 'essays',
-                    required: true, // inner join
-                    on: {
-                        '$essays.group_id$': { [Op.eq]: sequelize.col('group_user.id_group') }
-                    },
-                    include: [
-                        {
-                            model: Group,
-                            as: 'groups',
-                            required: true
-                        },
-                        {
-                            model: User,
-                            as: 'users',
-                            required: true
-                        }
-                    ]
-                }
+                { model: Group, as: 'groups', required: false },
+                { model: User, as: 'users', required: false }
             ]
-        }) as GroupUserWithEssays[];
+        });
+        console.log(essays)
 
-        const allEssays = (essays || [])
-            .flatMap(group => group.essays || []) // lấy tất cả essays và flatten
-            .filter((essay, index, self) =>
-                index === self.findIndex(e => e.id === essay.id) // loại trùng theo id
-            );
-        const tranAllEssays = allEssays.map((b: any) => b.toJSON());
-        tranAllEssays.map((f: any) => {
-            f.contens = JSON.parse(f.contens);
-            f.contens = JSON.parse(f.contens);
 
-            f.contens = {
-                text: f.contens.text,
-                image: JSON.stringify(f.contens.image)
+
+
+        // Chuyển từng instance Sequelize thành object thuần và xử lý contens
+        const tranAllEssays = essays.map((essay: any) => {
+            const obj = essay.toJSON ? essay.toJSON() : essay;
+
+            try {
+                let parsed = JSON.parse(obj.contens || '{}');
+                if (typeof parsed === 'string') {
+                    parsed = JSON.parse(parsed);
+                }
+
+                let imageValue = parsed.image || null;
+
+                if (imageValue && typeof imageValue === "object") {
+                    // Nếu là object → stringify
+                    imageValue = JSON.stringify(imageValue);
+                }
+
+                // Nếu đã là string thì giữ nguyên
+                obj.contens = {
+                    text: parsed.text || '',
+                    image: imageValue
+                };
+            } catch {
+                obj.contens = { text: '', image: 'null' };
             }
-        })
-        console.log(tranAllEssays);
 
-        // Truyền dữ liệu user vào view
-        res.render('contens/page_manager/user', { essays: tranAllEssays, user: user?.toJSON() });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+            return obj;
+        });
+        //console.log(tranAllEssays);
+        return res.render('contens/page_manager/user', {
+            essays: tranAllEssays,
+            user: user?.toJSON()
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 route.post('/update', authenticate.user_auth, method.updateUser);
 route.post('/upload/avatar', upload.single('image'), method.handleUpload, authenticate.user_auth, method.updateAvatarUser);

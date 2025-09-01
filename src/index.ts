@@ -26,7 +26,11 @@ const hbs = expressHandlebars.create({
             else if (diffHours > 0) return `${diffHours} hours ago`
             else if (diffMinutes > 0) return `${diffMinutes} minutes ago`
             else return `${diffSeconds} seconds ago`
+        },
+        json: (data: object) => {
+            return JSON.stringify(data);
         }
+
     }
 });
 // Cấu hình view engine

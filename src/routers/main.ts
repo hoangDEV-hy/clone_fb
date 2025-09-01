@@ -118,9 +118,10 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
 
             f.contens = {
                 text: f.contens.text,
-                image: JSON.stringify(f.contens.image)
+                image: f.contens.image
             }
         })
+        console.log(tranAllEssays)
         res.render('contens/main', { allEssays: tranAllEssays })
 
     } catch (error) {

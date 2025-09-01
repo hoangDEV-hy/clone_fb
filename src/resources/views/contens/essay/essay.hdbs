@@ -6,8 +6,12 @@
             <input type="hidden" id="groupId" value="{{group_id}}{{essay.group_id}}">
             <input type="hidden" id="userId" value="{{user.id}}{{essay.user_id}}">
             {{#if user.id}}
-            <img src="{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
+            <img src="/{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
             <h3>{{user.name}}</h3>
+            {{/if}}
+            {{#if essay.user_id}}
+            <img src="{{essay.users.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
+            <h3>{{essay.users.name}}</h3>
             {{/if}}
             <select id="scope">
                 <option value="">-- Chọn phạm vi truy cập --</option>
@@ -19,11 +23,12 @@
 
         <!-- Khung chứa background + textarea -->
         <div style="position: relative; width: 300px; height: 200px;">
+
             <img name="background" src="" alt=""
                 style="position: absolute; z-index: 1; width: 100%; height: 100%; object-fit: cover;">
-            <input name="dataImage" type="text" type="hidden" value={{conten.image}}>
+            <input name="dataImage" type="hidden" value={{essay.contens.image}}>
             <textarea name="contens" id="contens"
-                style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;">{{conten.text}}</textarea>
+                style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;">{{essay.contens.text}}</textarea>
         </div>
 
         <!-- Select background -->
@@ -64,7 +69,11 @@
         let emoji = document.getElementById('emoji');
         let data = document.querySelector('input[name="dataImage"]');
         let imgData = JSON.parse(data.value);
+        while (typeof imgData === 'string') {
+            imgData = JSON.parse(imgData);
+        }
         backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
+        console.log(backgrounds.src)
         // Đổi background
         ground.onchange = function () {
             backgrounds.src = this.value;
@@ -91,7 +100,7 @@
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
-            const res = await fetch('http://localhost:3000/essay/upload', {
+            const res = await fetch('http://localhost:3000/essays/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -115,6 +124,7 @@
             //image
             const url = backgrounds.src;
             console.log(url + 'ulr:')
+            let dataUrl = url;
             if (!url.startsWith('data:')) {
                 // nếu là url bình thường thì fetch và chuyển thành base64
                 dataUrl = await getBase64FromUrl(url);
@@ -137,12 +147,15 @@
             const formData = new FormData();
             formData.append('essayId', document.getElementById('essayId').value)
             formData.append('userId', document.getElementById('userId').value);
-            formData.append('groupId', document.getElementById('groupId').value);
-            formData.append('scope', document.getElementById('scope').value);
+            let group_id = document.getElementById('groupId').value;
+            let scope = document.getElementById('scope').value;
+            if (scope === '') scope = 'only_me';
+            formData.append('groupId', group_id);
+            formData.append('scope', scope);
 
             formData.append('conten', JSON.stringify(conten));
 
-            fetch('http://localhost:3000/essay/save', {
+            fetch('http://localhost:3000/essays/save', {
                 method: 'post',
                 body: formData
             })
