@@ -1,17 +1,17 @@
 <form action="">
     <div>
         <div style="display:flex">
-            <input type="hidden" id="essayId" value="{{essay.id}}">
+            <input type="hidden" id="PostId" value="{{Post.id}}">
             {{!-- for update --}}
-            <input type="hidden" id="groupId" value="{{group_id}}{{essay.group_id}}">
-            <input type="hidden" id="userId" value="{{user.id}}{{essay.user_id}}">
+            <input type="hidden" id="groupId" value="{{group_id}}{{Post.group_id}}">
+            <input type="hidden" id="userId" value="{{user.id}}{{Post.user_id}}">
             {{#if user.id}}
             <img src="/{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
             <h3>{{user.name}}</h3>
             {{/if}}
-            {{#if essay.user_id}}
-            <img src="{{essay.users.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
-            <h3>{{essay.users.name}}</h3>
+            {{#if Post.user_id}}
+            <img src="{{Post.users.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
+            <h3>{{Post.users.name}}</h3>
             {{/if}}
             <select id="scope">
                 <option value="">-- Chọn phạm vi truy cập --</option>
@@ -26,9 +26,9 @@
 
             <img name="background" src="" alt=""
                 style="position: absolute; z-index: 1; width: 100%; height: 100%; object-fit: cover;">
-            <input name="dataImage" type="hidden" value={{essay.contens.image}}>
+            <input name="dataImage" type="hidden" value={{Post.contens.image}}>
             <textarea name="contens" id="contens"
-                style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;">{{essay.contens.text}}</textarea>
+                style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;">{{Post.contens.text}}</textarea>
         </div>
 
         <!-- Select background -->
@@ -68,12 +68,15 @@
         let text = document.getElementById('contens');
         let emoji = document.getElementById('emoji');
         let data = document.querySelector('input[name="dataImage"]');
-        let imgData = JSON.parse(data.value);
-        while (typeof imgData === 'string') {
-            imgData = JSON.parse(imgData);
+        if (!data == null) {
+
+            let imgData = JSON.parse(data.value);
+            while (typeof imgData === 'string') {
+                imgData = JSON.parse(imgData);
+            }
+            backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
+            console.log(backgrounds.src)
         }
-        backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
-        console.log(backgrounds.src)
         // Đổi background
         ground.onchange = function () {
             backgrounds.src = this.value;
@@ -100,8 +103,8 @@
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
-            const res = await fetch('http://localhost:3000/essays/upload', {
-                method: 'POST',
+            const res = await fetch('http://localhost:3000/Posts/upload', {
+                method: 'Post',
                 body: formData
             });
 
@@ -145,7 +148,7 @@
 
 
             const formData = new FormData();
-            formData.append('essayId', document.getElementById('essayId').value)
+            formData.append('PostId', document.getElementById('PostId').value)
             formData.append('userId', document.getElementById('userId').value);
             let group_id = document.getElementById('groupId').value;
             let scope = document.getElementById('scope').value;
@@ -155,8 +158,8 @@
 
             formData.append('conten', JSON.stringify(conten));
 
-            fetch('http://localhost:3000/essays/save', {
-                method: 'post',
+            fetch('http://localhost:3000/Posts/save', {
+                method: 'Post',
                 body: formData
             })
         })

@@ -40,7 +40,7 @@
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Tạo tài khoản mới</h2>
 
             <!-- Form đăng ký -->
-            <form action="/login/register" method="POST">
+            <form action="/login/register" method="Post">
 
                 <!-- Nhóm input cho số điện thoại -->
                 <div class="mb-4">

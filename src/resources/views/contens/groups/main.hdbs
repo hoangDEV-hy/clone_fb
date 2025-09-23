@@ -5,7 +5,7 @@
         {{/each}}
     </div>
     <div>
-        {{#each essays}}
+        {{#each Posts}}
         <div id="news{{id}}">
             <div class="bd_ct_news_nguoiDang">
                 <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">

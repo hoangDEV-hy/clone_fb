@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Giả Lập Facebook</title>
-    <link rel="stylesheet" href="main.css">
+
 
 </head>
 
@@ -39,11 +39,12 @@
                     <li class="avt"> Nguyễn Hoàng: mời bạn tham gia nhóm</li>
                 </ul>
             </li>
-            <li><a href="profile.htm"><img src="./img/426309418_1440256106901425_3011488708200489727_n.jpg" <li
+            <li class="my_profile"><a href="profile.htm"><img src="/{{user.avatar}}" <li
                         onclick="hienMenu('submenu')">Tài khoản
                     <ul class="submenu menu">
                         alt="ảnh nền">
-                        Nguyễn Hoàng
+                        <p>{{user.name}}</p>
+                        <input type="hidden" value="{{user.id}}">
                 </a></li>
             <li onclick="hienMenu('subsubmenu')">Cài đặt
                 <ul class="subsubmenu menu">Ngôn Ngữ</ul>
@@ -62,10 +63,14 @@
         <div class="body_center">
             <div id="think">
                 <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
-                <a href="/essays">tạo tin</a>
+                <a href="/Posts">tạo tin</a>
             </div>
-            {{#each allEssays}}
-            <div id="news{{id}}">
+            <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
+                <iframe id="myIframe" src="/Post/iframe/commend" style="width:100%; height:400px; "></iframe>
+            </div>
+            {{#each allPosts}}
+            <div class="news">
+                <input type="hidden" name="news" value="{{id}}">
                 <div class="bd_ct_news_nguoiDang">
                     <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
                         <div style="top:0%">
@@ -90,13 +95,14 @@
 
                     <div class="bd_ct_news_commend">
                         <div id="bd_ct_news_commend_thongKe_news{{id}}">
-                            <p id="bd_ct_news_cmd_tk_text_news{{id}}" value="230">230 người khác</p>
+                            <p id="bd_ct_news_cmd_tk_text_news{{id}}"></p>
                         </div>
-                        <div id="bd_ct_news_commend_tuongTac">
-                            <input type="checkbox" class="like-checkbox" data-id="{{id}}">like
-                            <button onclick="binhLuan('news{{id}}')">Bình luận</button>
-                            <form action="/essay/share" method="post">
-                                <input type="hidden" name="id_essay" value={{id}}>
+                        <div class="bd_ct_news_commend_tuongTac">
+                            <input type="checkbox" class="like-checkbox" id="{{id}}" data-id="{{id}}">like
+                            <button name="commend" data-id="{{id}}">Bình luận</button>
+
+                            <form action="/Post/share" method="Post">
+                                <input type="hidden" name="id_Post" value={{id}}>
                                 <button type="submit">Chia sẻ</button>
                             </form>
                         </div>
@@ -124,56 +130,93 @@
             </ul>
             <iframe id="bodyright_mesifP"></iframe>
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('.bd_ct_news_title').forEach(container => {
-                    try {
-                        // Lấy hidden input trong div
-                        let hiddenInput = container.querySelector('.image_src_input');
-                        if (!hiddenInput) return;
+        <script type="module" src="/js/hander_image.js"></script>
+        <script type="module">
+            import hander_image from '/js/hander_image.js';
+            import functionInteractions from '/js/functionInteractions.js'
+            document.addEventListener('DOMContentLoaded', async () => {
+                // xử lý ảnh base64 từ hidden input
+                hander_image('.bd_ct_news_title', '.image_src_img', '.image_src_input');
 
-                        // Lấy JSON string từ value
-                        let data = hiddenInput.value;
-                        console.log("Raw hidden value:", data);
+                //for load_Posts, change_like
+                const id_user = document.querySelector('.my_profile input').value;
+                //for load_Posts, set_like
+                let data_load;
+                //for set_like, change_like
+                const nameCheckInput = '.like-checkbox';
+                //for send_commends, hander_dataIframe
+                const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
+                //for send_commends, hander_dataIframe, change_like, save_toDB
+                let change_like = {};
+                // lưu dữ liệu comment từ iframe
+                let add_commends = [];
+                //save the delete commend data
+                let deleted_commends = [];
+                //save the update commend data
+                let update_commends = [];
 
-                        // Parse sang object
-                        data = JSON.parse(data);
 
-                        // Gắn src cho img
-                        let imgElement = container.querySelector('.image_src_img');
-                        if (imgElement && data.mimeType && data.base64) {
-                            imgElement.src = `data:${data.mimeType};base64,${data.base64}`;
-                        }
-                    } catch (e) {
-                        console.error("Lỗi xử lý ảnh:", e);
-                    }
-                });
-                const checkbox = document.getElementById("like");
-
-
+                //change like
                 document.querySelectorAll('.like-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', async (e) => {
-                        const isCheck = e.target.checked;
-                        const id_essay = e.target.dataset.id;
-                        const url = '/essay/like';
-                        const method = isCheck ? "POST" : "DELETE";
-                        const formData = new FormData();
-                        formData.append('id_essays', id_essay);
-                        formData.append('classify', 'like');
-
-                        try {
-                            await fetch(url, {
-                                method,
-                                body: formData
-                            });
-                            console.log(isCheck ? "Added" : "Deleted");
-                        } catch (err) {
-                            console.error("API failed:", err);
-                        }
-                    });
+                    checkbox.addEventListener('change', (e) => {
+                        change_like = functionInteractions.change_like(e, change_like, id_user);
+                    })
                 });
-            });
+                //send_commends
+                const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
+                commendButtons.forEach(button => {
+                    button.addEventListener('click', async e => {
+                        functionInteractions.send_commends(e, nameContainIframe, "myIframe", '.my_profile img', id_user, data_load);
+                    })
+                })
+                //hander_dataIframe
+                window.addEventListener('message', e => {
+                    if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
 
+                    console.log("Message received at parent:", e.data);
+                    functionInteractions.hander_dataIframe(
+                        e,
+                        add_commends,
+                        deleted_commends,
+                        update_commends,
+                        nameContainIframe,
+                        change_like,
+                        id_user,
+                        (newData) => {
+                            deleted_commends = newData.deleted_commends;
+                            update_commends = newData.update_commends;
+                            change_like = newData.change_like;
+                            add_commends = newData.add_commends;
+                        }
+                    );
+                    console.log('add_commends', add_commends)
+
+                });
+
+                //save_toDB
+                window.addEventListener("pagehide", () => {
+                    functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
+                });
+
+
+
+
+
+
+
+
+                //for logic the program
+                (async () => {
+                    //take ids for load interactions
+                    const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
+                    //load interactions
+                    data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
+                    //set like
+                    await functionInteractions.set_like(data_load);
+                })();
+
+
+            })
         </script>
 </body>
 

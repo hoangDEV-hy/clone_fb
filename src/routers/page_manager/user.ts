@@ -5,7 +5,7 @@ import { User } from '../../models/user';
 import { upload } from '../../middware/updateImage';
 import { group_user } from '../../models/group_user';
 import { Group } from '../../models/group';
-import { Essays } from '../../models/essays';
+import { Posts } from '../../models/Posts';
 import { Op } from 'sequelize';
 import { sequelize } from '../../configs/sql';
 
@@ -17,21 +17,20 @@ route.get('/', authenticate.user_auth, async (req: any, res: any) => {
     try {
         const user = await User.findOne({ where: { id } });
 
-        const essays = await Essays.findAll({
+        const post = await Posts.findAll({
             where: { user_id: id },
             include: [
                 { model: Group, as: 'groups', required: false },
                 { model: User, as: 'users', required: false }
             ]
         });
-        console.log(essays)
 
 
 
 
         // Chuyển từng instance Sequelize thành object thuần và xử lý contens
-        const tranAllEssays = essays.map((essay: any) => {
-            const obj = essay.toJSON ? essay.toJSON() : essay;
+        const tranAllPosts = post.map((Post: any) => {
+            const obj = Post.toJSON ? Post.toJSON() : Post;
 
             try {
                 let parsed = JSON.parse(obj.contens || '{}');
@@ -57,9 +56,8 @@ route.get('/', authenticate.user_auth, async (req: any, res: any) => {
 
             return obj;
         });
-        //console.log(tranAllEssays);
         return res.render('contens/page_manager/user', {
-            essays: tranAllEssays,
+            Posts: tranAllPosts,
             user: user?.toJSON()
         });
 

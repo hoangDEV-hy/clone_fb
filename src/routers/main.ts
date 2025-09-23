@@ -2,7 +2,7 @@ import express from 'express'
 import { authenticate } from '../middware/auth';
 import { Response, Request } from 'express';
 import { Group, methods as model_group } from '../models/group';
-import { methods as model_essays, Essays } from '../models/essays';
+import { methods as model_Posts, Posts } from '../models/Posts';
 import { methods as model_user, User } from '../models/user';
 import { Op } from 'sequelize';
 import { user_user } from '../models/user_user';
@@ -15,11 +15,11 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
     try {
         const idUser = req.admin.id;
         let user = await model_user.selectUser(req.admin.id);
-        interface users extends Essays {
+        interface users extends Posts {
             users: User[];
         }
 
-        const userEssays = await Essays.findAll({
+        const userPosts = await Posts.findAll({
             where: {
                 [Op.and]: [
                     { user_id: idUser },
@@ -40,19 +40,19 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
             ]
         }) as users[];
 
-        interface userWithEssays extends user_user {
-            essays: Essays[];
+        interface userWithPosts extends user_user {
+            Posts: Posts[];
         }
 
-        const friendEssays = await user_user.findAll({
+        const friendPosts = await user_user.findAll({
             where: { id_userA: idUser },
             include: [
                 {
-                    model: Essays,
-                    as: 'essays',
+                    model: Posts,
+                    as: 'Posts',
                     required: true, // inner join
                     on: {
-                        '$essays.user_id$': { [Op.eq]: sequelize.col('user_user.id_userB') }
+                        '$Posts.user_id$': { [Op.eq]: sequelize.col('user_user.id_userB') }
                     },
                     where: {
                         [Op.or]: [
@@ -69,19 +69,19 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
                     ]
                 }
             ]
-        }) as userWithEssays[];
-        interface groupWithEssays extends group_user {
-            essays: Essays[];
+        }) as userWithPosts[];
+        interface groupWithPosts extends group_user {
+            Posts: Posts[];
         }
-        const groupEssays = await group_user.findAll({
+        const groupPosts = await group_user.findAll({
             where: { id_userA: idUser },
             include: [
                 {
-                    model: Essays,
-                    as: 'essays',
+                    model: Posts,
+                    as: 'Posts',
                     required: true, // inner join
                     on: {
-                        '$essays.group_id$': { [Op.eq]: sequelize.col('group_user.id_group') }
+                        '$Posts.group_id$': { [Op.eq]: sequelize.col('group_user.id_group') }
                     },
                     where: {
                         [Op.or]: [
@@ -103,26 +103,25 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
                     ]
                 }
             ]
-        }) as groupWithEssays[];
-        const allEssays = [
-            ...(userEssays || []),
-            ...friendEssays.flatMap(f => f.essays || []),
-            ...groupEssays.flatMap(g => g.essays || [])
-        ].filter((essay, index, self) =>
-            index === self.findIndex(e => e.id === essay.id)
+        }) as groupWithPosts[];
+        const allPosts = [
+            ...(userPosts || []),
+            ...friendPosts.flatMap(f => f.Posts || []),
+            ...groupPosts.flatMap(g => g.Posts || [])
+        ].filter((Post, index, self) =>
+            index === self.findIndex(e => e.id === Post.id)
         );
-        const tranAllEssays = allEssays.map((b: any) => b.toJSON());
-        tranAllEssays.map((f: any) => {
+        const tranAllPosts = allPosts.map((b: any) => b.toJSON());
+        tranAllPosts.map((f: any) => {
             f.contens = JSON.parse(f.contens);
-            f.contens = JSON.parse(f.contens);
+            if (typeof (f.contens) === "string") f.contens = JSON.parse(f.contens);
 
             f.contens = {
                 text: f.contens.text,
                 image: f.contens.image
             }
         })
-        console.log(tranAllEssays)
-        res.render('contens/main', { allEssays: tranAllEssays })
+        res.render('contens/main', { allPosts: tranAllPosts, user: user.toJSON() })
 
     } catch (error) {
         console.log(error);

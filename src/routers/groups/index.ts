@@ -26,16 +26,16 @@ router.get('/main', authenticate.user_auth, async (req: any, res: any) => {
 
         let joinGroup = await group.joinGroup_list(id);
         joinGroup = joinGroup.map((f: any) => f.toJSON());
-        const essaysAll = await group.essaysAll_group(id);
+        const PostsAll = await group.PostsAll_group(id);
 
 
 
-        // Lấy toàn bộ bài viết từ essaysAll (flatten)
-        const allEssays = essaysAll.flatMap((f: any) => f.essays || []);
+        // Lấy toàn bộ bài viết từ PostsAll (flatten)
+        const allPosts = PostsAll.flatMap((f: any) => f.Posts || []);
 
         // Chuyển từng instance Sequelize thành object thuần và xử lý contens
-        const tranAllEssays = allEssays.map((essay: any) => {
-            const obj = essay.toJSON();
+        const tranAllPosts = allPosts.map((Post: any) => {
+            const obj = Post.toJSON();
             obj.contens = JSON.parse(obj.contens);
             obj.contens = JSON.parse(obj.contens);
             obj.contens = {
@@ -47,7 +47,7 @@ router.get('/main', authenticate.user_auth, async (req: any, res: any) => {
         console.log(joinGroup)
 
 
-        res.render('contens/groups/main', { groups: joinGroup, essays: tranAllEssays })
+        res.render('contens/groups/main', { groups: joinGroup, Posts: tranAllPosts })
 
     } catch (error) {
         console.log(error);

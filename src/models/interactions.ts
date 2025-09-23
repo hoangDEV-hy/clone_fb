@@ -1,12 +1,14 @@
 import { sequelize } from "../configs/sql";
-import {  DataTypes, Model } from "sequelize";
+import { DataTypes, Model } from "sequelize";
+import { User } from "./user";
 
 class interactions extends Model {
     declare id: number;
     declare id_user: string;
-    declare id_essays: number;
+    declare id_Posts: number;
     declare classify: string;
-    declare content: Text;
+    declare content: string; // fix here
+    declare origin: string[]; // JSON array of strings
 }
 
 interactions.init({
@@ -20,7 +22,7 @@ interactions.init({
         type: DataTypes.STRING,
         allowNull: false
     },
-    id_essays: {
+    id_Posts: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
@@ -29,6 +31,19 @@ interactions.init({
     },
     content: {
         type: DataTypes.TEXT,
+
+    },
+    origin: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: '[]',
+        get() {
+            const raw = this.getDataValue('origin');
+            return raw ? JSON.parse(raw) : [];
+        },
+        set(value: any[]) {
+            this.setDataValue('origin', JSON.stringify(value));
+        }
     }
 }, {
     sequelize,
@@ -36,6 +51,8 @@ interactions.init({
     modelName: 'interactions',
     timestamps: true
 })
+//for take many information of user
+interactions.belongsTo(User, { foreignKey: 'id_user' })
 export { interactions };
 
 export let methods = {

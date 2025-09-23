@@ -1,17 +1,17 @@
 import { sequelize } from '../configs/sql'
 import { DataTypes, Model } from 'sequelize'
 
-class Essays extends Model {
+class Posts extends Model {
     declare id: number;
     declare group_id: number;
     declare user_id: string;
     declare contens: string;
     declare scope: string;
     declare think: string;
-    declare essayId_origin: number
+    declare PostId_origin: number
 }
 
-Essays.init({
+Posts.init({
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -38,7 +38,7 @@ Essays.init({
         type: DataTypes.TEXT,
         allowNull: true
     },
-    essayId_origin: {
+    PostId_origin: {
         type: DataTypes.INTEGER,
         allowNull: true
     }
@@ -50,37 +50,37 @@ import { User } from './user';
 import { Group } from './group';
 import { user_user } from './user_user';
 import { group_user } from './group_user';
-Essays.belongsTo(User, { as: 'users', foreignKey: 'user_id' })
-Essays.belongsTo(Group, {
+Posts.belongsTo(User, { as: 'users', foreignKey: 'user_id' })
+Posts.belongsTo(Group, {
     as: 'groups', foreignKey: {
         name: 'group_id',
         allowNull: true
     }
 })
-user_user.hasMany(Essays, {
-    foreignKey: 'user_id', // cột bất kỳ trong Essays, Sequelize không thực sự kiểm tra ở DB
-    as: 'essays'
+user_user.hasMany(Posts, {
+    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
+    as: 'Posts'
 });
-group_user.hasMany(Essays, {
-    foreignKey: 'user_id', // cột bất kỳ trong Essays, Sequelize không thực sự kiểm tra ở DB
-    as: 'essays'
+group_user.hasMany(Posts, {
+    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
+    as: 'Posts'
 });
 
-export { Essays }
+export { Posts }
 import { Response } from 'express';
 
 export let methods = {
     create: async (value: { [key: string]: string }) => {
-        return await Essays.create(value);
+        return await Posts.create(value);
     },
     select: async (value: { [key: string]: any }) => {
-        return await Essays.findAll({ where: value });
+        return await Posts.findAll({ where: value });
     },
     des: async (value: { [key: string]: any }) => {
-        return await Essays.destroy({ where: value });
+        return await Posts.destroy({ where: value });
     },
     up: async (value: { [key: string]: any }, conditions: { [key: string]: any }) => {
-        return await Essays.update(value, { where: conditions });
+        return await Posts.update(value, { where: conditions });
     }
 }
 

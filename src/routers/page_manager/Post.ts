@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { methods as model_group } from '../../models/group';
-import { methods as model_essays, Essays } from '../../models/essays';
+import { methods as model_Posts, Posts } from '../../models/Posts';
 import { authenticate } from '../../middware/auth'
 import express from "express"
 import { methods as model_user, User } from '../../models/user';
@@ -16,8 +16,8 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
         console.log('iduser', idUser, 'isAdmin', isAdmin, 'idGroup', idGroup);
         let user = await model_user.selectUser(req.admin.id);
         let group = await model_group.select(idGroup);
-        let essays = await model_essays.select({ user_id: idUser, group_id: idGroup, scope: 'group' })
-        const essays_tranforme = essays.map((b: any) => {
+        let Posts = await model_Posts.select({ user_id: idUser, group_id: idGroup, scope: 'group' })
+        const Posts_tranforme = Posts.map((b: any) => {
 
             let contenObj = JSON.parse(b.contens);
             if (typeof contenObj === 'string') {
@@ -37,8 +37,8 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
                 updatedAt: b.updatedAt
             }
         })
-        console.log(essays_tranforme);
-        res.render('contens/page_manager/essay', { user: user.toJSON(), group: group.toJSON(), essays: essays_tranforme, isAdmin: true })
+        console.log(Posts_tranforme);
+        res.render('contens/page_manager/Post', { user: user.toJSON(), group: group.toJSON(), Posts: Posts_tranforme, isAdmin: true })
 
     } catch (error) {
         console.log(error);
@@ -54,7 +54,7 @@ route.get('/admin', async (req: any, res: Response): Promise<any> => {
         //const idGroup = req.session.currentGroupId;
         const idGroup = 1;
         let group = await model_group.select(idGroup);
-        let essays = await Essays.findAll({
+        let post = await Posts.findAll({
             where: { group_id: idGroup, scope: 'group' },
             include: [{
                 model: User,
@@ -64,7 +64,7 @@ route.get('/admin', async (req: any, res: Response): Promise<any> => {
         });
 
 
-        const essays_tranforme = essays.map((b: any) => {
+        const Posts_tranforme = post.map((b: any) => {
             b = b.toJSON();
             b.contens = JSON.parse(b.contens);
             b.contens = JSON.parse(b.contens);
@@ -74,8 +74,8 @@ route.get('/admin', async (req: any, res: Response): Promise<any> => {
             }
             return b;
         })
-        console.log(essays_tranforme)
-        res.render('contens/page_manager/essay', { group: group?.toJSON?.(), essays: essays_tranforme })
+        console.log(Posts_tranforme)
+        res.render('contens/page_manager/Post', { group: group?.toJSON?.(), Posts: Posts_tranforme })
 
     } catch (error) {
         console.log(error);
@@ -84,7 +84,7 @@ route.get('/admin', async (req: any, res: Response): Promise<any> => {
 })
 route.delete('/del', authenticate.user_auth, async (req: any, res: Response): Promise<any> => {
     const id = req.body;
-    await model_essays.des(id);
+    await model_Posts.des(id);
     const idUser = req.admin.id;
     const isAdmin = req.session.admin;
     //const idGroup = req.session.currentGroupId;
@@ -92,8 +92,8 @@ route.delete('/del', authenticate.user_auth, async (req: any, res: Response): Pr
     console.log('iduser', idUser, 'isAdmin', isAdmin, 'idGroup', idGroup);
     let user = await model_user.selectUser(req.admin.id);
     let group = await model_group.select(idGroup);
-    let essays = await model_essays.select({ user_id: idUser, group_id: idGroup, scope: 'group' })
-    const essays_tranforme = essays.map((b: any) => {
+    let Posts = await model_Posts.select({ user_id: idUser, group_id: idGroup, scope: 'group' })
+    const Posts_tranforme = Posts.map((b: any) => {
 
         let contenObj = JSON.parse(b.contens);
         if (typeof contenObj === 'string') {
@@ -105,21 +105,21 @@ route.delete('/del', authenticate.user_auth, async (req: any, res: Response): Pr
             image: JSON.stringify(contenObj.image)
         }
     })
-    res.render('contens/page_manager/essay', { user: user.toJSON(), group: group.toJSON(), essay: essays_tranforme, isAdmin: isAdmin })
+    res.render('contens/page_manager/Post', { user: user.toJSON(), group: group.toJSON(), Post: Posts_tranforme, isAdmin: isAdmin })
 })
 route.get('/update', authenticate.user_auth, async (req: any, res: Response): Promise<any> => {
     const id = req.body;
-    let essay = await Essays.findOne({ where: id });
-    let contenObj = JSON.parse(essay!.contens);
+    let Post = await Posts.findOne({ where: id });
+    let contenObj = JSON.parse(Post!.contens);
     if (typeof contenObj === 'string') {
         contenObj = JSON.parse(contenObj);
     }
-    const essays_tranforme = {
+    const Posts_tranforme = {
         text: contenObj.text,
         image: JSON.stringify(contenObj.image)
     }
-    console.log(essay)
-    res.render('contens/essay', { essay: essay?.toJSON(), conten: essays_tranforme })
+    console.log(Post)
+    res.render('contens/Post', { Post: Post?.toJSON(), conten: Posts_tranforme })
 })
 
 export { route };

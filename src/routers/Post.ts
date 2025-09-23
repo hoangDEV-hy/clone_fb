@@ -1,6 +1,6 @@
 import express from "express";
 import { methods } from "../models/user";
-import { Essays, methods as model_essays } from "../models/essays"
+import { Posts, methods as model_Posts } from "../models/Posts"
 import { authenticate } from "../middware/auth";
 import { Response, Request } from "express";
 import { User } from "../models/user";
@@ -11,15 +11,14 @@ let route = express.Router();
 route.get('/', authenticate.user_auth, async (req: any, res: Response) => {
     const user = await methods.selectUser(req.admin.id);
     const group_id = req.session.currentGroupId;
-    console.log(group_id)
-    res.render('contens/essay/essay', { user: user.toJSON(), group_id: group_id });
+    res.render('contens/Post/Post', { user: user.toJSON(), group_id: group_id });
 })
 
 route.post('/update', authenticate.user_auth, async (req: any, res: Response) => {
-    const { essayId_curtain, essayId_original } = req.body;
-    const essays = await Essays.findOne({
+    const { PostId_curtain, PostId_original } = req.body;
+    const post = await Posts.findOne({
 
-        where: { id: essayId_curtain },
+        where: { id: PostId_curtain },
         include: [
             {
                 model: User,
@@ -34,18 +33,18 @@ route.post('/update', authenticate.user_auth, async (req: any, res: Response) =>
             }
         ]
     });
-    let contens = JSON.parse(essays!.contens);
+    let contens = JSON.parse(post!.contens);
 
     contens = {
         text: contens.text,
         //image: JSON.stringify(contens.image) // giữ nguyên object/array thay vì stringify
         image: contens.image
     };
-    essays!.contens = contens;
-    let essay = essays?.toJSON();
-    console.log(essay)
-    if (essay.essayId_origin) res.render('contens/essay/Extend_essay', { essay: essay })
-    else res.render('contens/essay/essay', { essay: essay })
+    post!.contens = contens;
+    let Post = post?.toJSON();
+    console.log(Post)
+    if (Post.PostId_origin) res.render('contens/Post/Extend_Post', { Post: Post })
+    else res.render('contens/Post/Post', { Post: Post })
 })
 import multer from 'multer';
 
@@ -61,7 +60,7 @@ route.post('/upload', uploadfile.single('file'), (req: any, res) => {
         base64
     });
 });
-import { methods as consto_essays } from "../constrollers/essays"
+import { methods as consto_Posts } from "../constrollers/Posts"
 import { json } from "sequelize";
 
 
@@ -75,12 +74,12 @@ let uploadForm = multer({
 route.post('/save', uploadForm.none(), async (req: Request, res: Response): Promise<any> => {
     try {
 
-        let { essayId_original, essayId_curtain, userId, groupId, conten, scope, think } = req.body;
+        let { PostId_original, PostId_curtain, userId, groupId, conten, scope, think } = req.body;
         if (groupId === '') groupId = null;
 
-        if (!essayId_curtain) await model_essays.create({ essayId_origin: essayId_original, user_id: userId, group_id: groupId, contens: conten, scope: scope, think: think });
+        if (!PostId_curtain) await model_Posts.create({ PostId_origin: PostId_original, user_id: userId, group_id: groupId, contens: conten, scope: scope, think: think });
         else {
-            await model_essays.up({ essayId_original: essayId_original, contens: conten, scope: scope, think: think }, { id: essayId_curtain });
+            await model_Posts.up({ PostId_original: PostId_original, contens: conten, scope: scope, think: think }, { id: PostId_curtain });
             console.log("updated done")
         }
         return res.json({ status: 'ok' });

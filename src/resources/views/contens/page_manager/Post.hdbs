@@ -7,10 +7,10 @@
 
             <img src="" alt="">
             {{#if isAdmin}}
-            <div><a href="essay/admin">Trang quản lý</a></div>
+            <div><a href="Post/admin">Trang quản lý</a></div>
             {{/if}}
         </div>
-        {{#each essays}}
+        {{#each Posts}}
         <div id="news{{id}}">
             <div class="bd_ct_news_nguoiDang">
                 <div id="bd_ct_n_nguoiDang_anh" style="position: relative;">
@@ -22,11 +22,11 @@
                     <h4>{{users.name}} . {{time updatedAt}}</h4>
                     <div>
 
-                        <form action="/page_manager/essay/del?_method=DELETE" method="post" style="display:inline">
+                        <form action="/page_manager/Post/del?_method=DELETE" method="Post" style="display:inline">
                             <input type="hidden" name="id" value="{{id}}">
                             <button type="submit">delete</button>
                         </form>
-                        <a href="/page_manager/essay/update">update</a>
+                        <a href="/page_manager/Post/update">update</a>
                     </div>
                 </div>
 

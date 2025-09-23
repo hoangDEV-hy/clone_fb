@@ -20,7 +20,7 @@
                     <table>
 
                         <th style="width: 10%;">
-                            <form action="/page_manager/user/upload/thumbnail" method="post"
+                            <form action="/page_manager/user/upload/thumbnail" method="Post"
                                 enctype="multipart/form-data">
                                 <input type="file" name="image" accept="image/*" required>
                                 <button type="submit">Tải lên</button>
@@ -29,7 +29,7 @@
 
                         </th>
                         <th style="width: 90%;">
-                            <form action="/page_manager/user/update/avatar" method="post">
+                            <form action="/page_manager/user/update/avatar" method="Post">
                                 <input type="text" name="name" value="{{user.name}}">
                                 <input type="text" name="hastag" value="{{user.hastag}}">
                                 <button type="submit">xác nhận</button>
@@ -52,15 +52,15 @@
             <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
             <button>Tạo tin</button>
         </div>
-        {{#each essays}}
+        {{#each Posts}}
         <div class="news">
-            <form action="/essay/interactions/share/delete=DELETE" method="post" style="display:inline">
+            <form action="/Post/interactions/share/delete=DELETE" method="Post" style="display:inline">
                 <input type="hidden" name="id" value="{{id}}">
                 <button type="submit">delete</button>
             </form>
-            <form action="/essays/update" method="post" style="display:inline">
-                <input type="hidden" name="essayId_curtain" value="{{id}}">
-                <input type="hidden" name="essayId_original" value="{{essayId_original}}">
+            <form action="/Posts/update" method="Post" style="display:inline">
+                <input type="hidden" name="PostId_curtain" value="{{id}}">
+                <input type="hidden" name="PostId_original" value="{{PostId_original}}">
                 <button type="submit">update</button>
             </form>
             <div class="bd_ct_news_nguoiDang">
