@@ -34,7 +34,8 @@ Group.init({
         tableName: 'groups'
     }
 );
-
+import { group_user } from './group_user';
+Group.hasMany(group_user, { foreignKey: 'id_group', as: 'groups' });
 export { Group };
 
 

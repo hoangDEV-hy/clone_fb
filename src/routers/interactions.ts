@@ -20,7 +20,6 @@ route.post('/interactions/load', upload.none(), async (req: any, res: Response):
     try {
         const { id_Posts, id_user } = req.body;
         const Posts_data = JSON.parse(id_Posts);
-        console.log("id_Posts, id_user", Posts_data, id_user)
         //check id_Posts
         if (!Posts_data || !id_user) {
             return res.status(400).json({ error: "id_Post và id_user là bắt buộc" });
@@ -113,7 +112,6 @@ route.post('/like', async (req: any, res: Response) => {
     } catch (error) {
         console.log(error);
     }
-    console.log(req.body)
     try {
         const dataToInsert: any = Object.values(req.body)
         await interactions.bulkCreate(dataToInsert);
@@ -181,11 +179,10 @@ route.post('/Post/load', authenticate.user_auth, upload.none(), async (req: any,
 
     //contens = JSON.parse(contens);
 
-
     contens = {
         text: contens.text,
         //image: JSON.stringify(contens.image) // giữ nguyên object/array thay vì stringify
-        image: contens.image
+        image: typeof contens.image === "string" ? JSON.parse(contens.image) : contens.image
     };
     post!.contens = contens;
     let Post = post?.toJSON();

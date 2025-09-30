@@ -58,6 +58,8 @@ const functionInteractions = {
         const Post_data = await res.json();
         Post_data.Post.like = like;
         // gửi Post_data  vào iframe
+        console.log(Post_data.Post)
+        //Post_data.Post.forEach(e => { console.log('e', e) })
         iframe.contentWindow.postMessage(
             { type: 'loadData', Post: Post_data.Post },
             '*'

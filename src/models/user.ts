@@ -4,7 +4,7 @@ import {
     Model
 } from 'sequelize';
 import { sequelize as db } from '../configs/sql';
-
+import { Request, Response } from 'express';
 
 
 // 3. Khai báo class model với generic Model<UserAttributes, UserCreationAttributes>
@@ -97,8 +97,8 @@ async function getNextUsername() {
 }
 
 export { User };
-import { Request, Response } from 'express';
-
+import { user_user } from './user_user';
+User.hasMany(user_user, { foreignKey: 'id_userA' })
 
 
 const methods = {

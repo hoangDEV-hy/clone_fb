@@ -34,10 +34,15 @@ user_user.init({
     modelName: 'user_user',
     timestamps: true
 })
-export { user_user };
 import { User } from "./user";
-User.hasMany(user_user, { foreignKey: 'id_userA' })
+import { Posts } from "./Posts";
+export { user_user };
 user_user.belongsTo(User, { foreignKey: 'id_userA' })
+user_user.hasMany(Posts, {
+    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
+    as: 'Posts'
+});
+
 
 
 export let methods = {

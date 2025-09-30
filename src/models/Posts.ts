@@ -50,6 +50,7 @@ import { User } from './user';
 import { Group } from './group';
 import { user_user } from './user_user';
 import { group_user } from './group_user';
+import { interactions } from './interactions';
 Posts.belongsTo(User, { as: 'users', foreignKey: 'user_id' })
 Posts.belongsTo(Group, {
     as: 'groups', foreignKey: {
@@ -57,17 +58,11 @@ Posts.belongsTo(Group, {
         allowNull: true
     }
 })
-user_user.hasMany(Posts, {
-    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
-    as: 'Posts'
-});
-group_user.hasMany(Posts, {
-    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
-    as: 'Posts'
-});
+Posts.hasMany(interactions, { as: 'interactions', foreignKey: 'id_Posts' })
+
+
 
 export { Posts }
-import { Response } from 'express';
 
 export let methods = {
     create: async (value: { [key: string]: string }) => {

@@ -2,19 +2,27 @@
     <h1>Quản lý bài đăng nhóm</h1>
     <div style="display: flex;">
         <div>
-            <h3>{{group.name}}</h3>
+            <h3>{{groups.name}}</h3>
 
 
             <img src="" alt="">
             {{#if isAdmin}}
-            <div><a href="Post/admin">Trang quản lý</a></div>
+            {{!-- for spliting admin sort and user sort --}}
+            <div><a href="Post/admin/Post">Trang quản lý</a></div>
             {{/if}}
         </div>
+        <select data-role="sort">
+            <option>--sort by--</option>
+            <option value="like">Most Likes</option>
+            <option value="commend">Most Commends</option>
+            <option value="share">Most Shares</option>
+        </select>
         {{#each Posts}}
-        <div id="news{{id}}">
+        <div class="news">
             <div class="bd_ct_news_nguoiDang">
                 <div id="bd_ct_n_nguoiDang_anh" style="position: relative;">
                     <div style="top:0%">
+                        <input type="hidden" value="{{users.id}}">
                         <img src="/{{users.avatar}}" alt="ảnh con">
                     </div>
                 </div>
@@ -26,7 +34,10 @@
                             <input type="hidden" name="id" value="{{id}}">
                             <button type="submit">delete</button>
                         </form>
-                        <a href="/page_manager/Post/update">update</a>
+                        <form action="/page_manager/Post/update" method="Post" style="display:inline">
+                            <input type="hidden" name="id" value="{{id}}">
+                            <button type="submit">update</button>
+                        </form>
                     </div>
                 </div>
 
@@ -38,12 +49,20 @@
                 </div>
                 <div class="bd_ct_news_commend">
                     <div id="bd_ct_news_commend_thongKe_news{{id}}">
-                        <p id="bd_ct_news_cmd_tk_text_news{{id}}" value="230">230 người khác</p>
+                        <p id="bd_ct_news_cmd_tk_text_news{{id}}"></p>
                     </div>
-                    <div id="bd_ct_news_commend_tuongTac">
-                        <button onclick="like('news{{id}}')">thích</button>
-                        <button onclick="binhLuan('news{{id}}')">Bình luận</button>
-                        <button onclick="chiaSe()">chia sẻ</button>
+                    <div class="bd_ct_news_commend_tuongTac">
+                        <input type="checkbox" class="like-checkbox" id="{{id}}" data-id="{{id}}">like
+                        <button name="commend" data-id="{{id}}">Bình luận</button>
+
+                        <form action="/Post/share" method="Post">
+                            <input type="hidden" name="id_Post" value={{id}}>
+                            <button type="submit">Chia sẻ</button>
+                        </form>
+                        <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
+                            <iframe id="myIframe" src="/Post/iframe/commend"
+                                style="width:100%; height:400px; "></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -51,20 +70,93 @@
         </div>
     </div>
 </div>
-<script>
+<script type="module">
+    import hander_image from '/js/hander_image.js';
+    import functionInteractions from '/js/functionInteractions.js'
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('input.image_src').forEach((hiddenInput, index) => {
-            try {
-                let data = JSON.parse(hiddenInput.value); // Giải mã JSON từ DB
-                let imgElement = hiddenInput.parentElement.querySelector('img.image_src');
+        hander_image('.bd_ct_news_title', 'img.image_src', 'input.image_src');
 
-                if (imgElement && data.mimeType && data.base64) {
-                    imgElement.src = `data:${data.mimeType};base64,${data.base64}`;
+        //for sorting
+        document.querySelector('[data-role="sort"]').addEventListener('change', () => {
+            let url = `Post/sort?sort=${document.querySelector('[data-role="sort"]').value}`;
+            window.location.href = url;
+        })
+        //for load_Posts, change_like
+        const id_user = document.querySelector('.news input[type="hidden"]').value;
+        console.log('id_user', id_user)
+
+        //for load_Posts, set_like
+        let data_load;
+        //for set_like, change_like
+        const nameCheckInput = '.like-checkbox';
+        //for send_commends, hander_dataIframe
+        const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
+        //for send_commends, hander_dataIframe, change_like, save_toDB
+        let change_like = {};
+        // lưu dữ liệu comment từ iframe
+        let add_commends = [];
+        //save the delete commend data
+        let deleted_commends = [];
+        //save the update commend data
+        let update_commends = [];
+
+        //change like
+        document.querySelectorAll('.like-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                change_like = functionInteractions.change_like(e, change_like, id_user);
+            })
+        });
+        //send_commends
+        const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
+        commendButtons.forEach(button => {
+            button.addEventListener('click', async e => {
+                functionInteractions.send_commends(e, nameContainIframe, "myIframe", 'img[alt="ảnh con"]', id_user, data_load);
+            })
+        })
+        //hander_dataIframe
+        window.addEventListener('message', e => {
+            if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
+
+            console.log("Message received at parent:", e.data);
+            functionInteractions.hander_dataIframe(
+                e,
+                add_commends,
+                deleted_commends,
+                update_commends,
+                nameContainIframe,
+                change_like,
+                id_user,
+                (newData) => {
+                    deleted_commends = newData.deleted_commends;
+                    update_commends = newData.update_commends;
+                    change_like = newData.change_like;
+                    add_commends = newData.add_commends;
                 }
-            } catch (e) {
-                console.error("Lỗi parse ảnh:", e);
-            }
+            );
+            console.log('add_commends', add_commends)
+
         });
 
+        //save_toDB
+        window.addEventListener("pagehide", () => {
+            functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
+        });
+
+
+
+
+
+
+
+
+        //for logic the program
+        (async () => {
+            //take ids for load interactions
+            const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="id"]');
+            //load interactions
+            data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
+            //set like
+            await functionInteractions.set_like(data_load);
+        })();
     });
 </script>

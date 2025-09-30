@@ -1,6 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import { sequelize } from '../configs/sql';
-import { Group } from "../models/group";
+
 
 class group_user extends Model {
     public id!: number;
@@ -38,9 +38,13 @@ group_user.init({
     })
 
 //setup association
-Group.hasMany(group_user, { foreignKey: 'id_group', as: 'groups' });
+import { Group } from "../models/group";
+import { Posts } from "./Posts";
 group_user.belongsTo(Group, { foreignKey: 'id_group', as: 'groups' });
-
+group_user.hasMany(Posts, {
+    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
+    as: 'Posts'
+});
 export { group_user };
 
 export let method = {
