@@ -62,7 +62,7 @@ sql.connect();
 
 //sync
 import { sequelize } from './configs/sql';
-import { DATE } from 'sequelize';
+import './models/chat/chat';
 
 sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
     .then(() => console.log('Database synced'))
@@ -79,7 +79,7 @@ app.use(methodOverride('_method'));
 
 
 
-router(app); // ✅ không còn lỗi vì đúng kiểu
+router(app);
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);

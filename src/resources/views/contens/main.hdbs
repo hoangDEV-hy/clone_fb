@@ -59,7 +59,7 @@
         </ul>
 
     </div>
-    <div class="body">
+    <div class="body" style="display: flex">
         <div class="body_center">
             <div id="think">
                 <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
@@ -128,94 +128,130 @@
                 <li>Đàm</li>
                 <li>Phạm Văn Thành</li>
             </ul>
-            <iframe id="bodyright_mesifP"></iframe>
+            <div data-role="chatBox">
+                <div data-role="chatHead" style="display: flex;">
+                    <h3 data-role="head_name">ten</h3>
+                    <img src="" alt="tagetPicture">
+                    <select data-role="head_option">
+                        <option value="voice">voice</option>
+                        <option value="emoji">voice</option>
+                    </select>
+                    <button data-role="head_close">close</button>
+                </div>
+                <div data-role="contain_chat">
+                    <div data-role="contain_otherChat">
+                        <div data-role="msg_content">Xin chào! 👋</div>
+                        <div data-role="msg_time">10:00</div>
+                    </div>
+                    <div data-role="contain_myChat">
+                        <div data-role="msg_content">Chào bạn!</div>
+                        <div data-role="msg_time">10:01</div>
+                    </div>
+                </div>
+                <div data-role="chatFooter">
+                    <select data-role="typeMes">
+                        <option value="voice">voice</option>
+                        <option value="emoji">emoji</option>
+                        <option value="picture">picture</option>
+                    </select>
+                    <textarea data-role="contenChat"></textarea>
+                    <button data-role="send_mes">send</button>
+                </div>
+            </div>
         </div>
-        <script type="module" src="/js/hander_image.js"></script>
-        <script type="module">
-            import hander_image from '/js/hander_image.js';
-            import functionInteractions from '/js/functionInteractions.js'
-            document.addEventListener('DOMContentLoaded', async () => {
-                // xử lý ảnh base64 từ hidden input
-                hander_image('.bd_ct_news_title', '.image_src_img', '.image_src_input');
-
-                //for load_Posts, change_like
-                const id_user = document.querySelector('.my_profile input').value;
-                //for load_Posts, set_like
-                let data_load;
-                //for set_like, change_like
-                const nameCheckInput = '.like-checkbox';
-                //for send_commends, hander_dataIframe
-                const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
-                //for send_commends, hander_dataIframe, change_like, save_toDB
-                let change_like = {};
-                // lưu dữ liệu comment từ iframe
-                let add_commends = [];
-                //save the delete commend data
-                let deleted_commends = [];
-                //save the update commend data
-                let update_commends = [];
-
-
-                //change like
-                document.querySelectorAll('.like-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', (e) => {
-                        change_like = functionInteractions.change_like(e, change_like, id_user);
-                    })
-                });
-                //send_commends
-                const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
-                commendButtons.forEach(button => {
-                    button.addEventListener('click', async e => {
-                        functionInteractions.send_commends(e, nameContainIframe, "myIframe", '.my_profile img', id_user, data_load);
-                    })
-                })
-                //hander_dataIframe
-                window.addEventListener('message', e => {
-                    if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
-
-                    functionInteractions.hander_dataIframe(
-                        e,
-                        add_commends,
-                        deleted_commends,
-                        update_commends,
-                        nameContainIframe,
-                        change_like,
-                        id_user,
-                        (newData) => {
-                            deleted_commends = newData.deleted_commends;
-                            update_commends = newData.update_commends;
-                            change_like = newData.change_like;
-                            add_commends = newData.add_commends;
-                        }
-                    );
-
-                });
-
-                //save_toDB
-                window.addEventListener("pagehide", () => {
-                    functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
-                });
-
-
-
-
-
-
-
-
-                //for logic the program
-                (async () => {
-                    //take ids for load interactions
-                    const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
-                    //load interactions
-                    data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
-                    //set like
-                    await functionInteractions.set_like(data_load);
-                })();
-
-
-            })
-        </script>
 </body>
+<script type="module" src="/js/hander_image.js"></script>
+<script type="module">
+    import hander_image from '/js/hander_image.js';
+    import functionInteractions from '/js/functionInteractions.js'
+    document.addEventListener('DOMContentLoaded', async () => {
+        // xử lý ảnh base64 từ hidden input
+        hander_image('.bd_ct_news_title', '.image_src_img', '.image_src_input');
+
+        //for load_Posts, change_like
+        const id_user = document.querySelector('.my_profile input').value;
+        //for load_Posts, set_like
+        let data_load;
+        //for set_like, change_like
+        const nameCheckInput = '.like-checkbox';
+        //for send_commends, hander_dataIframe
+        const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
+        //for send_commends, hander_dataIframe, change_like, save_toDB
+        let change_like = {};
+        // lưu dữ liệu comment từ iframe
+        let add_commends = [];
+        //save the delete commend data
+        let deleted_commends = [];
+        //save the update commend data
+        let update_commends = [];
+
+
+        //change like
+        document.querySelectorAll('.like-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                change_like = functionInteractions.change_like(e, change_like, id_user);
+            })
+        });
+        //send_commends
+        const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
+        commendButtons.forEach(button => {
+            button.addEventListener('click', async e => {
+                functionInteractions.send_commends(e, nameContainIframe, "myIframe", '.my_profile img', id_user, data_load);
+            })
+        })
+        //hander_dataIframe
+        window.addEventListener('message', e => {
+            if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
+
+            functionInteractions.hander_dataIframe(
+                e,
+                add_commends,
+                deleted_commends,
+                update_commends,
+                nameContainIframe,
+                change_like,
+                id_user,
+                (newData) => {
+                    deleted_commends = newData.deleted_commends;
+                    update_commends = newData.update_commends;
+                    change_like = newData.change_like;
+                    add_commends = newData.add_commends;
+                }
+            );
+
+        });
+
+        //save_toDB
+        window.addEventListener("pagehide", () => {
+            functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
+        });
+        //chatBox
+        //for add_event & display
+        let chatBox = document.querySelector('[data-role="chatBox"]');
+        chatBox.addEventListener('click', () => {
+            chatBox.style.display = 'none';
+        })
+
+
+
+
+
+
+
+
+            //for logic the program
+            (async () => {
+                //take ids for load interactions
+                const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
+                //load interactions
+                data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
+                //set like
+                await functionInteractions.set_like(data_load);
+            })();
+
+
+    })
+</script>
+
 
 </html>
