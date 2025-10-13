@@ -121,7 +121,12 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
                 image: f.contens.image
             }
         })
-        res.render('contens/main', { allPosts: tranAllPosts, user: user.toJSON() })
+
+
+        //for chatting
+        let friend_array: any = await user_user.findAll({ where: { id_userA: idUser }, attributes: ['id_userB'], include: [{ model: User, required: true, attributes: ['name', 'avatar'] }] })
+        console.log("allPosts", allPosts)
+        res.render('contens/main', { allPosts: tranAllPosts, user: user.toJSON(), friend_array: friend_array.map((e: any) => e.toJSON()) })
 
     } catch (error) {
         console.log(error);

@@ -116,19 +116,20 @@
         <div class="body_right">
 
             <h2>Người liên hệ</h2>
-            <ul>
-                <li><a href="#" onclick="openMes()">Hiệu Phạm</a></li>
-                <li><a href="#" onclick="openMes()">Bùi Huy</a></li>
-                <li>Đặng Thiên</li>
-                <li>Huy Trần Gia</li>
-                <li>Văn Khiêm</li>
-                <li>Việt Dũng</li>
-                <li>Thảo Lê</li>
-                <li>Linh Phương</li>
-                <li>Đàm</li>
-                <li>Phạm Văn Thành</li>
+            <ul data-role="friendList">
+                {{#each friend_array}}
+
+                <li data-id="{{id_userB}}">
+                    <img src={{user.avatar}} width="30" height="30">
+                    <span>{{user.name}}</span>
+                    </a>
+                </li>
+
+                {{/each}}
             </ul>
-            <div data-role="chatBox">
+
+
+            <div data-role="chatBox" style="display: none;">
                 <div data-role="chatHead" style="display: flex;">
                     <h3 data-role="head_name">ten</h3>
                     <img src="" alt="tagetPicture">
@@ -140,27 +141,37 @@
                 </div>
                 <div data-role="contain_chat">
                     <div data-role="contain_otherChat">
-                        <div data-role="msg_content">Xin chào! 👋</div>
-                        <div data-role="msg_time">10:00</div>
+
                     </div>
                     <div data-role="contain_myChat">
-                        <div data-role="msg_content">Chào bạn!</div>
-                        <div data-role="msg_time">10:01</div>
+
                     </div>
                 </div>
                 <div data-role="chatFooter">
                     <select data-role="typeMes">
+
+                        <option>----------</option>
                         <option value="voice">voice</option>
                         <option value="emoji">emoji</option>
                         <option value="picture">picture</option>
                     </select>
-                    <textarea data-role="contenChat"></textarea>
+                    <emoji-picker style="display: none;"></emoji-picker>
+                    <div data-role="voiceAction" style="display: none;">
+                        <button data-role="start_voice">start</button>
+                        <button data-role="end_voice">end</button>
+                        <audio data-role="replay_voice" controls></audio>
+                    </div>
+                    <input type="file" data-role="upload_img" style="display: none;" accept="image/*, image/jpeg">
+
+                    <textarea data-role="contentChat"></textarea>
                     <button data-role="send_mes">send</button>
                 </div>
             </div>
         </div>
 </body>
 <script type="module" src="/js/hander_image.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 <script type="module">
     import hander_image from '/js/hander_image.js';
     import functionInteractions from '/js/functionInteractions.js'
@@ -228,9 +239,202 @@
         //chatBox
         //for add_event & display
         let chatBox = document.querySelector('[data-role="chatBox"]');
-        chatBox.addEventListener('click', () => {
+        chatBox.querySelector('[data-role=head_close]').addEventListener('click', () => {
             chatBox.style.display = 'none';
         })
+        //chatBox.addEventListener('click', () => {
+        //chatBox.style.display = 'none';
+        // })
+        let friend_chat = document.querySelector('[data-role="friendList"]');
+
+        friend_chat.addEventListener('click', (e) => {
+            const li = e.target.closest('li');
+            if (!li) return; // nếu click không nằm trên li thì bỏ qua
+            const socket = io();
+            const receiver_id = li.dataset.id;
+            socket.emit("get_chatData", receiver_id, (data) => {
+                console.log(data)
+                // Main chat container
+                const containChat = document.querySelector('[data-role="contain_chat"]');
+
+                // Sub-containers for each side
+                const myChat = containChat.querySelector('[data-role="contain_myChat"]');
+                const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
+                handleChatData(data[0].contentsChat, myChat, otherChat, receiver_id);
+                containChat.scrollTop = containChat.scrollHeight;
+            });
+            const chatHead = chatBox.querySelector('[data-role="chatHead"]');
+            const headName = chatHead.querySelector('[data-role="head_name"]');
+            headName.textContent = li.querySelector('span').value
+            const headImg = chatHead.querySelector('img').src = li.querySelector('img').src;
+            // for waiting for data in Socket.IO
+            function handleChatData(data, myChat, otherChat, receiver_id) {
+                if (!Array.isArray(data)) return;
+                myChat.innerHTML = "";
+                otherChat.innerHTML = "";
+                data.forEach((e) => {
+                    let parent;
+                    if (e.author === receiver_id) parent = otherChat;
+                    else parent = myChat;
+                    let message = document.createElement('div');
+                    message.innerHTML = `<div data-role="msg_contentt">${e.content}</div>
+                        <div data-role="msg_time">${e.updatedAt}</div>`;
+                    parent.appendChild(message);
+                })
+
+
+                console.log("✅ Hoàn thành xử lý data");
+            }
+            socket.on("connect", () => {
+                console.log(socket.id)
+            });
+
+
+            chatBox.style.display = 'block';
+        });
+        //for sending message
+        const typeMes = document.querySelector('[data-role="typeMes"]');
+        const emojiPicker = document.querySelector('emoji-picker');
+        const voiceAction = document.querySelector('[data-role="voiceAction"]')
+        const chatContent = document.querySelector('[data-role="contentChat"]');
+        const upload_img = document.querySelector('[data-role="upload_img"]');
+        typeMes.addEventListener('change', () => {
+            if (typeMes.value === 'emoji') {
+                emojiPicker.style.display = 'block';
+            } else if (typeMes.value === 'voice') {
+                voiceAction.style.display = 'block';
+            } else if (typeMes.value === 'picture') {
+                upload_img.style.display = 'block';
+            }
+        });
+        emojiPicker.addEventListener('emoji-click', (e) => {
+            chatContent.value += e.detail.unicode;
+        });
+        // for setting up voice
+        let start_buton = voiceAction.querySelector("[data-role='start_voice']");
+        let end_buton = voiceAction.querySelector("[data-role='end_voice']");
+        let audioObjectArray = [];
+        let mediaRecorder;
+
+
+        // Bắt đầu ghi âm
+        start_buton.onclick = async () => {
+            try {
+                //config recording
+
+                // Lấy luồng âm thanh từ micro
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioObjectArray = [];
+
+                // Khi có dữ liệu âm thanh mới
+                mediaRecorder.ondataavailable = (event) => {
+                    audioObjectArray.push(event.data);
+                };
+
+                // Khi dừng ghi âm
+                mediaRecorder.onstop = () => {
+                    // Tạo blob âm thanh từ dữ liệu thu được
+                    const audioData = new Blob(audioObjectArray, { type: "audio/webm" });
+                    const replay_voice = voiceAction.querySelector("[data-role='replay_voice']");
+                    replay_voice.src = URL.createObjectURL(audioData);
+
+                    // Tạo nút xoá audio
+                    const destroy = document.createElement("button");
+                    destroy.textContent = "Xoá";
+                    destroy.onclick = () => {
+                        replay_voice.pause();
+                        if (replay_voice.src) URL.revokeObjectURL(replay_voice.src);
+
+                        // Xoá dữ liệu trong thẻ audio (nhưng KHÔNG xoá thẻ)
+                        replay_voice.removeAttribute("src");
+                        replay_voice.load();
+                        destroy.remove();
+                    }
+                    replay_voice.insertAdjacentElement("afterend", destroy);
+                };
+
+                // Bắt đầu ghi âm
+                mediaRecorder.start();
+                console.log("🔴 Bắt đầu ghi âm...");
+                start_buton.disabled = true;
+                end_buton.disabled = false;
+
+            } catch (err) {
+                console.error("❌ Không thể truy cập micro:", err);
+                alert("Không thể bật micro. Hãy kiểm tra quyền truy cập!");
+            }
+        };
+
+        // Dừng ghi âm
+        end_buton.onclick = () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                console.log("⏹️ Dừng ghi âm.");
+            }
+            start_buton.disabled = false;
+            end_buton.disabled = true;
+        };
+        //for uploading a picture
+        upload_img.addEventListener('change', () => {
+
+            const file = upload_img.files[0]; // get selected file
+            if (!file) return;
+
+            let imgData = new FileReader();
+
+            imgData.onload = (e) => {
+                // Tạo wrapper chứa ảnh + nút xoá
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.gap = '10px';
+                wrapper.style.marginTop = '10px';
+
+                const preview_img = document.createElement('img');
+                const destroy = document.createElement('button');
+
+                preview_img.src = e.target.result;
+                preview_img.style.maxWidth = "120px";
+                preview_img.style.borderRadius = "4px";
+                preview_img.style.border = "1px solid #ccc";
+
+                destroy.textContent = "Xoá";
+                destroy.style.padding = "5px 10px";
+                destroy.style.cursor = "pointer";
+
+                // Gắn vào wrapper
+                wrapper.appendChild(preview_img);
+                wrapper.appendChild(destroy);
+
+                // Gắn wrapper vào ngay sau textarea chatContent
+                chatContent.insertAdjacentElement('afterend', wrapper);
+
+                // Delete button
+                destroy.onclick = () => {
+                    preview_img.remove();
+                    destroy.remove();
+                };
+            };
+
+            imgData.readAsDataURL(file); // 🔹 this triggers the onload
+        });
+
+
+
+
+        // Ẩn emoji picker khi click ra ngoài
+        document.addEventListener('click', (e) => {
+            if (!emojiPicker.contains(e.target) && e.target !== typeMes && e.target !== chatContent) {
+                emojiPicker.style.display = 'none';
+            }
+            if (!voiceAction.contains(e.target) && e.target !== typeMes && e.target !== chatContent) {
+                voiceAction.style.display = 'none';
+            }
+            if (!upload_img.contains(e.target) && e.target !== typeMes && e.target !== chatContent) {
+                upload_img.style.display = 'none';
+            }
+        });
 
 
 
@@ -239,15 +443,17 @@
 
 
 
-            //for logic the program
-            (async () => {
-                //take ids for load interactions
-                const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
-                //load interactions
-                data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
-                //set like
-                await functionInteractions.set_like(data_load);
-            })();
+
+
+        //for logic the program
+        (async () => {
+            //take ids for load interactions
+            const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
+            //load interactions
+            data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
+            //set like
+            await functionInteractions.set_like(data_load);
+        })();
 
 
     })

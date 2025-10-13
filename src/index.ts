@@ -3,8 +3,15 @@ import path from 'path';
 const expressHandlebars = require('express-handlebars');
 import * as sql from './configs/sql'; // giả sử bạn export connect, sequelize...
 import router from './routers'; // phải là export default từ routers/index.ts
+//for Messenger 
+import { Server } from 'socket.io'
+import http from 'http'
+import { setup_chat } from './socket/index';
 
 const app: Express = express();
+//change server to ioServer
+const server = http.createServer(app);
+const io = new Server(server);
 const port = 3000;
 //function timestamps
 const hbs = expressHandlebars.create({
@@ -74,13 +81,16 @@ app.use(express.json());
 
 //add delete, update methods
 import methodOverride from 'method-override';
+import { createServer } from 'http';
 
 app.use(methodOverride('_method'));
 
 
 
 router(app);
+//for listening to  client login
+setup_chat(io);
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });

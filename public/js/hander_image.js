@@ -5,6 +5,7 @@ export default function hander_image(namePost, namePicture, nameDataPicture) {
             if (!hiddenInput) return;
 
             let data = hiddenInput.value;
+            console.log(data)
             data = JSON.parse(data);
             if (typeof data === "string") data = JSON.parse(data);
 
