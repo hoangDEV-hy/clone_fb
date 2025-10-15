@@ -246,11 +246,11 @@
         //chatBox.style.display = 'none';
         // })
         let friend_chat = document.querySelector('[data-role="friendList"]');
-
+        let socket;
         friend_chat.addEventListener('click', (e) => {
             const li = e.target.closest('li');
             if (!li) return; // nếu click không nằm trên li thì bỏ qua
-            const socket = io();
+            socket = io();
             const receiver_id = li.dataset.id;
             socket.emit("get_chatData", receiver_id, (data) => {
                 console.log(data)
@@ -315,7 +315,8 @@
         let end_buton = voiceAction.querySelector("[data-role='end_voice']");
         let audioObjectArray = [];
         let mediaRecorder;
-
+        let imgData;
+        let audioData;
 
         // Bắt đầu ghi âm
         start_buton.onclick = async () => {
@@ -335,7 +336,7 @@
                 // Khi dừng ghi âm
                 mediaRecorder.onstop = () => {
                     // Tạo blob âm thanh từ dữ liệu thu được
-                    const audioData = new Blob(audioObjectArray, { type: "audio/webm" });
+                    audioData = new Blob(audioObjectArray, { type: "audio/webm" });
                     const replay_voice = voiceAction.querySelector("[data-role='replay_voice']");
                     replay_voice.src = URL.createObjectURL(audioData);
 
@@ -381,7 +382,7 @@
             const file = upload_img.files[0]; // get selected file
             if (!file) return;
 
-            let imgData = new FileReader();
+            imgData = new FileReader();
 
             imgData.onload = (e) => {
                 // Tạo wrapper chứa ảnh + nút xoá
@@ -393,13 +394,14 @@
 
                 const preview_img = document.createElement('img');
                 const destroy = document.createElement('button');
-
+                preview_img.dataset.role = 'preview_img';
                 preview_img.src = e.target.result;
                 preview_img.style.maxWidth = "120px";
                 preview_img.style.borderRadius = "4px";
                 preview_img.style.border = "1px solid #ccc";
 
                 destroy.textContent = "Xoá";
+                destroy.dataset.role = 'destroy';
                 destroy.style.padding = "5px 10px";
                 destroy.style.cursor = "pointer";
 
@@ -419,6 +421,49 @@
 
             imgData.readAsDataURL(file); // 🔹 this triggers the onload
         });
+        //for sending message
+        document.querySelector('[data-role="send_mes"]').addEventListener('click', () => {
+            let sent_data = new FormData();
+
+            if (imgData) {
+                let fileImg = new File([imgData], `img-${Date.now()}.png`, { type: "image/png" });
+                sent_data.append('img', fileImg);
+            }
+
+            if (audioData) {
+                let fileAudio = new File([audioData], `voice-${Date.now()}.webm`, { type: "audio/webm" });
+                sent_data.append('audio', fileAudio);
+            }
+
+            fetch('/upload/data', {
+                method: "POST",
+                body: sent_data
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('data', data)
+                    const send_mesData = {
+                        text: chatContent.value,
+                        img: data.imgUrl,
+                        voice: data.voiceUrl
+                    };
+                    // Gửi dữ liệu qua socket
+                    socket.emit('send_mes', send_mesData, (e) => console.log('Server response:', e));
+                    //cleaning interface preview of message
+                    if (send_mesData.img) {
+                        document.querySelector('[data-role="preview_img"]').remove();
+                        document.querySelector('[data-role="destroy"]').remove();
+                    }
+                    if (send_mesData.voice) {
+                        const replay_voice = voiceAction.querySelector("[data-role='replay_voice']");
+                        replay_voice.removeAttribute("src");
+                        replay_voice.load();
+                    }
+                    chatContent.value = "";
+                })
+                .catch(err => console.error('Lỗi upload:', err));
+        });
+
 
 
 

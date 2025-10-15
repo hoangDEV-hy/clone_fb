@@ -10,5 +10,11 @@ export let config_dataChat = {
             else
                 callback('Create successfully')
         });
+    },
+    get_mesData: (socket: Socket)=>{
+        socket.on('send_mes', (send_mesData, send_notification)=>{
+            console.log("send_mesData",send_mesData);
+            send_notification("da gui")
+        })
     }
 }
