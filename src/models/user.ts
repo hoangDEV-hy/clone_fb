@@ -98,7 +98,8 @@ async function getNextUsername() {
 
 export { User };
 import { user_user } from './user_user';
-User.hasMany(user_user, { foreignKey: 'id_userA' })
+User.hasMany(user_user, { foreignKey: 'id_userA', as: 'userA' })
+User.hasMany(user_user, { foreignKey: 'id_userB', as: 'userB' })
 
 
 const methods = {

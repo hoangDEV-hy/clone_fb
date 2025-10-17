@@ -21,8 +21,8 @@ route.post('/interactions/load', upload.none(), async (req: any, res: Response):
         const { id_Posts, id_user } = req.body;
         const Posts_data = JSON.parse(id_Posts);
         //check id_Posts
-        if (!Posts_data || !id_user) {
-            return res.status(400).json({ error: "id_Post và id_user là bắt buộc" });
+        if (!Array.isArray(Posts_data) || Posts_data.length === 0 || !id_user) {
+            return res.status(400).json({ error: "id_Posts (phải là mảng có ít nhất 1 phần tử) và id_user là bắt buộc" });
         }
 
 

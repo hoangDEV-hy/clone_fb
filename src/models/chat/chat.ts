@@ -1,13 +1,12 @@
-import { raw } from 'express';
 import { sequelize } from '../../configs/sql'
 import { Model, DataTypes } from "sequelize";
 
 class chat extends Model {
-    public id!: number;
-    public receiver_id!: string;
-    public menber!: Array<string>;
-    public contents!: Array<number>;
-    public admin!: number;
+    declare id: number;
+    declare sender_id: string;
+    declare receiver_id: string;
+    declare member: Array<string>;
+    declare admin: number;
 }
 chat.init(
     {
@@ -16,8 +15,13 @@ chat.init(
             primaryKey: true,
             autoIncrement: true
         },
+        sender_id: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         receiver_id: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
+            allowNull: false
         },
         member: {
             type: DataTypes.STRING,
@@ -31,18 +35,8 @@ chat.init(
                 this.setDataValue('member', JSON.stringify(value));
             }
         },
-        contents: {
-            type: DataTypes.STRING,
-            get(this: chat): number[] {
-                const rawValue = this.getDataValue('contents') as string | null;
-                return rawValue ? JSON.parse(rawValue) : [];
-            },
-            set(this: chat, value: number[]) {
-                this.setDataValue('contents', JSON.stringify(value));
-            }
-        },
         admin: {
-            type: DataTypes.INTEGER
+            type: DataTypes.STRING
         }
     },
 

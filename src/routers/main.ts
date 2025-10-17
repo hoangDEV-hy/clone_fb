@@ -124,9 +124,32 @@ route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<
 
 
         //for chatting
-        let friend_array: any = await user_user.findAll({ where: { id_userA: idUser }, attributes: ['id_userB'], include: [{ model: User, required: true, attributes: ['name', 'avatar'] }] })
-        console.log("allPosts", allPosts)
-        res.render('contens/main', { allPosts: tranAllPosts, user: user.toJSON(), friend_array: friend_array.map((e: any) => e.toJSON()) })
+        let friend_array: any = await user_user.findAll({
+            where: {
+                status: 'done',
+                [Op.or]: [
+                    { id_userA: idUser },
+                    { id_userB: idUser }
+                ]
+            }, attributes: ['id_userB', 'id_userA'],
+            include: [
+                {
+                    model: User,
+                    as: 'userA',
+                    attributes: ['id', 'name', 'avatar']
+                },
+                {
+                    model: User,
+                    as: 'userB',
+                    attributes: ['id', 'name', 'avatar']
+                }
+            ]
+        })
+        const friendList = friend_array.map((f: any) =>
+            f.id_userA === idUser ? f.userB : f.userA
+        );
+
+        res.render('contens/main', { allPosts: tranAllPosts, user: user.toJSON(), friend_array: friendList.map((e: any) => e.toJSON()) })
 
     } catch (error) {
         console.log(error);

@@ -118,13 +118,10 @@
             <h2>Người liên hệ</h2>
             <ul data-role="friendList">
                 {{#each friend_array}}
-
-                <li data-id="{{id_userB}}">
-                    <img src={{user.avatar}} width="30" height="30">
-                    <span>{{user.name}}</span>
-                    </a>
+                <li data-id="{{id}}">
+                    <img src="{{avatar}}" width="30" height="30" alt="{{name}}">
+                    <span>{{name}}</span>
                 </li>
-
                 {{/each}}
             </ul>
 
@@ -132,6 +129,7 @@
             <div data-role="chatBox" style="display: none;">
                 <div data-role="chatHead" style="display: flex;">
                     <h3 data-role="head_name">ten</h3>
+                    <input type="hidden" data-role="head_chatId">
                     <img src="" alt="tagetPicture">
                     <select data-role="head_option">
                         <option value="voice">voice</option>
@@ -246,21 +244,24 @@
         //chatBox.style.display = 'none';
         // })
         let friend_chat = document.querySelector('[data-role="friendList"]');
-        let socket;
+        let socket = io();
+        let receiver_id;
         friend_chat.addEventListener('click', (e) => {
             const li = e.target.closest('li');
             if (!li) return; // nếu click không nằm trên li thì bỏ qua
-            socket = io();
-            const receiver_id = li.dataset.id;
-            socket.emit("get_chatData", receiver_id, (data) => {
-                console.log(data)
+            receiver_id = li.dataset.id;
+            socket.emit('register', id_user);
+            socket.emit("get_chatData", id_user, receiver_id, (data) => {
+                console.log("data", data)
                 // Main chat container
                 const containChat = document.querySelector('[data-role="contain_chat"]');
 
                 // Sub-containers for each side
                 const myChat = containChat.querySelector('[data-role="contain_myChat"]');
                 const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
-                handleChatData(data[0].contentsChat, myChat, otherChat, receiver_id);
+                const idChat = chatHead.querySelector('[data-role="head_chatId"]');
+                idChat.value = data[0].id;
+                handleChatData(data[0].contensChat, myChat, otherChat, receiver_id);
                 containChat.scrollTop = containChat.scrollHeight;
             });
             const chatHead = chatBox.querySelector('[data-role="chatHead"]');
@@ -268,23 +269,7 @@
             headName.textContent = li.querySelector('span').value
             const headImg = chatHead.querySelector('img').src = li.querySelector('img').src;
             // for waiting for data in Socket.IO
-            function handleChatData(data, myChat, otherChat, receiver_id) {
-                if (!Array.isArray(data)) return;
-                myChat.innerHTML = "";
-                otherChat.innerHTML = "";
-                data.forEach((e) => {
-                    let parent;
-                    if (e.author === receiver_id) parent = otherChat;
-                    else parent = myChat;
-                    let message = document.createElement('div');
-                    message.innerHTML = `<div data-role="msg_contentt">${e.content}</div>
-                        <div data-role="msg_time">${e.updatedAt}</div>`;
-                    parent.appendChild(message);
-                })
 
-
-                console.log("✅ Hoàn thành xử lý data");
-            }
             socket.on("connect", () => {
                 console.log(socket.id)
             });
@@ -292,6 +277,46 @@
 
             chatBox.style.display = 'block';
         });
+        function handleChatData(data, myChat, otherChat, receiver_id) {
+            if (!Array.isArray(data)) return;
+            console.log('function is running')
+            myChat.innerHTML = "";
+            otherChat.innerHTML = "";
+            data.forEach((e) => {
+                let parent;
+                if (e.author === receiver_id) parent = otherChat;
+                else parent = myChat;
+                let message = document.createElement('div');
+                console.log('added message:', message, 'to', parent);
+                let contentElement;
+                let timeElement = document.createElement('div');
+                timeElement.dataset.role = 'msg_time';
+                timeElement.textContent = e.updatedAt;
+
+                if (e.type === 'picture') {
+                    contentElement = document.createElement('img');
+                    contentElement.dataset.role = 'msg_contentt';
+                    contentElement.src = e.content; // e.content should be image URL
+                } else if (e.type === 'voice') {
+                    contentElement = document.createElement('audio');
+                    contentElement.dataset.role = 'msg_contentt';
+                    contentElement.src = e.content; // e.content should be audio URL
+                    contentElement.controls = true;
+                } else if (e.type === 'text') {
+                    contentElement = document.createElement('div');
+                    contentElement.dataset.role = 'msg_contentt';
+                    contentElement.textContent = e.content; // safer than innerHTML
+                }
+
+                message.appendChild(contentElement);
+                message.appendChild(timeElement);
+                parent.appendChild(message);
+
+            })
+
+
+            console.log("✅ Hoàn thành xử lý data");
+        }
         //for sending message
         const typeMes = document.querySelector('[data-role="typeMes"]');
         const emojiPicker = document.querySelector('emoji-picker');
@@ -441,14 +466,16 @@
             })
                 .then(res => res.json())
                 .then(data => {
-                    console.log('data', data)
+                    const chatId = document.querySelector('[data-role="head_chatId"]').value;
+                    const author = id_user;
+                    console.log("chatId", chatId, "author", author)
                     const send_mesData = {
                         text: chatContent.value,
                         img: data.imgUrl,
                         voice: data.voiceUrl
                     };
                     // Gửi dữ liệu qua socket
-                    socket.emit('send_mes', send_mesData, (e) => console.log('Server response:', e));
+                    socket.emit('send_mes', send_mesData, chatId, author, receiver_id);
                     //cleaning interface preview of message
                     if (send_mesData.img) {
                         document.querySelector('[data-role="preview_img"]').remove();
@@ -462,6 +489,14 @@
                     chatContent.value = "";
                 })
                 .catch(err => console.error('Lỗi upload:', err));
+        });
+        //for reloading mes from server
+        const containChat = document.querySelector('[data-role="contain_chat"]');
+        const myChat = containChat.querySelector('[data-role="contain_myChat"]');
+        const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
+        socket.on('receive_mes', (data, receiver_id) => {
+            console.log('📩 Nhận tin nhắn mới:', data);
+            handleChatData(data, myChat, otherChat, receiver_id);
         });
 
 

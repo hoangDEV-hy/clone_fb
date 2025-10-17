@@ -5,6 +5,7 @@ class contensChat extends Model {
     public chatID!: number;
     public contens!: string;
     public author!: string;
+    public type!: string;
 }
 contensChat.init({
     id: {
@@ -21,6 +22,10 @@ contensChat.init({
         allowNull: false
     },
     author: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    type: {
         type: DataTypes.STRING,
         allowNull: false
     }
