@@ -132,8 +132,9 @@
                     <input type="hidden" data-role="head_chatId">
                     <img src="" alt="tagetPicture">
                     <select data-role="head_option">
-                        <option value="voice">voice</option>
-                        <option value="emoji">voice</option>
+                        <option>----------</option>
+                        <option value="delete">delete</option>
+                        <option value="cancel">cancel</option>
                     </select>
                     <button data-role="head_close">close</button>
                 </div>
@@ -297,6 +298,14 @@
                 let parent;
                 if (e.author === receiver_id) parent = otherChat;
                 else parent = myChat;
+                let idMess = document.createElement('input');
+                idMess.type = 'hidden';
+                idMess.value = JSON.stringify({
+                    id: e.id,
+                    author: e.author
+                })
+                let update_button = document.createElement('button');
+                update_button.innerText = 'update button';
                 let message = document.createElement('div');
                 console.log('added message:', message, 'to', parent);
                 let contentElement;
@@ -318,9 +327,10 @@
                     contentElement.dataset.role = 'msg_contentt';
                     contentElement.textContent = e.content; // safer than innerHTML
                 }
-
+                message.appendChild(idMess);
                 message.appendChild(contentElement);
                 message.appendChild(timeElement);
+                message.appendChild(update_button);
                 parent.appendChild(message);
 
             })
@@ -513,6 +523,14 @@
                 console.log('notification'); return
             }
             handleChatData(data, myChat, otherChat, receiver_id);
+        });
+
+        //delete event 
+        const chatHead = document.querySelector('[data-role="chatHead"]');
+        const delSelect = chatHead.querySelector('[data-role="head_option"]');
+
+        delSelect.addEventListener('change', (e) => {
+            console.log(e.target.value);
         });
 
 
