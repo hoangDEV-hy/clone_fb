@@ -1,8 +1,9 @@
 import { chat } from "../models/chat/chat";
 import { contensChat } from "../models/chat/contensChat"
+import { Op } from "sequelize";
 
 //for selecting history chat
-interface select_chatsType extends chat, contensChat {
+export interface select_chatsType extends chat, contensChat {
 }
 //for saving messages
 interface MessageData {
@@ -11,9 +12,18 @@ interface MessageData {
     voice?: string | null;
     [key: string]: string | null | undefined;
 }
-export async function select_chats(sender_id: string, receiver_id: string): Promise<boolean | select_chatsType[]> {
+export interface create_chat {
+    created: boolean,
+    chatId: number
+}
+export async function select_chats(sender_id: string, receiver_id: string): Promise<create_chat | select_chatsType[]> {
     let chatResult: chat[] = await chat.findAll({
-        where: { receiver_id: receiver_id, sender_id: sender_id },
+        where: {
+            [Op.or]: [
+                { [Op.and]: [{ sender_id }, { receiver_id }] },
+                { [Op.and]: [{ sender_id: receiver_id }, { receiver_id: sender_id }] }
+            ]
+        },
         include: {
             model: contensChat,
             required: false,//left-join
@@ -21,8 +31,8 @@ export async function select_chats(sender_id: string, receiver_id: string): Prom
         }
     })
     if (chatResult.length === 0) {
-        await chat.create({ receiver_id: receiver_id, sender_id: sender_id });
-        return true
+        const newChat = await chat.create({ receiver_id: receiver_id, sender_id: sender_id });
+        return { created: true, chatId: newChat.id };
     }
     // return [chatInstance as unknown as select_chatsType, created as unknown as select_chatsType]
     const chatData: select_chatsType[] = chatResult.map((c) => c.toJSON())

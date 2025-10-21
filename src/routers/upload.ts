@@ -24,7 +24,7 @@ route.post('/data', uploadMiddleware, (req: any, res: any): void => {
     const file = req.files;
     let resuilt: any = {};
     if (file.img) resuilt.imgUrl = `/upload/images/${file.img[0].filename}`;
-    if (file.audio) resuilt.voiceUrl = `/uploads/voices/${file.audio[0].filename}`;
+    if (file.audio) resuilt.voiceUrl = `/upload/voices/${file.audio[0].filename}`;
     return res.json(resuilt)
 })
 

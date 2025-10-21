@@ -137,7 +137,7 @@
                     </select>
                     <button data-role="head_close">close</button>
                 </div>
-                <div data-role="contain_chat">
+                <div data-role="contain_chat" style="display: flex;">
                     <div data-role="contain_otherChat">
 
                     </div>
@@ -246,6 +246,7 @@
         let friend_chat = document.querySelector('[data-role="friendList"]');
         let socket = io();
         let receiver_id;
+        let idChat;
         friend_chat.addEventListener('click', (e) => {
             const li = e.target.closest('li');
             if (!li) return; // nếu click không nằm trên li thì bỏ qua
@@ -253,16 +254,28 @@
             socket.emit('register', id_user);
             socket.emit("get_chatData", id_user, receiver_id, (data) => {
                 console.log("data", data)
+
                 // Main chat container
                 const containChat = document.querySelector('[data-role="contain_chat"]');
 
                 // Sub-containers for each side
                 const myChat = containChat.querySelector('[data-role="contain_myChat"]');
                 const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
-                const idChat = chatHead.querySelector('[data-role="head_chatId"]');
-                idChat.value = data[0].id;
-                handleChatData(data[0].contensChat, myChat, otherChat, receiver_id);
+                idChat = chatHead.querySelector('[data-role="head_chatId"]');
+                myChat.innerHTML = "";
+                otherChat.innerHTML = "";
                 containChat.scrollTop = containChat.scrollHeight;
+                if (Array.isArray(data.data)) {
+                    //for notification
+                    idChat.value = data.data[0].id;
+                    //if(receiver_id!== data.data[0].receiver_id) {console.log('notification'); return}
+                    console.log("idChat", idChat)
+                    handleChatData(data.data[0].contensChat, myChat, otherChat, receiver_id);
+                } else {
+                    idChat.value = data.chatId;
+                    console.log("idChat", idChat)
+                }
+
             });
             const chatHead = chatBox.querySelector('[data-role="chatHead"]');
             const headName = chatHead.querySelector('[data-role="head_name"]');
@@ -280,8 +293,6 @@
         function handleChatData(data, myChat, otherChat, receiver_id) {
             if (!Array.isArray(data)) return;
             console.log('function is running')
-            myChat.innerHTML = "";
-            otherChat.innerHTML = "";
             data.forEach((e) => {
                 let parent;
                 if (e.author === receiver_id) parent = otherChat;
@@ -451,7 +462,7 @@
             let sent_data = new FormData();
 
             if (imgData) {
-                let fileImg = new File([imgData], `img-${Date.now()}.png`, { type: "image/png" });
+                let fileImg = upload_img.files[0];
                 sent_data.append('img', fileImg);
             }
 
@@ -485,6 +496,7 @@
                         const replay_voice = voiceAction.querySelector("[data-role='replay_voice']");
                         replay_voice.removeAttribute("src");
                         replay_voice.load();
+                        audioData = undefined;
                     }
                     chatContent.value = "";
                 })
@@ -494,8 +506,12 @@
         const containChat = document.querySelector('[data-role="contain_chat"]');
         const myChat = containChat.querySelector('[data-role="contain_myChat"]');
         const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
-        socket.on('receive_mes', (data, receiver_id) => {
+        socket.on('receive_mes', (data) => {
             console.log('📩 Nhận tin nhắn mới:', data);
+            if (String(data[0].chatID) !== idChat.value) {
+                console.log("id_chat", idChat.value, typeof (idChat.value), "chatID", data[0].chatID)
+                console.log('notification'); return
+            }
             handleChatData(data, myChat, otherChat, receiver_id);
         });
 
