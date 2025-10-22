@@ -140,6 +140,7 @@
                     <select data-role="head_option">
                         <option>----------</option>
                         <option value="delete">delete</option>
+                        <option value="submit">submit</option>
                         <option value="cancel">cancel</option>
                     </select>
                     <button data-role="head_close">close</button>
@@ -309,15 +310,10 @@
                     update_button.innerText = 'update button';
                     parent.appendChild(update_button);
                 }
-                let idMess = document.createElement('input');
-                idMess.type = 'hidden';
-                idMess.value = JSON.stringify({
-                    id: e.id,
-                    author: e.author
-                })
 
                 let message = document.createElement('div');
                 message.dataset.role = 'message';
+                message.dataset.messageId = e.id;
                 console.log('added message:', message, 'to', parent);
                 let contentElement;
                 let timeElement = document.createElement('div');
@@ -338,7 +334,6 @@
                     contentElement.dataset.role = 'msg_content';
                     contentElement.textContent = e.content; // safer than innerHTML
                 }
-                message.appendChild(idMess);
                 message.appendChild(contentElement);
                 message.appendChild(timeElement);
                 parent.appendChild(message);
@@ -539,10 +534,12 @@
         const chatHead = document.querySelector('[data-role="chatHead"]');
         const delSelect = chatHead.querySelector('[data-role="head_option"]');
 
-        delSelect.addEventListener('change', (e) => {
+        let selecter_messages;
+        delSelect.addEventListener('change', async (e) => {
             console.log(e.target.value);
+            let contain_myChat = document.querySelector('[data-role="contain_myChat"]')
             if (e.target.value == 'delete') {
-                let contain_myChat = document.querySelector('[data-role="contain_myChat"]')
+                selecter_messages = new Set();
                 let update_buttons = contain_myChat.querySelectorAll('button');
 
                 update_buttons.forEach(msg => {
@@ -552,18 +549,18 @@
                 });
 
                 let messages = contain_myChat.querySelectorAll('[data-role="message"]');
-                let selecter_messages = new Set();
+
 
                 messages.forEach(e => {
-                    let chat_idAndAuthor = JSON.parse(e.querySelector('input').value);
+                    let chat_id = e.dataset.messageId;
                     e.addEventListener('click', () => {
-                        if (selecter_messages.has(chat_idAndAuthor)) {
+                        if (selecter_messages.has(chat_id)) {
                             // Nếu đã chọn thì hủy chọn
-                            selecter_messages.delete(chat_idAndAuthor);
+                            selecter_messages.delete(chat_id);
                             e.classList.remove('selected');
                         } else {
                             // Nếu chưa chọn thì chọn
-                            selecter_messages.add(chat_idAndAuthor);
+                            selecter_messages.add(chat_id);
                             e.classList.add('selected');
                         }
                         console.log(selecter_messages);
@@ -571,6 +568,37 @@
                 });
 
             }
+            if (e.target.value === 'submit') {
+                let send_data = new FormData();
+                const delArray = [...selecter_messages];
+                console.log(delArray);
+
+                send_data.append("del_mesData", JSON.stringify(delArray));
+
+                try {
+                    const response = await fetch('/mess/del', {
+                        method: 'POST',
+                        body: send_data
+                    });
+
+                    const result = await response.json();
+                    console.log(result)
+                    if (result.result == 'success') {
+                        selecter_messages.forEach((msgId) => {
+                            const remove_divMess = contain_myChat.querySelector(
+                                `[data-role="message"][data-message-id="${msgId}"]`
+                            );
+                            if (remove_divMess) remove_divMess.remove();
+                        });
+                    } else {
+                        alert("Failed to delete messages");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Fail to delete (network or server error)");
+                }
+            }
+
         });
 
 
