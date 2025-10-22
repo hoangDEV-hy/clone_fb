@@ -9,6 +9,12 @@
 
 
 </head>
+<style>
+    [data-role="message"].selected {
+        border: 2px solid red;
+        background: #ffeaea;
+    }
+</style>
 
 <body>
     <div id="bd_ct_news_cmd_tuongTac_nenMo"></div>
@@ -297,16 +303,21 @@
             data.forEach((e) => {
                 let parent;
                 if (e.author === receiver_id) parent = otherChat;
-                else parent = myChat;
+                else {
+                    parent = myChat;
+                    let update_button = document.createElement('button');
+                    update_button.innerText = 'update button';
+                    parent.appendChild(update_button);
+                }
                 let idMess = document.createElement('input');
                 idMess.type = 'hidden';
                 idMess.value = JSON.stringify({
                     id: e.id,
                     author: e.author
                 })
-                let update_button = document.createElement('button');
-                update_button.innerText = 'update button';
+
                 let message = document.createElement('div');
+                message.dataset.role = 'message';
                 console.log('added message:', message, 'to', parent);
                 let contentElement;
                 let timeElement = document.createElement('div');
@@ -315,22 +326,21 @@
 
                 if (e.type === 'picture') {
                     contentElement = document.createElement('img');
-                    contentElement.dataset.role = 'msg_contentt';
+                    contentElement.dataset.role = 'msg_content';
                     contentElement.src = e.content; // e.content should be image URL
                 } else if (e.type === 'voice') {
                     contentElement = document.createElement('audio');
-                    contentElement.dataset.role = 'msg_contentt';
+                    contentElement.dataset.role = 'msg_content';
                     contentElement.src = e.content; // e.content should be audio URL
                     contentElement.controls = true;
                 } else if (e.type === 'text') {
                     contentElement = document.createElement('div');
-                    contentElement.dataset.role = 'msg_contentt';
+                    contentElement.dataset.role = 'msg_content';
                     contentElement.textContent = e.content; // safer than innerHTML
                 }
                 message.appendChild(idMess);
                 message.appendChild(contentElement);
                 message.appendChild(timeElement);
-                message.appendChild(update_button);
                 parent.appendChild(message);
 
             })
@@ -531,6 +541,36 @@
 
         delSelect.addEventListener('change', (e) => {
             console.log(e.target.value);
+            if (e.target.value == 'delete') {
+                let contain_myChat = document.querySelector('[data-role="contain_myChat"]')
+                let update_buttons = contain_myChat.querySelectorAll('button');
+
+                update_buttons.forEach(msg => {
+                    if (msg) {
+                        msg.style.display = "none"; // ẩn nút
+                    }
+                });
+
+                let messages = contain_myChat.querySelectorAll('[data-role="message"]');
+                let selecter_messages = new Set();
+
+                messages.forEach(e => {
+                    let chat_idAndAuthor = JSON.parse(e.querySelector('input').value);
+                    e.addEventListener('click', () => {
+                        if (selecter_messages.has(chat_idAndAuthor)) {
+                            // Nếu đã chọn thì hủy chọn
+                            selecter_messages.delete(chat_idAndAuthor);
+                            e.classList.remove('selected');
+                        } else {
+                            // Nếu chưa chọn thì chọn
+                            selecter_messages.add(chat_idAndAuthor);
+                            e.classList.add('selected');
+                        }
+                        console.log(selecter_messages);
+                    });
+                });
+
+            }
         });
 
 
