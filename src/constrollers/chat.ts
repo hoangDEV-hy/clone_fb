@@ -1,6 +1,8 @@
 import { chat } from "../models/chat/chat";
 import { contensChat } from "../models/chat/contensChat"
 import { Op } from "sequelize";
+import { config_chatFunc } from "../models/configs/config_chat";
+import { config_chat } from "../models/configs/config_chat";
 
 //for selecting history chat
 export interface select_chatsType extends chat, contensChat {
@@ -51,3 +53,30 @@ export async function create_mes(chatId: string, author: string, send_mesData: M
     const saverMes = await Promise.all(tasks);
     return saverMes;
 }
+export async function createOrUpdateOrLoad_chat(
+    updateDataWhere: Record<string, any>,
+    updateDataEdit: Record<string, any>,
+    saveData: Record<string, any>
+): Promise<any> {
+    // Nếu updateDataEdit không tồn tại hoặc rỗng hoặc toàn null/undefined → chỉ load thôi
+    if (
+        !updateDataEdit ||
+        Object.values(updateDataEdit).every(v => v === undefined || v === null)
+    ) {
+        console.log("⚠️ updateDataEdit rỗng hoặc không hợp lệ => chỉ lấy dữ liệu");
+        return await config_chat.findOne({ where: updateDataWhere });
+    }
+
+    // Nếu có dữ liệu hợp lệ thì update
+    const result = await config_chatFunc.update_config(updateDataEdit, updateDataWhere);
+    if (result) {
+        const [affectedCount] = result;
+        if (affectedCount > 0) {
+            return await config_chat.findOne({ where: updateDataWhere });
+        }
+    }
+
+    // Nếu không update được thì tạo mới
+    return await config_chatFunc.create_config(saveData);
+}
+

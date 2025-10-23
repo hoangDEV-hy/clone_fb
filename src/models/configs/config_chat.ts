@@ -33,5 +33,12 @@ export let config_chatFunc = {
         } catch (error) {
             console.error("Lỗi khi tạo config:", error)
         }
+    },
+    update_config: (dataEdit: { [key: string]: string }, dataWhere: { [key: string]: string }) => {
+        try {
+            return config_chat.update(dataEdit, { where: dataWhere })
+        } catch (error) {
+            console.error("Lỗi khi truy cập config:", error)
+        }
     }
 } 

@@ -245,6 +245,9 @@
             functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
         });
         //chatBox
+
+
+
         //for add_event & display
         let chatBox = document.querySelector('[data-role="chatBox"]');
         chatBox.querySelector('[data-role=head_close]').addEventListener('click', () => {
@@ -256,6 +259,7 @@
         let friend_chat = document.querySelector('[data-role="friendList"]');
         let socket = io();
         let receiver_id;
+        let head_name;
         let idChat;
         friend_chat.addEventListener('click', (e) => {
             const li = e.target.closest('li');
@@ -266,11 +270,16 @@
 
                 // Main chat container
                 const containChat = document.querySelector('[data-role="contain_chat"]');
-
+                const chatHead = chatBox.querySelector('[data-role="chatHead"]');
+                head_name = chatHead.querySelector('[data-role="head_name"]');
+                console.log('name', li.querySelector('span').textContent)
+                head_name.textContent = li.querySelector('span').textContent
+                const headImg = chatHead.querySelector('img').src = li.querySelector('img').src;
                 // Sub-containers for each side
                 const myChat = containChat.querySelector('[data-role="contain_myChat"]');
                 const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
                 idChat = chatHead.querySelector('[data-role="head_chatId"]');
+
                 myChat.innerHTML = "";
                 otherChat.innerHTML = "";
                 containChat.scrollTop = containChat.scrollHeight;
@@ -281,13 +290,11 @@
                 } else {
                     idChat.value = data.chatId;
                 }
+                //installing configMes
+                install_configChat(true);
 
-            });
-            const chatHead = chatBox.querySelector('[data-role="chatHead"]');
-            const headName = chatHead.querySelector('[data-role="head_name"]');
-            console.log('name', li.querySelector('span').textContent)
-            headName.textContent = li.querySelector('span').textContent
-            const headImg = chatHead.querySelector('img').src = li.querySelector('img').src;
+            })
+
             // for waiting for data in Socket.IO
 
             socket.on("connect", () => {
@@ -296,6 +303,7 @@
 
 
             chatBox.style.display = 'block';
+
         });
         function handleChatData(data, myChat, otherChat, receiver_id) {
             if (!Array.isArray(data)) return;
@@ -612,7 +620,6 @@
             if (e.target.value === 'edit_nickName') {
                 let chatHead = document.querySelector('[data-role="chatHead"]');
 
-                let head_name = chatHead.querySelector('[data-role="head_name"]');
                 head_name.contentEditable = "true";
 
                 let submit = document.createElement('button');
@@ -621,21 +628,31 @@
                 chatHead.appendChild(submit);
 
                 submit.addEventListener('click', async () => {
-                    let respone = await fetch('/mess/config', {
-                        method: 'Post',
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ "chat_id": idChat.value, "author": id_user, "name": head_name.textContent })
-                    })
-                    let data = await respone.json(); // ✅ parse JSON
-                    console.log(data.save_data);
+                    await install_configChat(false);
                     submit.remove();
                 })
             }
 
         });
+        async function install_configChat(loadOrIntall) {
+            let body;
+            if (!loadOrIntall) body = JSON.stringify({ "chat_id": idChat.value, "author": id_user, "name": head_name.textContent })
+            else body = JSON.stringify({ "chat_id": idChat.value, "author": id_user })
+            let respone = await fetch('/mess/config', {
+                method: 'Post',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: body
+            })
+            let data = await respone.json(); // ✅ parse JSON
+            console.log(data.save_data);
 
+            if (data.save_data?.nickName) {
+                head_name.textContent = data.save_data.nickName;
+            }
+            head_name.contentEditable = "false";
+        }
 
 
 
