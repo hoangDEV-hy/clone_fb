@@ -620,7 +620,16 @@
                 submit.dataset.role = 'submit_button';
                 chatHead.appendChild(submit);
 
-                submit.addEventListener('click', () => {
+                submit.addEventListener('click', async () => {
+                    let respone = await fetch('/mess/config', {
+                        method: 'Post',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ "chat_id": idChat.value, "author": id_user, "name": head_name.textContent })
+                    })
+                    let data = await respone.json(); // ✅ parse JSON
+                    console.log(data.save_data);
                     submit.remove();
                 })
             }

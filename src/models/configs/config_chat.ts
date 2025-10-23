@@ -9,7 +9,7 @@ class config_chat extends Model {
 
 config_chat.init({
     chat_id: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     author: {
@@ -26,3 +26,12 @@ config_chat.init({
     })
 export { config_chat }
 
+export let config_chatFunc = {
+    create_config: (data: { [key: string]: string }) => {
+        try {
+            return config_chat.create(data)
+        } catch (error) {
+            console.error("Lỗi khi tạo config:", error)
+        }
+    }
+} 

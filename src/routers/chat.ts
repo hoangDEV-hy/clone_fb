@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import multer = require("multer");
 const upload = multer();
 import { contensChat } from "../models/chat/contensChat";
+import { config_chatFunc } from "../models/configs/config_chat";
 import { Op } from "sequelize";
 interface del_mesData {
     id: number,
@@ -36,4 +37,11 @@ route.post('/del', upload.none(), async (req: Request, res: Response) => {
         res.status(500).send({ result: 'fail' });
     }
 });
+route.post('/config', async (req: Request, res: Response) => {
+    const { chat_id, author, name: nickName } = req.body;
+    console.log("data", chat_id, author, nickName)
+    const save_data: any = await config_chatFunc.create_config({ chat_id, author, nickName });
+    console.log("save_data", save_data);
+    res.send({ "save_data": save_data.toJSON() });
+})
 export { route }
