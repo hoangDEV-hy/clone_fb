@@ -142,6 +142,8 @@
                         <option value="delete">delete</option>
                         <option value="submit">submit</option>
                         <option value="cancel">cancel</option>
+                        <option value="edit_nickName">changing nickname</option>
+
                     </select>
                     <button data-role="head_close">close</button>
                 </div>
@@ -261,7 +263,6 @@
             receiver_id = li.dataset.id;
             socket.emit('register', id_user);
             socket.emit("get_chatData", id_user, receiver_id, (data) => {
-                console.log("data", data)
 
                 // Main chat container
                 const containChat = document.querySelector('[data-role="contain_chat"]');
@@ -276,23 +277,21 @@
                 if (Array.isArray(data.data)) {
                     //for notification
                     idChat.value = data.data[0].id;
-                    //if(receiver_id!== data.data[0].receiver_id) {console.log('notification'); return}
-                    console.log("idChat", idChat)
                     handleChatData(data.data[0].contensChat, myChat, otherChat, receiver_id);
                 } else {
                     idChat.value = data.chatId;
-                    console.log("idChat", idChat)
                 }
 
             });
             const chatHead = chatBox.querySelector('[data-role="chatHead"]');
             const headName = chatHead.querySelector('[data-role="head_name"]');
-            headName.textContent = li.querySelector('span').value
+            console.log('name', li.querySelector('span').textContent)
+            headName.textContent = li.querySelector('span').textContent
             const headImg = chatHead.querySelector('img').src = li.querySelector('img').src;
             // for waiting for data in Socket.IO
 
             socket.on("connect", () => {
-                console.log(socket.id)
+                console.log(socket.id);
             });
 
 
@@ -300,7 +299,6 @@
         });
         function handleChatData(data, myChat, otherChat, receiver_id) {
             if (!Array.isArray(data)) return;
-            console.log('function is running')
             data.forEach((e) => {
                 let parent;
                 if (e.author === receiver_id) parent = otherChat;
@@ -314,7 +312,6 @@
                 let message = document.createElement('div');
                 message.dataset.role = 'message';
                 message.dataset.messageId = e.id;
-                console.log('added message:', message, 'to', parent);
                 let contentElement;
                 let timeElement = document.createElement('div');
                 timeElement.dataset.role = 'msg_time';
@@ -341,7 +338,6 @@
             })
 
 
-            console.log("✅ Hoàn thành xử lý data");
         }
         //for sending message
         const typeMes = document.querySelector('[data-role="typeMes"]');
@@ -408,7 +404,6 @@
 
                 // Bắt đầu ghi âm
                 mediaRecorder.start();
-                console.log("🔴 Bắt đầu ghi âm...");
                 start_buton.disabled = true;
                 end_buton.disabled = false;
 
@@ -422,7 +417,6 @@
         end_buton.onclick = () => {
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
-                console.log("⏹️ Dừng ghi âm.");
             }
             start_buton.disabled = false;
             end_buton.disabled = true;
@@ -494,7 +488,6 @@
                 .then(data => {
                     const chatId = document.querySelector('[data-role="head_chatId"]').value;
                     const author = id_user;
-                    console.log("chatId", chatId, "author", author)
                     const send_mesData = {
                         text: chatContent.value,
                         img: data.imgUrl,
@@ -522,9 +515,7 @@
         const myChat = containChat.querySelector('[data-role="contain_myChat"]');
         const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
         socket.on('receive_mes', (data) => {
-            console.log('📩 Nhận tin nhắn mới:', data);
             if (String(data[0].chatID) !== idChat.value) {
-                console.log("id_chat", idChat.value, typeof (idChat.value), "chatID", data[0].chatID)
                 console.log('notification'); return
             }
             handleChatData(data, myChat, otherChat, receiver_id);
@@ -536,7 +527,6 @@
 
         let selecter_messages;
         delSelect.addEventListener('change', async (e) => {
-            console.log(e.target.value);
             let contain_myChat = document.querySelector('[data-role="contain_myChat"]')
             if (e.target.value == 'delete') {
                 selecter_messages = new Set();
@@ -558,15 +548,12 @@
                         e.addEventListener('click', () => {
                             if (!selecter_messages) return; // bảo vệ khi cancel
                             if (selecter_messages.has(chat_id)) {
-                                console.log("cahy 1");
                                 selecter_messages.delete(chat_id);
                                 e.classList.remove('selected');
                             } else {
-                                console.log("cahy 2");
                                 selecter_messages.add(chat_id);
                                 e.classList.add('selected');
                             }
-                            console.log(selecter_messages);
                         });
 
                         // Đánh dấu là đã gắn listener
@@ -621,6 +608,21 @@
                 });
 
                 selecter_messages = undefined;
+            }
+            if (e.target.value === 'edit_nickName') {
+                let chatHead = document.querySelector('[data-role="chatHead"]');
+
+                let head_name = chatHead.querySelector('[data-role="head_name"]');
+                head_name.contentEditable = "true";
+
+                let submit = document.createElement('button');
+                submit.innerText = 'submit';
+                submit.dataset.role = 'submit_button';
+                chatHead.appendChild(submit);
+
+                submit.addEventListener('click', () => {
+                    submit.remove();
+                })
             }
 
         });
