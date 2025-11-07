@@ -183,6 +183,10 @@
                 </li>
                 {{/each}}
             </ul>
+            <ul data-role="myRoom">
+                <li>Room 1</li>
+                <li>Room 2</li>
+            </ul>
 
 
             <div data-role="chatBox" style="display: none;">
@@ -210,6 +214,7 @@
 
                     </div>
                 </div>
+                <div data-role="notification"></div>
                 <div data-role="chatFooter">
                     <select data-role="typeMes">
 
@@ -785,6 +790,10 @@
         window.openConfirm = function () {
             const overlay = document.getElementById("overlayConfirm");
             if (overlay) overlay.style.display = "flex";
+            const h1 = document.createElement('h1')
+            h1.textContent = 'it runed'
+
+            document.querySelector('[data-role="notification"]').appendChild(h1)
         }
 
         document.getElementById("btnCancelConfirm").onclick = function () {
@@ -795,8 +804,12 @@
             document.getElementById("overlayConfirm").style.display = "none";
             alert("Đã đồng ý");
         }
-
-
+        document.querySelectorAll('[data-role="myRoom"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                console.log(e.target.textContent.trim());
+            }
+            )
+        })
     })
 </script>
 

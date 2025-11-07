@@ -5,8 +5,9 @@ class chat extends Model {
     declare id: number;
     declare sender_id: string;
     declare receiver_id: string;
-    declare member: Array<string>;
     declare admin: number;
+    declare name: string;
+    declare type:string;
 }
 chat.init(
     {
@@ -23,20 +24,14 @@ chat.init(
             type: DataTypes.STRING,
             allowNull: false
         },
-        member: {
-            type: DataTypes.STRING,
-            get(this: chat): number[] {
-                const rawValue = this.getDataValue('member') as string | null;
-
-                return rawValue ? JSON.parse(rawValue) : [];
-            },
-            set(this: chat, value: number[]) {
-
-                this.setDataValue('member', JSON.stringify(value));
-            }
-        },
         admin: {
             type: DataTypes.STRING
+        },
+        name: {
+            type: DataTypes.STRING
+        },
+        type:{
+            type:DataTypes.STRING
         }
     },
 
