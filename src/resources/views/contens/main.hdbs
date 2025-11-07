@@ -137,12 +137,14 @@
                     <h3 data-role="head_name">ten</h3>
                     <input type="hidden" data-role="head_chatId">
                     <img src="" alt="tagetPicture">
+                    <button data-role="add_member">thêm thành viên</button>
                     <select data-role="head_option">
                         <option>----------</option>
                         <option value="delete">delete</option>
                         <option value="submit">submit</option>
                         <option value="cancel">cancel</option>
                         <option value="edit_nickName">changing nickname</option>
+                        <option value="select_members">show members</option>
 
                     </select>
                     <button data-role="head_close">close</button>
@@ -631,6 +633,18 @@
                     await install_configChat(false);
                     submit.remove();
                 })
+            }
+            if (e.target.value === 'select_members') {
+                let iframe = document.createElement('iframe');
+                iframe.style.width = "100%";
+                iframe.style.height = "400px";
+
+                document
+                    .querySelector('.body_center')
+                    .insertBefore(
+                        iframe,
+                        document.querySelector('.bd_ct_news_cmd_tuongTac_pop')
+                    );
             }
 
         });
