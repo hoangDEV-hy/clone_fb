@@ -1,0 +1,12 @@
+<div data-role="textBox">
+    <form action="">
+        <input type="text" name="textBox">
+    </form>
+</div>
+<div data-role="tableValue">
+    <table>
+        <ul>name</ul>
+        <li>a1</li>
+        <li>a2</li>
+    </table>
+</div>

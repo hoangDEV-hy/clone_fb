@@ -30,3 +30,11 @@ chat_member.init({
     createdAt: true,
     updatedAt: true
 })
+export {chat_member}
+export let methods = {
+    select: async (key: { [value: string]: string }): Promise<chat_member[]> => {
+        return chat_member.findAll({
+            where: key
+        })
+    }
+}

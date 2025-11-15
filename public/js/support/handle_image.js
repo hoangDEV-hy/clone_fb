@@ -1,4 +1,4 @@
-export default function hander_image(namePost, namePicture, nameDataPicture) {
+export default function handle_image(namePost, namePicture, nameDataPicture) {
     document.querySelectorAll(namePost).forEach(container => {
         try {
             let hiddenInput = container.querySelector(nameDataPicture);
