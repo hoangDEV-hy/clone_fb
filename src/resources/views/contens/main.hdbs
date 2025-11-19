@@ -346,21 +346,6 @@
         notification.define();
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         //for confirm repling to an invitation
         window.openConfirm = function () {
             const overlay = document.getElementById("overlayConfirm");
@@ -393,6 +378,14 @@
             const iframe = document.getElementById('myIframe');
             iframe.src = '/mess/chat_room/people';
             document.querySelector(nameContainIframe).style.display = "block";
+            //for searching chat_room, friend
+            let chat_roomUserId = {
+                chat_roomId: chatState.chat_id.value,
+                idUser: id_user
+            };
+            iframe.onload = () => {
+                iframe.contentWindow.postMessage(chat_roomUserId, window.location.origin);
+            };
             let close_buttonIframe = document.createElement('button');
             close_buttonIframe.addEventListener('click', () => {
                 document.querySelector(nameContainIframe).style.display = "none";

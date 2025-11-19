@@ -136,7 +136,8 @@ route.get('/', authenticate.user_auth, async (req: any, res: any) => {
         });
         return res.render('contens/page_manager/user', {
             Posts: tranAllPosts,
-            user: user?.toJSON()
+            user: user?.toJSON(),
+            config_interface: true
         });
 
     } catch (error) {

@@ -19,16 +19,17 @@
             <tr>
                 <th>
                     <table>
-
+                        <img src="/{{user.avatar}}" alt="avt">
+                        {{#if config_interface}}
                         <th style="width: 10%;">
                             <form action="/page_manager/user/upload/thumbnail" method="Post"
                                 enctype="multipart/form-data">
                                 <input type="file" name="image" accept="image/*" required>
                                 <button type="submit">Tải lên</button>
-                                <img src="/{{user.avatar}}" alt="avt">
                             </form>
 
                         </th>
+
                         <th style="width: 90%;">
                             <form action="/page_manager/user/update/avatar" method="Post">
                                 <input type="text" name="name" value="{{user.name}}">
@@ -37,22 +38,26 @@
                             </form>
                         </th>
 
+
                     </table>
                 </th>
                 <th>
                     <div id="head_button">
                         <button>chỉnh sửa trang cá nhân</button>
-                    </div>y
+                    </div>
                 </th>
+                {{/if }}
             </tr>
         </table>
     </div>
 
     <div class="body">
+        {{#if config_interface}}
         <div id="think">
             <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
             <button>Tạo tin</button>
         </div>
+        {{/if}}
         <select name="sort">
             <option>--sort by--</option>
             <option value="like">Most Likes</option>
@@ -124,10 +129,10 @@
     </div>
 
     <script type="module">
-        import hander_image from '/js/hander_image.js';
-        import functionInteractions from '/js/functionInteractions.js'
+        import handle_image from '/js/support/handle_image.js';
+        import functionInteractions from '/js/interactions/functionInteractions.js'
         document.addEventListener('DOMContentLoaded', () => {
-            hander_image('.bd_ct_news_title', '.image_src_img', '.image_src_input')
+            handle_image('.bd_ct_news_title', '.image_src_img', '.image_src_input')
 
             //for sorting
             document.querySelector('.body select[name="sort"]').addEventListener('change', () => {
@@ -210,6 +215,9 @@
                 //set like
                 await functionInteractions.set_like(data_load);
             })();
+
+            //
+            console.log('config_interface', "{{config_interface}}")
         });
     </script>
 </body>

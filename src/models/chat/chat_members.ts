@@ -30,11 +30,17 @@ chat_member.init({
     createdAt: true,
     updatedAt: true
 })
-export {chat_member}
+
+import { User } from "../user";
+// for selecting user information
+chat_member.belongsTo(User, {
+    foreignKey: 'idUser', as: 'users'
+})
+export { chat_member }
 export let methods = {
     select: async (key: { [value: string]: string }): Promise<chat_member[]> => {
         return chat_member.findAll({
             where: key
         })
-    }
+    },
 }

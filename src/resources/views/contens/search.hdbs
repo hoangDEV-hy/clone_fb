@@ -1,12 +1,111 @@
-<div data-role="textBox">
-    <form action="">
-        <input type="text" name="textBox">
-    </form>
-</div>
-<div data-role="tableValue">
-    <table>
-        <ul>name</ul>
-        <li>a1</li>
-        <li>a2</li>
-    </table>
-</div>
+<body>
+
+    <div data-role="textBox">
+        <input type="text" name="name">
+    </div>
+
+    <div data-role="tableValue">
+        <table border="1">
+            <tr>
+                <th></th>
+                <th>Name</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        let input = document.querySelector('[data-role="textBox"] input');
+        let inputBox = document.querySelector('[data-role="textBox"]');
+
+        window.addEventListener('message', event => {
+            if (event.origin !== window.location.origin) return;
+            window.lastChatRoomUser = event.data;
+            console.log('Đã nhận được data từ iframe');
+        });
+
+        let timer = null;
+
+        async function send_searchResult() {
+            const text = input.value.trim();
+            if (text === "") return;
+
+            const data = window.lastChatRoomUser;
+
+            if (!data) {
+                console.log("⚠ Chưa nhận được postMessage từ iframe → chưa submit");
+                return;
+            }
+
+            const params = new URLSearchParams({
+                idUser: data.idUser,
+                chat_roomId: data.chat_roomId,
+                name: text
+            });
+
+            let search_values = await fetch('/mess/search?' + params.toString());
+            search_values = await search_values.json();
+
+            let table = document.querySelector('[data-role="tableValue"] table');
+            table.innerHTML = `
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                </tr>
+            `;
+
+            handle_searchValues(search_values.friendList);
+        }
+
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(send_searchResult, 2000);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!inputBox.contains(e.target)) {
+                clearTimeout(timer);
+                send_searchResult();
+            }
+        });
+
+        //for add member to the room
+        //document.querySelector('[data-role="addTo_room"]').addEventListener('click', () => {
+        //console.log('clicked');
+        //})
+
+        function test() {
+            console.log('clicked');
+        }
+
+
+
+        //must split
+        function handle_searchValues(list) {
+            let table = document.querySelector('[data-role="tableValue"] table');
+
+            if (!list || list.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.textContent = 'No data';
+                td.colSpan = 2;
+                tr.appendChild(td);
+                table.appendChild(tr);
+                return;
+            }
+
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        ${item.avatar ? `<img src="/${item.avatar}" width="40" height="40">` : ''}
+                    </td>
+                    <a href="/mess/search/profileUser?userId=${item.id}">
+                ${item.name || ''}
+            </a>
+                    <td><button data-role="addTo_room" onclick=test()>add to the room</button></td>
+                `;
+                table.appendChild(tr);
+            });
+        }
+    </script>
+</body>
