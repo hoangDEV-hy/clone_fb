@@ -7,8 +7,8 @@ import { contensChat } from "../models/chat/contensChat";
 import { config_chatFunc } from "../models/configs/config_chat";
 import { createOrUpdateOrLoad_chat } from "../constrollers/chat"
 //to get the friends who are not in the chatrooms
-import { methods as methodFriends, user_user } from "../models/user_user"
-import { methods as methodChat_members, chat_member } from "../models/chat/chat_members"
+import { methods as methodsFriends, user_user } from "../models/user_user"
+import { methods as methodsChat_members, chat_member } from "../models/chat/chat_members"
 import { Op, where } from "sequelize";
 import { route as routerOfSearch } from "./search";
 
@@ -86,3 +86,10 @@ export { route }
 
 //get members of chatroom
 route.use('/search', routerOfSearch);
+
+//post add a member to a chatroom
+route.post('/chat_room/people', async (req: Request, res: Response) => {
+    const { chat_memberValue } = req.body;
+    let result = await methodsChat_members.create(chat_memberValue);
+    console.log("result", result)
+})

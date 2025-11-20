@@ -31,3 +31,12 @@ notifications.init({
     updatedAt: true,
     createdAt: true
 })
+export let methods = {
+    create: async (key: { [value: string]: any }): Promise<notifications> => {
+        return await notifications.create({
+            sender_id: key.sender_id,
+            receiver_id: key.receiver_id,
+            content: key.content
+        })
+    },
+}

@@ -7,8 +7,9 @@
     <div data-role="tableValue">
         <table border="1">
             <tr>
-                <th></th>
+                <th>Avatar</th>
                 <th>Name</th>
+                <th>Action</th>
             </tr>
         </table>
     </div>
@@ -16,7 +17,9 @@
     <script>
         let input = document.querySelector('[data-role="textBox"] input');
         let inputBox = document.querySelector('[data-role="textBox"]');
+        let data = undefined;
 
+        // Nhận dữ liệu từ iframe
         window.addEventListener('message', event => {
             if (event.origin !== window.location.origin) return;
             window.lastChatRoomUser = event.data;
@@ -25,12 +28,12 @@
 
         let timer = null;
 
+        // Gửi request tìm kiếm
         async function send_searchResult() {
             const text = input.value.trim();
             if (text === "") return;
 
-            const data = window.lastChatRoomUser;
-
+            data = window.lastChatRoomUser;
             if (!data) {
                 console.log("⚠ Chưa nhận được postMessage từ iframe → chưa submit");
                 return;
@@ -42,25 +45,28 @@
                 name: text
             });
 
-            let search_values = await fetch('/mess/search?' + params.toString());
+            let search_values = await fetch('/mess/search?' + params);
             search_values = await search_values.json();
 
             let table = document.querySelector('[data-role="tableValue"] table');
             table.innerHTML = `
                 <tr>
-                    <th></th>
+                    <th>Avatar</th>
                     <th>Name</th>
+                    <th>Action</th>
                 </tr>
             `;
 
             handle_searchValues(search_values.friendList);
         }
 
+        // Delay khi nhập
         input.addEventListener('input', () => {
             clearTimeout(timer);
-            timer = setTimeout(send_searchResult, 2000);
+            timer = setTimeout(send_searchResult, 1000);
         });
 
+        // Click ra ngoài → chạy tìm kiếm
         document.addEventListener('click', (e) => {
             if (!inputBox.contains(e.target)) {
                 clearTimeout(timer);
@@ -68,27 +74,34 @@
             }
         });
 
-        //for add member to the room
-        //document.querySelector('[data-role="addTo_room"]').addEventListener('click', () => {
-        //console.log('clicked');
-        //})
+        // Thêm user vào phòng
+        function addTo_room(userId) {
+            console.log("Add user:", userId);
+            const chat_memberValue = {
+                chat_id: data.chat_roomId,
+                idUser: data.idUser,
+                status: 'pending'
+            };
+            const notification_value = {
+                sender_id: data.idUser,
+                receiver_id: userId,
+                content: "Invite to chat room"
+            };
+            console.log("chat_memberValue", chat_memberValue);
+            console.log("notification:", notification_value);
 
-        function test() {
-            console.log('clicked');
+            // TODO: gửi request API tại đây
         }
 
-
-
-        //must split
+        // Render danh sách
         function handle_searchValues(list) {
             let table = document.querySelector('[data-role="tableValue"] table');
 
             if (!list || list.length === 0) {
                 const tr = document.createElement('tr');
-                const td = document.createElement('td');
-                td.textContent = 'No data';
-                td.colSpan = 2;
-                tr.appendChild(td);
+                tr.innerHTML = `
+                    <td colspan="3" style="text-align:center">No data</td>
+                `;
                 table.appendChild(tr);
                 return;
             }
@@ -99,13 +112,18 @@
                     <td>
                         ${item.avatar ? `<img src="/${item.avatar}" width="40" height="40">` : ''}
                     </td>
-                    <a href="/mess/search/profileUser?userId=${item.id}">
-                ${item.name || ''}
-            </a>
-                    <td><button data-role="addTo_room" onclick=test()>add to the room</button></td>
+                    <td>
+                        <a href="/mess/search/profileUser?userId=${item.id}">
+                            ${item.name || ''}
+                        </a>
+                    </td>
+                    <td>
+                        <button onclick="addTo_room('${item.id}')">Add to room</button>
+                    </td>
                 `;
                 table.appendChild(tr);
             });
         }
     </script>
+
 </body>

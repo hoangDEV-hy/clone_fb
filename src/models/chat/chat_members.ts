@@ -43,4 +43,11 @@ export let methods = {
             where: key
         })
     },
+    create: async (key: { [value: string]: any }): Promise<chat_member> => {
+        return await chat_member.create({
+            chat_id: key.chat_id,
+            idUser: key.idUser,
+            status: key.status
+        })
+    },
 }
