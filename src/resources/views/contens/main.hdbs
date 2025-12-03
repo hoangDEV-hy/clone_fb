@@ -344,6 +344,8 @@
         });
         //notifications
         notification.define();
+        //generate a notification
+
 
 
         //for confirm repling to an invitation

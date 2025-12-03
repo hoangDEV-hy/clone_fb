@@ -75,7 +75,7 @@
         });
 
         // Thêm user vào phòng
-        function addTo_room(userId) {
+        async function addTo_room(userId) {
             console.log("Add user:", userId);
             const chat_memberValue = {
                 chat_id: data.chat_roomId,
@@ -90,7 +90,14 @@
             console.log("chat_memberValue", chat_memberValue);
             console.log("notification:", notification_value);
 
-            // TODO: gửi request API tại đây
+            let response = await fetch('/notification/chat_member', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ notification_value })
+            });
+
         }
 
         // Render danh sách

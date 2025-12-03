@@ -1,7 +1,10 @@
 import { Server } from "socket.io";
 import { config_dataChat } from "./chat"
+
 let active_users: any = [];
+let ioInstance: Server;
 export function setup_chat(io: Server) {
+    ioInstance = io;
     io.on('connection', (socket) => {
 
         socket.on('register', (user_id) => {
@@ -12,7 +15,7 @@ export function setup_chat(io: Server) {
         config_dataChat.get_chatData(socket);
         //listening mesData to server and emit mesData to client
         config_dataChat.getAndSend_mesData(socket, io, active_users);
-        
+
         //emit mesData to client
         socket.emit('get_chatData',)
         socket.on('disconnect', () => {
@@ -23,6 +26,20 @@ export function setup_chat(io: Server) {
                 }
             }
         })
+       
+       
     })
 
+}
+//for sending a notification
+export function sendNotification(notificationValue: { receiver_id: string; content: string }) {
+    if (!ioInstance) return console.error("Socket.io not initialized");
+
+    const socketId = active_users[notificationValue.receiver_id];
+    if (socketId) {
+        ioInstance.to(socketId).emit('create_notification', notificationValue);
+        console.log('Sent notification to user screen');
+    } else {
+        console.log('Send to notification center instead');
+    }
 }
