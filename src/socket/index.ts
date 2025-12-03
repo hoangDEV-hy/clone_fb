@@ -26,8 +26,8 @@ export function setup_chat(io: Server) {
                 }
             }
         })
-       
-       
+
+
     })
 
 }

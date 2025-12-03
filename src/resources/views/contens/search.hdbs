@@ -85,7 +85,7 @@
             const notification_value = {
                 sender_id: data.idUser,
                 receiver_id: userId,
-                content: "Invite to chat room"
+                content: `Invite to chat room of ${data.idUser}`
             };
             console.log("chat_memberValue", chat_memberValue);
             console.log("notification:", notification_value);
