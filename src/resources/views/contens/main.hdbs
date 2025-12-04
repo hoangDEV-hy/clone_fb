@@ -111,7 +111,6 @@
             <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
                 <iframe id="myIframe" src="/Post/iframe/commend" style="width:100%; height:400px; "></iframe>
             </div>
-            <button type="button" class="btn btn-primary" id="liveToastBtn">Show live toast</button>
             <button onclick="openConfirm()">test show dialog</button>
             <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
@@ -333,37 +332,16 @@
         });
         //notifications
         notification.define();
-        //generate a notification
+        //generate a notificationn & handle_notification
         socket.on('create_notification', (data) => {
             if (data) {
-                notification.generate_notification(data.content);
+                notification.generate_notification(data.content, "Thông báo", "invited_joinChat");
+
             }
             else {
                 console.log('khong ton tai data.content');
             }
         });
-
-
-
-
-        //for confirm repling to an invitation
-        window.openConfirm = function () {
-            const overlay = document.getElementById("overlayConfirm");
-            if (overlay) overlay.style.display = "flex";
-            const h1 = document.createElement('h1')
-            h1.textContent = 'it runed'
-
-            document.querySelector('[data-role="notification"]').appendChild(h1)
-        }
-
-        document.getElementById("btnCancelConfirm").onclick = function () {
-            document.getElementById("overlayConfirm").style.display = "none";
-        }
-
-        document.getElementById("btnOkConfirm").onclick = function () {
-            document.getElementById("overlayConfirm").style.display = "none";
-            alert("Đã đồng ý");
-        }
 
         //event click_listRoom
         document.querySelectorAll('[data-role="myRoom"]').forEach(el => {
