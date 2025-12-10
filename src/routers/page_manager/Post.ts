@@ -33,7 +33,6 @@ route.get('/', authenticate.user_auth, async (req: Request, res: Response): Prom
         const isAdmin: string | undefined = req.session?.admin;
         //const idGroup = req.session.currentGroupId;
         const idGroup = 1;
-        console.log('iduser', idUser, 'isAdmin', isAdmin, 'idGroup', idGroup);
         //vi 1 group nhung nhieu bai viet nen khong chung du lieu dc
         let group: Group = await model_group.select(idGroup);
         let contain_posts: contain_posts[] = await Posts.findAll({
@@ -111,7 +110,6 @@ route.delete('/del', authenticate.user_auth, async (req: Request, res: Response)
     const isAdmin: string | undefined = req.session?.admin;
     //const idGroup = req.session.currentGroupId;
     const idGroup = 1;
-    console.log('iduser', idUser, 'isAdmin', isAdmin, 'idGroup', idGroup);
     let group: Group = await model_group.select(idGroup);
     let contain_posts: contain_posts[] = await Posts.findAll({
         where: { group_id: idGroup, scope: 'group' },
@@ -178,7 +176,6 @@ route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): 
     //const idGroup:number = req.session.currentGroupId;
     const idGroup = 1;
     try {
-        console.log("sort=:", req.query.sort);
         //for where in the query
         let sort: string = req.query.sort as string;
         let post: contain_posts[] = await Posts.findAll({
@@ -250,7 +247,6 @@ route.get('/admin/Post/sort', async (req: Request, res: Response): Promise<void>
     const idGroup = 1;
     const isAdmin: string | undefined = req.session?.admin;
     try {
-        console.log("sort=:", req.query.sort);
         //for where in the query
         let sort: string = req.query.sort as string;
         let post: contain_posts[] = await Posts.findAll({

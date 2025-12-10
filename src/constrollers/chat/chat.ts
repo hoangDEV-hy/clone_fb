@@ -1,8 +1,8 @@
-import { chat } from "../models/chat/chat";
-import { contensChat } from "../models/chat/contensChat"
+import { chat } from "../../models/chat/chat";
+import { contensChat } from "../../models/chat/contensChat"
 import { Op } from "sequelize";
-import { config_chatFunc } from "../models/configs/config_chat";
-import { config_chat } from "../models/configs/config_chat";
+import { config_chatFunc } from "../../models/configs/config_chat";
+import { config_chat } from "../../models/configs/config_chat";
 
 //for selecting history chat
 export interface select_chatsType extends chat, contensChat {

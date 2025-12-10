@@ -10,7 +10,7 @@ const notification = {
             })
         }
     },
-    generate_notification(message, title = "Thông báo", type) {
+    generate_notification(chat_memberValue, title = "Thông báo", type) {
         const container = document.getElementById("toast-container");
 
         let toast = document.createElement('div');
@@ -26,16 +26,15 @@ const notification = {
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-            ${message}
+            ${chat_memberValue.content}
         </div>
     `;
 
         container.appendChild(toast);
 
         toast.addEventListener('click', () => {
-            console.log("it runned")
             if (type === "invited_joinChat") {
-                notification.handler_InvitedNotification();
+                notification.handler_InvitedNotification(chat_memberValue, chat_memberValue.id);
                 toast.remove();
             } else {
                 console.log("không tồn tại");
@@ -49,7 +48,7 @@ const notification = {
             toast.remove();
         })
     },
-    handler_InvitedNotification() {
+    handler_InvitedNotification(chat_memberValue, notificationId) {
 
         const overlay = document.getElementById("overlayConfirm");
         if (overlay) overlay.style.display = "flex";
@@ -57,14 +56,35 @@ const notification = {
         h1.textContent = 'it runed'
 
         document.querySelector('[data-role="notification"]').appendChild(h1)
-
-        document.getElementById("btnCancelConfirm").onclick = function () {
+        document.getElementById("btnCancelConfirm").onclick = async function () {
             document.getElementById("overlayConfirm").style.display = "none";
+            let response_delete_chat_member = await fetch('/mess/chat_room/people', {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(chat_memberValue)
+            });
         }
 
-        document.getElementById("btnOkConfirm").onclick = function () {
+        document.getElementById("btnOkConfirm").onclick = async function () {
             document.getElementById("overlayConfirm").style.display = "none";
             alert("Đã đồng ý");
+            let response_chat_member = await fetch('/mess/chat_room/people', {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(chat_memberValue)
+            });
+
+            let response_delete_notification = await fetch('/notification/chat_member', {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ notificationId })
+            });
         }
     }
 }

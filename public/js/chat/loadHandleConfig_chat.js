@@ -15,6 +15,7 @@ const loadHandleConfig_chat = {
 
                 socket.emit('register', id_user);
                 socket.emit("get_chatData", id_user, chatState.receiver_id, (data) => {
+                    console.log('selectedChatData', data);
                     const containChat = document.querySelector('[data-role="contain_chat"]');
                     const chatHead = chatBox.querySelector('[data-role="chatHead"]');
 
@@ -29,9 +30,9 @@ const loadHandleConfig_chat = {
                     myChat.innerHTML = "";
                     otherChat.innerHTML = "";
 
-                    if (Array.isArray(data.data)) {
-                        chatState.chat_id.value = data.data[0].id;
-                        loadHandleConfig_chat.handleChatData(data.data[0].contensChat, myChat, otherChat, chatState.receiver_id);
+                    if (Array.isArray(data.chat.data)) {
+                        chatState.chat_id.value = data.chat.data[0].id;
+                        loadHandleConfig_chat.handleChatData(data.chat.data[0].contensChat, myChat, otherChat, chatState.receiver_id);
                     } else {
                         chatState.chat_id.value = data.chatId;
                     }

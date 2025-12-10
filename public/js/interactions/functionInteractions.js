@@ -74,13 +74,11 @@ const functionInteractions = {
         );
         // gui commends to iframe
         let commend_data_array;
-        console.log('data_load', data_load)
         for (let [key, value] of Object.entries(data_load)) {
             if (key === 'commend') {
                 commend_data_array = value.filter(e => e.id_Posts == id_Post);
             }
         }
-        console.log('commend_data_array', commend_data_array)
 
 
         iframe.contentWindow.postMessage({

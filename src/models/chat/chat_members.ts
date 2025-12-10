@@ -1,5 +1,5 @@
 import { sequelize } from "../../configs/sql";
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, WhereOptions } from "sequelize";
 
 class chat_member extends Model {
     declare chat_id: number;
@@ -43,6 +43,11 @@ export let methods = {
             where: key
         })
     },
+    selectWhere: async (key: WhereOptions): Promise<chat_member[]> => {
+        return chat_member.findAll({
+            where: key
+        })
+    },
     create: async (key: { [value: string]: any }): Promise<chat_member> => {
         return await chat_member.create({
             chat_id: key.chat_id,
@@ -50,4 +55,37 @@ export let methods = {
             status: key.status
         })
     },
+    remove: async (chat_memberValue: {
+        sender_id: number;
+        receiver_id: number;
+    }): Promise<any> => {
+        return await chat_member.destroy({
+            where: {
+                chat_id: chat_memberValue.sender_id,
+                idUser: chat_memberValue.receiver_id
+            }
+        });
+    },
+    update: async (chat_memberValue: {
+        sender_id: number;
+        receiver_id: number;
+        status: string;
+    }): Promise<any> => {
+        return await chat_member.update(
+            { status: 'joining' },
+            {
+                where: {
+                    chat_id: chat_memberValue.sender_id,
+                    idUser: chat_memberValue.receiver_id
+                }
+            }
+        );
+    },
+    creates: async (chat_valueMembers: Array<{
+        chat_id: number;
+        idUser: string;
+        status: string;
+    }>): Promise<any> => {
+        return await chat_member.bulkCreate(chat_valueMembers);
+    }
 }

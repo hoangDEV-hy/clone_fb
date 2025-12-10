@@ -1,36 +1,68 @@
 import { Socket } from 'socket.io'
-import { select_chats, create_mes } from '../constrollers/chat'
-import { select_chatsType, create_chat } from "../constrollers/chat"
+import { select_chats, create_mes } from '../constrollers/chat/chat'
+import { select_chatsType, create_chat } from "../constrollers/chat/chat"
+import { select_members, add_members } from '../constrollers/chat/chat_members'
 export let config_dataChat = {
     get_chatData: (socket: Socket) => {
         socket.on('get_chatData', async (sender_id, receiver_id, callback) => {
-            let select_chatsData: select_chatsType[] | create_chat = await select_chats(sender_id, receiver_id);
-            if (Array.isArray(select_chatsData)) {
-                callback({
-                    message: 'Chat found',
-                    data: select_chatsData
-                });
-            } else if (select_chatsData.created) {
-                callback({
-                    message: 'Chat created successfully',
-                    data: select_chatsData
-                });
-            } else {
-                callback({
-                    message: 'Unexpected result',
-                    data: null
+            try {
+                let select_chatsData = await select_chats(sender_id, receiver_id);
+                let select_chatMembers = await select_members(sender_id, receiver_id);
+
+                let result: any = {};
+
+                if (Array.isArray(select_chatsData)) {
+                    result.chat = {
+                        message: 'Chat found',
+                        data: select_chatsData
+                    };
+                } else if (select_chatsData.created) {
+                    result.chat = {
+                        message: 'Chat created successfully',
+                        data: select_chatsData
+                    };
+                }
+
+                // 3. Check members
+                if (Array.isArray(select_chatMembers) && select_chatMembers.length > 0) {
+                    result.members = {
+                        message: 'Member of this chat found'
+                    };
+                } else {
+                    let chat_id: string | number;
+
+                    if (Array.isArray(select_chatsData)) {
+                        // Chat existed before, so use the first chat's id
+                        chat_id = select_chatsData[0].id;
+                    } else {
+                        // Chat was newly created
+                        chat_id = select_chatsData.chatId;
+                    }
+                    let status = 'joining';
+                    let chat_valueMembers = [{ chat_id: chat_id, idUser: sender_id, status: status }, { chat_id: chat_id, idUser: receiver_id, status: status }];
+                    const created = await add_members(chat_valueMembers);
+
+                    result.members = {
+                        message: created
+                            ? 'Add members of chat successfully' : 'Cannot add members'
+                    };
+                }
+
+                // 4. Chỉ callback 1 lần
+                return callback(result);
+
+            } catch (err) {
+                return callback({
+                    message: 'Error: ' + err
                 });
             }
         });
     },
     getAndSend_mesData: (socket: Socket, io: any, active_users: any[]) => {
         socket.on('send_mes', async (send_mesData, chatId, author, receiver_id) => {
-            console.log("chatId", chatId, "author", author)
-            console.log("send_mesData", send_mesData);
             try {
 
                 const saverMes = await create_mes(chatId, author, send_mesData);
-                console.log(saverMes)
                 // Phát lại cho người gửi (xác nhận)
                 if (active_users[author]) {
                     io.to(active_users[author]).emit('receive_mes', saverMes, author);

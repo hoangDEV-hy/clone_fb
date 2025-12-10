@@ -335,8 +335,7 @@
         //generate a notificationn & handle_notification
         socket.on('create_notification', (data) => {
             if (data) {
-                notification.generate_notification(data.content, "Thông báo", "invited_joinChat");
-
+                notification.generate_notification(data, "Thông báo", "invited_joinChat");
             }
             else {
                 console.log('khong ton tai data.content');

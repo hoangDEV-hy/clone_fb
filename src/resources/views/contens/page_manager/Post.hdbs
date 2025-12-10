@@ -83,7 +83,6 @@
         })
         //for load_Posts, change_like
         const id_user = document.querySelector('.news input[type="hidden"]').value;
-        console.log('id_user', id_user)
 
         //for load_Posts, set_like
         let data_load;
@@ -117,7 +116,6 @@
         window.addEventListener('message', e => {
             if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
 
-            console.log("Message received at parent:", e.data);
             functionInteractions.hander_dataIframe(
                 e,
                 add_commends,
@@ -133,7 +131,6 @@
                     add_commends = newData.add_commends;
                 }
             );
-            console.log('add_commends', add_commends)
 
         });
 

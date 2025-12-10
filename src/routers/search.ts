@@ -15,7 +15,6 @@ route.get('/', async (req: Request, res: Response, next: NextFunction) => {
         const idUser = req.query.idUser as string;
         const idChatRoom = Number(req.query.chat_roomId);
 
-        console.log('chat_data', name, idUser, idChatRoom);
 
         // ============================
         // 1. LẤY DANH SÁCH CHAT MEMBERS
@@ -35,8 +34,7 @@ route.get('/', async (req: Request, res: Response, next: NextFunction) => {
             ]
         });
 
-        const existingUserIds = chatMembers.map(m => m.idUser);
-
+        const existingUserIds = chatMembers.map(m => { return m.idUser });
 
         // ============================
         // 2. LẤY DANH SÁCH BẠN BÈ

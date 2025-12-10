@@ -155,7 +155,6 @@ const featureOfChat = {
                         voice: data.voiceUrl
                     };
                     // Gửi dữ liệu qua socket
-                    console.log('receiver_id', receiver_id)
                     socket.emit('send_mes', send_mesData, chatId, author, receiver_id);
                     //cleaning interface preview of message
                     if (send_mesData.img) {

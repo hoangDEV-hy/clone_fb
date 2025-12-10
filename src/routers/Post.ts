@@ -42,7 +42,6 @@ route.post('/update', authenticate.user_auth, async (req: any, res: Response) =>
     };
     post!.contens = contens;
     let Post = post?.toJSON();
-    console.log(Post)
     if (Post.PostId_origin) res.render('contens/Post/Extend_Post', { Post: Post })
     else res.render('contens/Post/Post', { Post: Post })
 })
@@ -80,7 +79,6 @@ route.post('/save', uploadForm.none(), async (req: Request, res: Response): Prom
         if (!PostId_curtain) await model_Posts.create({ PostId_origin: PostId_original, user_id: userId, group_id: groupId, contens: conten, scope: scope, think: think });
         else {
             await model_Posts.up({ PostId_original: PostId_original, contens: conten, scope: scope, think: think }, { id: PostId_curtain });
-            console.log("updated done")
         }
         return res.json({ status: 'ok' });
     }

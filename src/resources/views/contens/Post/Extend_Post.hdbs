@@ -71,7 +71,6 @@
         let emoji = document.getElementById('emoji');
         let imgData = JSON.parse(data.value);
         while (typeof imgData === "string") imgData = JSON.parse(imgData);
-        console.log(JSON.stringify(imgData))
         let backgrounds = document.querySelector('img[name="background"]');
         backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
         // Chèn emoji vào textarea
@@ -91,7 +90,6 @@
                 image: data.value
 
             }
-            console.log('id', document.getElementById('PostId_curtain').value)
 
 
             const formData = new FormData();

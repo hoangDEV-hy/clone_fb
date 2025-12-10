@@ -75,7 +75,6 @@
                 imgData = JSON.parse(imgData);
             }
             backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
-            console.log(backgrounds.src)
         }
         // Đổi background
         ground.onchange = function () {
@@ -126,7 +125,6 @@
             e.preventDefault();
             //image
             const url = backgrounds.src;
-            console.log(url + 'ulr:')
             let dataUrl = url;
             if (!url.startsWith('data:')) {
                 // nếu là url bình thường thì fetch và chuyển thành base64
@@ -143,8 +141,7 @@
                     base64: base64
                 }
             }
-            console.log('user_id', document.getElementById('userId').value);
-            console.log('groupId', document.getElementById('groupId').value);
+
 
 
             const formData = new FormData();

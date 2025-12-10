@@ -5,7 +5,7 @@ import multer = require("multer");
 const upload = multer();
 import { contensChat } from "../models/chat/contensChat";
 import { config_chatFunc } from "../models/configs/config_chat";
-import { createOrUpdateOrLoad_chat } from "../constrollers/chat"
+import { createOrUpdateOrLoad_chat } from "../constrollers/chat/chat"
 //to get the friends who are not in the chatrooms
 import { methods as methodsFriends, user_user } from "../models/user_user"
 import { methods as methodsChat_members, chat_member } from "../models/chat/chat_members"
@@ -25,7 +25,6 @@ route.post('/del', upload.none(), async (req: Request, res: Response) => {
             del_mesData = JSON.parse(del_mesData);
         }
 
-        console.log('req:', del_mesData);
 
 
         const ids = del_mesData
@@ -45,9 +44,7 @@ route.post('/del', upload.none(), async (req: Request, res: Response) => {
 });
 route.post('/config', async (req: Request, res: Response) => {
     const { chat_id, author, name: nickName } = req.body;
-    console.log("data", chat_id, author, nickName)
     const save_data: any = await createOrUpdateOrLoad_chat({ chat_id, author }, { nickName }, { chat_id, author, nickName });
-    console.log("save_data", save_data);
     res.send({ "save_data": save_data.toJSON() });
 })
 //post chat_room people
@@ -91,5 +88,33 @@ route.use('/search', routerOfSearch);
 route.post('/chat_room/people', async (req: Request, res: Response) => {
     const { chat_memberValue } = req.body;
     let result = await methodsChat_members.create(chat_memberValue);
-    console.log("result", result)
+    res.json(result);
 })
+
+//Delete: remove a chat member
+route.delete('/chat_room/people', async (req: Request, res: Response): Promise<any> => {
+    try {
+        const chat_memberValue = req.body;
+
+        const result = await methodsChat_members.remove(chat_memberValue);
+
+        return res.json({ success: true, result });
+    } catch (error) {
+        console.error("UPDATE ERROR:", error);
+        return res.status(500).json({ success: false, error });
+    }
+});
+
+// Patch: update status of chat member
+route.patch('/chat_room/people', async (req: Request, res: Response): Promise<any> => {
+    try {
+        const chat_memberValue = req.body;
+
+        const result = await methodsChat_members.update(chat_memberValue);
+
+        return res.json({ success: true, result });
+    } catch (error) {
+        console.error("UPDATE ERROR:", error);
+        return res.status(500).json({ success: false, error });
+    }
+});

@@ -39,4 +39,9 @@ export let methods = {
             content: key.content
         })
     },
+    delete: async (notificationId: number): Promise<any> => {
+        return await notifications.destroy({
+            where: { id: notificationId }
+        });
+    }
 }

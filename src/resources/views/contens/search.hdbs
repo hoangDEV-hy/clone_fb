@@ -76,27 +76,35 @@
 
         // Thêm user vào phòng
         async function addTo_room(userId) {
-            console.log("Add user:", userId);
             const chat_memberValue = {
                 chat_id: data.chat_roomId,
-                idUser: data.idUser,
+                idUser: userId,
                 status: 'pending'
             };
             const notification_value = {
-                sender_id: data.idUser,
+                sender_id: data.chat_roomId,
                 receiver_id: userId,
                 content: `Invite to chat room of ${data.idUser}`
             };
-            console.log("chat_memberValue", chat_memberValue);
-            console.log("notification:", notification_value);
 
-            let response = await fetch('/notification/chat_member', {
+
+            let response_add_notification = await fetch('/notification/chat_member', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ notification_value })
             });
+            let response_add_chat_member = await fetch('/mess/chat_room/people', {
+                method: "Post",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ chat_memberValue })
+            })
+            // Parse JSON properly
+            let chatMemberJson = await response_add_notification.json();
+            console.log('response_add_notification', chatMemberJson);
 
         }
 

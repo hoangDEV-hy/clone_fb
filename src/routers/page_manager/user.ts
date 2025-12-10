@@ -19,7 +19,6 @@ declare module "express-serve-static-core" {
 route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): Promise<any> => {
     const id = req.admin?.id;
     try {
-        console.log("sort=:", req.query.sort);
         //for where in the query
         let sort: string = req.query.sort as string;
         let post: any = await Posts.findAll({
