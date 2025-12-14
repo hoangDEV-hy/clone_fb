@@ -68,9 +68,15 @@
 
         // Click ra ngoài → chạy tìm kiếm
         document.addEventListener('click', (e) => {
-            if (!inputBox.contains(e.target)) {
-                clearTimeout(timer);
-                send_searchResult();
+            try {
+
+                if (!inputBox.contains(e.target)) {
+                    clearTimeout(timer);
+                    send_searchResult();
+                }
+            } catch (err) {
+                console.log("lỗi trong xử lý client", err);
+                alert('thêm thành viên không thành công');
             }
         });
 
@@ -81,32 +87,55 @@
                 idUser: userId,
                 status: 'pending'
             };
+
             const notification_value = {
                 sender_id: data.chat_roomId,
                 receiver_id: userId,
                 content: `Invite to chat room of ${data.idUser}`
             };
 
+            try {
+                // Gửi request tạo notification
+                const response_add_notification = await fetch('/notification/chat_member', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ notification_value })
+                });
 
-            let response_add_notification = await fetch('/notification/chat_member', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ notification_value })
-            });
-            let response_add_chat_member = await fetch('/mess/chat_room/people', {
-                method: "Post",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ chat_memberValue })
-            })
-            // Parse JSON properly
-            let chatMemberJson = await response_add_notification.json();
-            console.log('response_add_notification', chatMemberJson);
+                // Kiểm tra lỗi HTTP
+                if (!response_add_notification.ok) {
+                    const errorBody = await response_add_notification.text();
+                    console.error("❌ Lỗi khi tạo notification:", errorBody);
+                    throw new Error("Không thể tạo notification");
+                }
+                else {
+                    alert("thành công")
+                }
 
+                // Gửi request thêm chat member
+                const response_add_chat_member = await fetch('/mess/chat_room/people', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chat_memberValue })
+                });
+
+                if (!response_add_chat_member.ok) {
+                    const errorBody = await response_add_chat_member.text();
+                    console.error("❌ Lỗi khi thêm người vào phòng:", errorBody);
+                    throw new Error("Không thể thêm người vào chat room");
+                }
+
+                const chatMemberJson = await response_add_chat_member.json();
+                console.log('👥 Add chat member response:', chatMemberJson);
+
+            } catch (err) {
+                console.error("🔥 Lỗi trong addTo_room:", err);
+
+                // Tùy bạn xử lý UI
+                alert("Có lỗi xảy ra khi gửi lời mời vào phòng chat.");
+            }
         }
+
 
         // Render danh sách
         function handle_searchValues(list) {

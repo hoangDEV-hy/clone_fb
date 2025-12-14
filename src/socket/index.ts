@@ -33,13 +33,19 @@ export function setup_chat(io: Server) {
 }
 //for sending a notification
 export function sendNotification(notificationValue: { id: number, sender_id: string, receiver_id: string; content: string }) {
-    if (!ioInstance) return console.error("Socket.io not initialized");
+    try {
 
-    const socketId = active_users[notificationValue.receiver_id];
-    if (socketId) {
-        ioInstance.to(socketId).emit('create_notification', notificationValue);
-        console.log('Sent notification to user screen');
-    } else {
-        console.log('Send to notification center instead');
+        if (!ioInstance) return console.error("Socket.io not initialized");
+
+        const socketId = active_users[notificationValue.receiver_id];
+        if (socketId) {
+            ioInstance.to(socketId).emit('create_notification', notificationValue);
+            console.log('Sent notification to user screen');
+        } else {
+            console.log('Send to notification center instead');
+        }
+    } catch (err) {
+        console.log("Lỗi khi gửi thông báo đến client", err);
+        throw err;
     }
 }

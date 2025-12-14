@@ -33,11 +33,17 @@ notifications.init({
 })
 export let methods = {
     create: async (key: { [value: string]: any }): Promise<notifications> => {
-        return await notifications.create({
-            sender_id: key.sender_id,
-            receiver_id: key.receiver_id,
-            content: key.content
-        })
+        try{
+
+            return await notifications.create({
+                sender_id: key.sender_id,
+                receiver_id: key.receiver_id,
+                content: key.content
+            })
+        }catch(err){
+            console.error("Error in create():", err);
+            throw err;
+        }
     },
     delete: async (notificationId: number): Promise<any> => {
         return await notifications.destroy({

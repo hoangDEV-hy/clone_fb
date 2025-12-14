@@ -58,33 +58,99 @@ const notification = {
         document.querySelector('[data-role="notification"]').appendChild(h1)
         document.getElementById("btnCancelConfirm").onclick = async function () {
             document.getElementById("overlayConfirm").style.display = "none";
-            let response_delete_chat_member = await fetch('/mess/chat_room/people', {
-                method: 'DELETE',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(chat_memberValue)
-            });
+
+            try {
+                const response_delete_chat_member = await fetch('/mess/chat_room/people', {
+                    method: 'DELETE',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(chat_memberValue)
+                });
+
+                if (!response_delete_chat_member.ok) {
+                    const errorData = await response_delete_chat_member.json();
+                    throw new Error(errorData.error || 'Delete chat member failed');
+                }
+
+                const data = await response_delete_chat_member.json();
+
+                if (data.success) {
+                    console.log('Xóa chat member thành công:', data.result);
+                    alert('Huỷ thành công');
+                } else {
+                    console.error('Server trả success=false:', data.error);
+                    alert('Huỷ không thành công');
+                }
+
+            } catch (error) {
+                console.error('DELETE CHAT MEMBER ERROR:', error);
+                alert('Huỷ không thành công');
+            }
+
         }
 
         document.getElementById("btnOkConfirm").onclick = async function () {
             document.getElementById("overlayConfirm").style.display = "none";
             alert("Đã đồng ý");
-            let response_chat_member = await fetch('/mess/chat_room/people', {
-                method: 'PATCH',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(chat_memberValue)
-            });
+            try {
+                const response_chat_member = await fetch('/mess/chat_room/people', {
+                    method: 'PATCH',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(chat_memberValue)
+                });
 
-            let response_delete_notification = await fetch('/notification/chat_member', {
-                method: 'DELETE',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ notificationId })
-            });
+                if (!response_chat_member.ok) {
+                    const errorData = await response_chat_member.json();
+                    throw new Error(errorData.error || 'Update chat member failed');
+                }
+
+                const data = await response_chat_member.json();
+
+                if (data.success) {
+                    console.log('Update thành công:', data.result);
+                } else {
+                    console.error('Server trả success=false:', data.error);
+                }
+                try {
+                    const response_delete_notification = await fetch('/notification/chat_member', {
+                        method: 'DELETE',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ notificationId })
+                    });
+
+                    if (!response_delete_notification.ok) {
+                        const errorData = await response_delete_notification.json();
+                        throw new Error(errorData.error || 'Delete notification failed');
+                    }
+
+                    const data = await response_delete_notification.json();
+
+                    if (data.success) {
+                        console.log('Xóa notification thành công');
+                        alert('Vào nhóm thành công');
+
+                    } else {
+                        console.error('Server trả success=false:', data.error);
+                        alert('Vào nhóm thành công');
+                    }
+
+                } catch (error) {
+                    console.error('DELETE NOTIFICATION ERROR:', error);
+                    alert('Vào nhóm không thành công');
+                }
+
+
+            } catch (error) {
+                console.error('CLIENT ERROR:', error);
+            }
+
+
+
         }
     }
 }

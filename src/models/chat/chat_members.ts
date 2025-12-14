@@ -44,7 +44,7 @@ export let methods = {
         })
     },
     selectWhere: async (key: WhereOptions): Promise<chat_member[]> => {
-        return chat_member.findAll({
+        return await chat_member.findAll({
             where: key
         })
     },

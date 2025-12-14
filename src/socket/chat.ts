@@ -7,7 +7,6 @@ export let config_dataChat = {
         socket.on('get_chatData', async (sender_id, receiver_id, callback) => {
             try {
                 let select_chatsData = await select_chats(sender_id, receiver_id);
-                let select_chatMembers = await select_members(sender_id, receiver_id);
 
                 let result: any = {};
 
@@ -22,6 +21,17 @@ export let config_dataChat = {
                         data: select_chatsData
                     };
                 }
+                let chat_id: number;
+
+                if (Array.isArray(select_chatsData)) {
+                    // Chat existed before, so use the first chat's id
+                    chat_id = select_chatsData[0].id;
+                } else {
+                    // Chat was newly created
+                    chat_id = select_chatsData.chatId;
+                }
+                let select_chatMembers = await select_members(sender_id, receiver_id, chat_id);
+                console.log('select_chatMembers', select_chatMembers)
 
                 // 3. Check members
                 if (Array.isArray(select_chatMembers) && select_chatMembers.length > 0) {
@@ -29,15 +39,7 @@ export let config_dataChat = {
                         message: 'Member of this chat found'
                     };
                 } else {
-                    let chat_id: string | number;
 
-                    if (Array.isArray(select_chatsData)) {
-                        // Chat existed before, so use the first chat's id
-                        chat_id = select_chatsData[0].id;
-                    } else {
-                        // Chat was newly created
-                        chat_id = select_chatsData.chatId;
-                    }
                     let status = 'joining';
                     let chat_valueMembers = [{ chat_id: chat_id, idUser: sender_id, status: status }, { chat_id: chat_id, idUser: receiver_id, status: status }];
                     const created = await add_members(chat_valueMembers);
