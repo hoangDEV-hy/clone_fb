@@ -56,18 +56,18 @@ export let methods = {
         })
     },
     remove: async (chat_memberValue: {
-        sender_id: number;
+        selectedIdChatRoom: number;
         receiver_id: number;
     }): Promise<any> => {
         return await chat_member.destroy({
             where: {
-                chat_id: chat_memberValue.sender_id,
+                chat_id: chat_memberValue.selectedIdChatRoom,
                 idUser: chat_memberValue.receiver_id
             }
         });
     },
     update: async (chat_memberValue: {
-        sender_id: number;
+        selectedIdChatRoom: number;
         receiver_id: number;
         status: string;
     }): Promise<any> => {
@@ -75,7 +75,7 @@ export let methods = {
             { status: 'joining' },
             {
                 where: {
-                    chat_id: chat_memberValue.sender_id,
+                    chat_id: chat_memberValue.selectedIdChatRoom,
                     idUser: chat_memberValue.receiver_id
                 }
             }

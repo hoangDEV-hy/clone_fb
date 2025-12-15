@@ -33,14 +33,14 @@ notifications.init({
 })
 export let methods = {
     create: async (key: { [value: string]: any }): Promise<notifications> => {
-        try{
+        try {
 
             return await notifications.create({
-                sender_id: key.sender_id,
+                sender_id: key.selectedIdChatRoom ?? key.selectedSenderId,
                 receiver_id: key.receiver_id,
                 content: key.content
             })
-        }catch(err){
+        } catch (err) {
             console.error("Error in create():", err);
             throw err;
         }

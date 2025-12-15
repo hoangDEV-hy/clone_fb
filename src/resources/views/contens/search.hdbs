@@ -89,14 +89,15 @@
             };
 
             const notification_value = {
-                sender_id: data.chat_roomId,
+                selectedIdChatRoom: data.chat_roomId,
+                selectedSenderId: data.idUser,
                 receiver_id: userId,
                 content: `Invite to chat room of ${data.idUser}`
             };
 
             try {
                 // Gửi request tạo notification
-                const response_add_notification = await fetch('/notification/chat_member', {
+                const response_add_notification = await fetch('/notification/chat_members', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ notification_value })

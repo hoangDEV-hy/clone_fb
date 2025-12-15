@@ -55,7 +55,17 @@ const notification = {
         const h1 = document.createElement('h1')
         h1.textContent = 'it runed'
 
-        document.querySelector('[data-role="notification"]').appendChild(h1)
+        document.querySelector('[data-role="notification"]').appendChild(h1);
+
+        // Send the notification to the admin
+        const selectedValueNotificationAdmin = {
+            selectedSenderId: chat_memberValue.receiver_id,
+            receiver_id: chat_memberValue.selectedSenderId,
+            content: ""
+        };
+        console.log('chat_memberValue', chat_memberValue)
+        console.log('selectedValueNotificationAdmin', selectedValueNotificationAdmin)
+
         document.getElementById("btnCancelConfirm").onclick = async function () {
             document.getElementById("overlayConfirm").style.display = "none";
 
@@ -82,6 +92,9 @@ const notification = {
                     console.error('Server trả success=false:', data.error);
                     alert('Huỷ không thành công');
                 }
+                // Send the notification to the admin
+                selectedValueNotificationAdmin.content = `${selectedValueNotificationAdmin.receiver_id} canceled the invitation to join`;
+                notification.sendValueNotificationAdmin(selectedValueNotificationAdmin);
 
             } catch (error) {
                 console.error('DELETE CHAT MEMBER ERROR:', error);
@@ -115,7 +128,7 @@ const notification = {
                     console.error('Server trả success=false:', data.error);
                 }
                 try {
-                    const response_delete_notification = await fetch('/notification/chat_member', {
+                    const response_delete_notification = await fetch('/notification/chat_members', {
                         method: 'DELETE',
                         headers: {
                             "Content-Type": "application/json"
@@ -143,7 +156,10 @@ const notification = {
                     console.error('DELETE NOTIFICATION ERROR:', error);
                     alert('Vào nhóm không thành công');
                 }
-
+                // Send the notification to the admin
+                selectedValueNotificationAdmin.content =
+                    `${selectedValueNotificationAdmin.receiver_id} accepted the invitation to join the group`;
+                notification.sendValueNotificationAdmin(selectedValueNotificationAdmin);
 
             } catch (error) {
                 console.error('CLIENT ERROR:', error);
@@ -152,6 +168,37 @@ const notification = {
 
 
         }
+    },
+    async sendValueNotificationAdmin(selectedValueNotificationAdmin) {
+        try {
+            const selectedResponseSendingToAdmin = await fetch('/notification/admins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selectedValueNotificationAdmin })
+            });
+
+            if (!selectedResponseSendingToAdmin.ok) {
+                const errorData = await selectedResponseSendingToAdmin.json();
+                throw new Error(errorData.message || 'Sending notification failed');
+            }
+
+            const data = await selectedResponseSendingToAdmin.json();
+
+            if (data.success) {
+                console.log('Notification sent successfully');
+                alert('Joined the group successfully');
+            } else {
+                console.error('Server returned success = false:', data.message);
+                alert('Joined the group failed');
+            }
+
+        } catch (error) {
+            console.error('Notification sending error:', error);
+            alert('Failed to join the group');
+        }
     }
 }
+
 export default notification

@@ -32,7 +32,7 @@ export function setup_chat(io: Server) {
 
 }
 //for sending a notification
-export function sendNotification(notificationValue: { id: number, sender_id: string, receiver_id: string; content: string }) {
+export function sendNotification(notificationValue: { id: number, selectedIdChatRoom: string, selectedSenderId: string, receiver_id: string; content: string }) {
     try {
 
         if (!ioInstance) return console.error("Socket.io not initialized");
