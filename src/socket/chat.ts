@@ -2,6 +2,11 @@ import { Socket } from 'socket.io'
 import { select_chats, create_mes } from '../constrollers/chat/chat'
 import { select_chatsType, create_chat } from "../constrollers/chat/chat"
 import { select_members, add_members } from '../constrollers/chat/chat_members'
+
+//types
+import { notifications } from '../models/notifications'
+
+
 export let config_dataChat = {
     get_chatData: (socket: Socket) => {
         socket.on('get_chatData', async (sender_id, receiver_id, callback) => {
@@ -78,6 +83,12 @@ export let config_dataChat = {
             catch (e) {
                 console.log('errol', e);
             }
+        })
+    },
+    joinChatRoomAndSendNotificationsChat: (socket: Socket) => {
+        socket.on('joinChatRoom', (idChat, selectedValueNotificationChat: notifications) => {
+            socket.join(idChat);
+            socket.in(idChat).emit('sendedNotificationChat', selectedValueNotificationChat)
         })
     }
 }

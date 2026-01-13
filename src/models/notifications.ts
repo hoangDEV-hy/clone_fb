@@ -1,7 +1,7 @@
 import { sequelize } from "../configs/sql";
 import { DataTypes, Model } from "sequelize";
 
-class notifications extends Model {
+export class notifications extends Model {
     declare id: number;
     declare sender_id: number;
     declare receiver_id: string;

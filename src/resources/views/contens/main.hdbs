@@ -51,6 +51,13 @@
         color: white;
         border: none;
     }
+
+    .menu {
+        display: none;
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+    }
 </style>
 
 <body>
@@ -82,13 +89,16 @@
                     <li class="avt"> Nguyễn Hoàng: mời bạn tham gia nhóm</li>
                 </ul>
             </li>
-            <li class="my_profile"><a href="profile.htm"><img src="/{{user.avatar}}" <li
-                        onclick="hienMenu('submenu')">Tài khoản
-                    <ul class="submenu menu">
-                        alt="ảnh nền">
-                        <p>{{user.name}}</p>
-                        <input type="hidden" value="{{user.id}}">
-                </a></li>
+            <li class="my_profile" onclick="hienMenu('submenu')">
+                <a href="profile.htm">
+                    <img src="/{{user.avatar}}" alt="ảnh đại diện">
+                    Tài khoản
+                </a>
+                <ul class="submenu menu">
+                    <li>{{user.name}}</li>
+                    <li><input type="hidden" value="{{user.id}}"></li>
+                </ul>
+            </li>
             <li onclick="hienMenu('subsubmenu')">Cài đặt
                 <ul class="subsubmenu menu">Ngôn Ngữ</ul>
             </li>
@@ -285,6 +295,9 @@
             chatState = await loadHandleConfig_chat.load_chat(socket, id_user, chatState);
             // Send message asynchronously
             featureOfChat.send_mes(id_user, chatState.receiver_id, socket);
+            socket.onAny((event, ...args) => {
+                console.log('📡 received event:', event, args);
+            });
 
             // Return the updated chatState
             return chatState;
@@ -335,6 +348,7 @@
         //generate a notificationn & handle_notification
         socket.on('create_notification', (data) => {
             if (data) {
+                console.log('data', data);
                 notification.generate_notification(data, "Thông báo", "invited_joinChat");
             }
             else {
@@ -370,6 +384,19 @@
             document.querySelector(nameContainIframe).appendChild(close_buttonIframe);
         })
     })
+</script>
+<script>
+    function hienMenu(className) {
+        // Ẩn tất cả menu trước
+        const menus = document.querySelectorAll('.menu');
+        menus.forEach(menu => menu.style.display = 'none');
+
+        // Hiện menu được click
+        const menu = document.querySelector('.' + className);
+        if (menu) {
+            menu.style.display = 'block';
+        }
+    }
 </script>
 
 

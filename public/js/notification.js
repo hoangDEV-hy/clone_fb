@@ -9,6 +9,7 @@ const notification = {
                 toastBootstrap.show()
             })
         }
+        console.log("define notification runned")
     },
     generate_notification(chat_memberValue, title = "Thông báo", type) {
         const container = document.getElementById("toast-container");
@@ -63,6 +64,12 @@ const notification = {
             receiver_id: chat_memberValue.selectedSenderId,
             content: ""
         };
+        // send the notification to the chat room
+        // let selectedValueNotificationChat = {
+        //     selectedSenderId: chat_memberValue.receiver_id,
+        //     receiver_id: chat_memberValue.chat_id,
+        //     content: `New ${chat_memberValue.receiver_id} joined this room`
+        // };
         console.log('chat_memberValue', chat_memberValue)
         console.log('selectedValueNotificationAdmin', selectedValueNotificationAdmin)
 
@@ -146,10 +153,13 @@ const notification = {
                     if (data.success) {
                         console.log('Xóa notification thành công');
                         alert('Vào nhóm thành công');
+                        //send a notification to the chat-room
+                        // console.log("The event has been triggered");
+                        // socket.emit('joinChatRoom', selectedValueNotificationChat.receiver_id, selectedValueNotificationChat);
 
                     } else {
                         console.error('Server trả success=false:', data.error);
-                        alert('Vào nhóm thành công');
+                        alert('Vào nhóm không thành công');
                     }
 
                 } catch (error) {

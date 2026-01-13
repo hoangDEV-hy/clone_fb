@@ -18,6 +18,22 @@ export function setup_chat(io: Server) {
 
         //emit mesData to client
         socket.emit('get_chatData',)
+
+        //defaultJoinLeaveChatRoom
+        socket.on('defaultJoinChatRoom', (idChat) => {
+            socket.join(idChat);
+        })
+        socket.on('defaultLeaveChatRoom', (idChat) => {
+            for (const room of socket.rooms) {
+                if (room !== idChat) {
+                    socket.leave(room);
+                    console.log(`Đã rời khỏi phòng: ${room}`);
+                }
+            }
+        })
+        //join chat room send notification to chat
+        //config_dataChat.joinChatRoomAndSendNotificationsChat(socket);
+
         socket.on('disconnect', () => {
             for (const userId in active_users) {
                 if (active_users[userId] === socket.id) {
@@ -39,6 +55,9 @@ export function sendNotification(notificationValue: { id: number, selectedIdChat
 
         const socketId = active_users[notificationValue.receiver_id];
         if (socketId) {
+            console.log('Active users:', active_users);
+            console.log('Receiver ID:', notificationValue.receiver_id);
+            console.log('Socket ID:', socketId);
             ioInstance.to(socketId).emit('create_notification', notificationValue);
             console.log('Sent notification to user screen');
         } else {
