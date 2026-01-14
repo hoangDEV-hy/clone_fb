@@ -18,45 +18,63 @@ router.get('/followers', async (req: Request, res: Response): Promise<void> => {
     }
 });
 
-router.post('/followers', async (req: Request, res: Response): Promise<void> => {
-    try {
-        const {
-            selectedFollowerID,
-            additionedFollowingsID,
-            notification_value
-        } = req.body;
+router.post(
+    '/followers',
+    async (req: Request, res: Response): Promise<void> => {
+        try {
+            const {
+                selectedFollowerID,
+                additionedFollowingsID,
+                notification_value,
+            } = req.body;
 
-        if (
-            !selectedFollowerID ||
-            !additionedFollowingsID ||
-            notification_value === undefined
-        ) {
-            res.status(400).json({
+            // Missing input
+            if (
+                !selectedFollowerID ||
+                !additionedFollowingsID ||
+                notification_value === undefined
+            ) {
+                throw new Error('MISSING_INPUT');
+            }
+
+            // Self follow is not allowed
+            if (additionedFollowingsID.includes(selectedFollowerID)) {
+                throw new Error('SELF_FOLLOW_NOT_ALLOWED');
+            }
+
+            const data = await FollowerController.addFollowers(
+                additionedFollowingsID,
+                selectedFollowerID,
+                notification_value
+            );
+
+            res.status(200).json(data);
+        } catch (error) {
+            console.error('Error in addFollowers route:', error);
+
+            if (error instanceof Error) {
+                if (error.message === 'MISSING_INPUT') {
+                    res.status(400).json({
+                        error: true,
+                        message: 'Missing required inputs',
+                    });
+                }
+
+                if (error.message === 'SELF_FOLLOW_NOT_ALLOWED') {
+                    res.status(400).json({
+                        error: true,
+                        message: 'You cannot follow yourself',
+                    });
+                }
+            }
+
+            res.status(500).json({
                 error: true,
-                message: 'Thiếu inputs'
+                message: 'Internal server error',
             });
         }
-
-        // Không thể follow chính mình
-        if (selectedFollowerID === additionedFollowingsID) {
-            res.status(400).json({
-                error: true,
-                message: 'Không thể follow chính mình'
-            });
-        }
-
-        const data = await FollowerController.addFollowers(
-            additionedFollowingsID,
-            selectedFollowerID,
-            notification_value
-        );
-
-        res.json(data);
-    } catch (error) {
-        console.error('Error in addFollowers route:', error);
-        res.status(500).json({ message: 'Server error' });
     }
-});
+);
 
 router.delete('/followers', async (req: Request, res: Response): Promise<void> => {
     try {
@@ -87,6 +105,31 @@ router.delete('/followers', async (req: Request, res: Response): Promise<void> =
     } catch (error) {
         console.error('Error in deleteFollowers route:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.post('/existingfollowing', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { follower, following } = req.body;
+
+        if (!follower || !following) {
+            res.status(400).json({
+                message: 'follower và following là bắt buộc',
+            });
+        }
+
+        const exists = await FollowerController.checkFollowing(follower, following);
+
+        res.status(200).json({
+            message: exists ? 'Đã tồn tại follow' : 'Chưa từng follow',
+            exists,
+        });
+    } catch (error) {
+        console.error('existingfollowing error:', error);
+
+        res.status(500).json({
+            message: 'Lỗi server',
+        });
     }
 });
 

@@ -62,9 +62,15 @@ export let methods = {
         }
     },
     delete: async (notificationId: number): Promise<any> => {
-        return await notifications.destroy({
-            where: { id: notificationId }
-        });
+        try {
+
+            return await notifications.destroy({
+                where: { id: notificationId }
+            });
+        } catch (err) {
+            console.error('Error in notifications.delete():', err);
+            throw err;
+        }
     },
     selectNotificationsAndQuantity: async (
         userId: string,

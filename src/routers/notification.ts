@@ -50,17 +50,6 @@ route.post('/chat_members', async (req: Request, res: Response) => {
 
 
 
-route.delete('/chat_members', async (req: Request, res: Response): Promise<any> => {
-    try {
-        const { notificationId } = req.body as { notificationId: number };
-
-        const result = await methodsNotifications.delete(notificationId);
-
-        return res.json({ success: true, result });
-    } catch (error) {
-        return res.status(500).json({ success: false, error });
-    }
-});
 
 route.post("/admins", async (req: Request, res: Response): Promise<void> => {
     try {
@@ -117,5 +106,17 @@ route.post('/notificationcenter', async (req: Request, res: Response): Promise<v
     }
 });
 
+//for click to delete notification
+route.delete('/notification', async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { notificationId } = req.body as { notificationId: number };
+
+        const result = await methodsNotifications.delete(notificationId);
+
+        return res.json({ success: true, result });
+    } catch (error) {
+        return res.status(500).json({ success: false, error });
+    }
+});
 
 export { route };

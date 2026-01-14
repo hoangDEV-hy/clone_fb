@@ -122,6 +122,25 @@ export const methods = {
             },
             transaction
         });
+    },
+    selectFollowing: async (
+        follower: string,
+        following: string
+    ): Promise<Follower | null> => {
+        try {
+
+            const existingFollowing = await Follower.findOne({
+                where: {
+                    follower_id: follower,
+                    following_id: following,
+                },
+            });
+
+            return existingFollowing;
+        } catch (err) {
+            console.error('Error in Model_Follower.selectFollowing:', err);
+            throw err;
+        }
     }
 };
 

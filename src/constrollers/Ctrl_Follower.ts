@@ -28,7 +28,6 @@ const FollowerController = {
         notification_value: NotificationServerTake
     ): Promise<void> => {
         const transaction = await sequelize.transaction();
-
         try {
             await followerMethods.addFollowers(
                 additionedFollowingsID,
@@ -84,6 +83,22 @@ const FollowerController = {
         } catch (error) {
             await transaction.rollback();
             console.error('Error in deleteFollowers controller:', error);
+            throw error;
+        }
+    },
+    checkFollowing: async (
+        follower: string,
+        following: string
+    ): Promise<boolean> => {
+        if (!follower || !following) {
+            throw new Error('follower và following là bắt buộc');
+        }
+
+        try {
+            const result = await followerMethods.selectFollowing(follower, following);
+            return result !== null;
+        } catch (error) {
+            console.error('checkFollowing error:', error);
             throw error;
         }
     }
