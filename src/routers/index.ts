@@ -9,8 +9,9 @@ import { route as interactions } from './interactions'
 import { route as upload } from './upload'
 import { route as chat } from './chat'
 import { route as notification } from './notification'
+import { router as follow } from './Router_Follower'
 
-import { Express } from 'express'; // nếu bạn muốn kiểu rõ hơn thay vì `any`
+import { Express } from 'express';
 
 function router(app: Express): void {
     app.use('/', login);
@@ -21,7 +22,8 @@ function router(app: Express): void {
     app.use('/Post', interactions);
     app.use('/upload', upload);
     app.use('/mess', chat);
-    app.use('/notification', notification)
+    app.use('/notification', notification);
+    app.use('/follow', follow);
 }
 
 

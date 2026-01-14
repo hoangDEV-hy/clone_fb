@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express"
 import { methods as methodsNotifications } from "../models/notifications"
 import { sendNotification } from '../socket/index';
+import { getNotificationCenter } from '../constrollers/Ctrl_Notification'
 
 let route = express.Router();
 
@@ -30,7 +31,7 @@ route.post('/chat_members', async (req: Request, res: Response) => {
 
         // Gửi realtime notification
         try {
-            sendNotification(notificationValue);
+            //sendNotification(notificationValue);
         } catch (err) {
             console.error("Lỗi khi gửi thông báo đến client:", err);
         }
@@ -85,7 +86,7 @@ route.post("/admins", async (req: Request, res: Response): Promise<void> => {
 
         // Send realtime notification
         try {
-            sendNotification(notificationValue);
+            //sendNotification(notificationValue);
         } catch (err) {
             console.error("Error while sending notification to client:", err);
         }
@@ -98,5 +99,23 @@ route.post("/admins", async (req: Request, res: Response): Promise<void> => {
         });
     }
 });
+
+//take all notifications
+route.post('/notificationcenter', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { selectedUserID, page } = req.body as {
+            selectedUserID: string;
+            page: number;
+        };
+
+        const result = await getNotificationCenter(selectedUserID, page);
+
+        res.json({ success: true, result });
+    } catch (error) {
+        console.error('Route /notificationcenter error:', error);
+        res.status(500).json({ success: false });
+    }
+});
+
 
 export { route };

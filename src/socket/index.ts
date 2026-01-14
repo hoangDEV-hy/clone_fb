@@ -1,6 +1,8 @@
 import { Server } from "socket.io";
 import { config_dataChat } from "./chat"
+import { sendNotificationWhenOnline } from '../services/SendNotificationServices/WhenOnline'
 
+import NotificationServerTake from "../types/Type_Notification";
 let active_users: any = [];
 let ioInstance: Server;
 export function setup_chat(io: Server) {
@@ -48,23 +50,34 @@ export function setup_chat(io: Server) {
 
 }
 //for sending a notification
-export function sendNotification(notificationValue: { id: number, selectedIdChatRoom: string, selectedSenderId: string, receiver_id: string; content: string }) {
+export function sendNotification(
+    notificationValue: NotificationServerTake
+): void {
     try {
-
-        if (!ioInstance) return console.error("Socket.io not initialized");
+        if (!ioInstance) {
+            console.error('Socket.io not initialized');
+            return;
+        }
 
         const socketId = active_users[notificationValue.receiver_id];
-        if (socketId) {
-            console.log('Active users:', active_users);
-            console.log('Receiver ID:', notificationValue.receiver_id);
-            console.log('Socket ID:', socketId);
-            ioInstance.to(socketId).emit('create_notification', notificationValue);
-            console.log('Sent notification to user screen');
-        } else {
-            console.log('Send to notification center instead');
+
+        if (!socketId) {
+            console.log(
+                'User offline, send to notification center instead'
+            );
+            return;
         }
+
+        sendNotificationWhenOnline(ioInstance, socketId, notificationValue);
+
+        console.log(
+            `Notification sent to user ${notificationValue.receiver_id}`
+        );
     } catch (err) {
-        console.log("Lỗi khi gửi thông báo đến client", err);
+        console.error(
+            'Lỗi khi gửi thông báo đến client:',
+            err
+        );
         throw err;
     }
 }
