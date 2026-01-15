@@ -12,7 +12,11 @@ router.get('/followers', async (req: Request, res: Response): Promise<void> => {
             Number(page)
         );
 
-        res.json(data);
+        res.status(200).json({
+            success: true,
+            pagination: page,
+            data: data
+        });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -100,8 +104,11 @@ router.delete('/followers', async (req: Request, res: Response): Promise<void> =
             selectedFollowerID,
             notification_value
         );
-
-        res.json(data);
+        res.status(200).json({
+            success: true,
+            message: 'Huỷ theo dõi thành công',
+            data: data
+        });
     } catch (error) {
         console.error('Error in deleteFollowers route:', error);
         res.status(500).json({ message: 'Server error' });
