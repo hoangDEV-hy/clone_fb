@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import FollowerController from '../constrollers/Ctrl_Follower';
 
+import NotificationServerTake from "../types/Type_Notification";
+
 let router = express.Router();
 
 router.get('/followers', async (req: Request, res: Response): Promise<void> => {
@@ -30,7 +32,11 @@ router.post(
                 selectedFollowerID,
                 additionedFollowingsID,
                 notification_value,
-            } = req.body;
+            } = req.body as {
+                selectedFollowerID: string;
+                additionedFollowingsID: string[];
+                notification_value: NotificationServerTake;
+            };
 
             // Missing input
             if (
@@ -85,8 +91,12 @@ router.delete('/followers', async (req: Request, res: Response): Promise<void> =
         const {
             selectedFollowerID,
             deletedFollowingsID,
-            notification_value
-        } = req.body;
+            notification_value,
+        } = req.body as {
+            selectedFollowerID: string;
+            deletedFollowingsID: string[];
+            notification_value: NotificationServerTake;
+        };
 
         if (
             !selectedFollowerID ||

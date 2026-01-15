@@ -311,6 +311,9 @@
 
         //chatBox
         let socket = io();
+        socket.onAny((event, ...args) => {
+            console.log('📡 received event:', event, args);
+        });
         let chatState = {
             receiver_id: null,
             head_name: null,
@@ -321,13 +324,20 @@
             chatState = await loadHandleConfig_chat.load_chat(socket, id_user, chatState);
             // Send message asynchronously
             featureOfChat.send_mes(id_user, chatState.receiver_id, socket);
-            socket.onAny((event, ...args) => {
-                console.log('📡 received event:', event, args);
-            });
-
             // Return the updated chatState
             return chatState;
         }
+        //for realtime notifications
+        socket.on('badge_increment', (badge_increment) => {
+            console.log('badge_increment run')
+            const badge = document.getElementById('unreadBadge');
+            if (!badge) return;
+
+            const current = parseInt(badge.textContent || '0', 10);
+            const newCount = current + badge_increment;
+
+            NotificationCenter.updateUnreadBadge(newCount);
+        })
 
         // Usage
         handle_functions(socket, chatState, id_user)
@@ -374,7 +384,6 @@
         //generate a notificationn & handle_notification
         socket.on('create_notification', (data, callback) => {
             if (data) {
-                console.log('data', data)
                 if (data.type === "invited_joinChat") {
                     notification.generate_notification(data, "Thông báo", "invited_joinChat", socket);
                 }
@@ -451,6 +460,7 @@
                     // load notification khi mở thông báo
                     if (className === 'thongBao') {
                         NotificationCenter.loadNotifications(id_user, 1);
+
                     }
                 }
             });

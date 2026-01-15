@@ -9,10 +9,8 @@ const notification = {
                 toastBootstrap.show()
             })
         }
-        console.log("define notification runned")
     },
     generate_notification(data, title = "Thông báo", type, socket) {
-        console.log('data', data)
         const container = document.getElementById("toast-container");
 
         let toast = document.createElement('div');
@@ -41,7 +39,7 @@ const notification = {
             }
             else if (type === "follow") {
                 // Gửi acknowledgment về server để xác nhận đã nhận được
-                socket.emit('notification_clicked', { received: true });
+                socket.emit('notification_clicked', true);
                 toast.remove();
             }
             else {
@@ -53,6 +51,7 @@ const notification = {
         btToast.show();
 
         toast.addEventListener('hidden.bs.toast', () => {
+            socket.emit('notification_clicked', false);
             toast.remove();
         })
     },

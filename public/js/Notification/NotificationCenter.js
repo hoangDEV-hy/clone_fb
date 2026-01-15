@@ -85,6 +85,7 @@ const NotificationCenter = {
         if (count > 0) {
             badge.textContent = count;
             badge.style.display = 'inline-block';
+            badge.style.color = 'red';
         } else {
             badge.style.display = 'none';
         }
