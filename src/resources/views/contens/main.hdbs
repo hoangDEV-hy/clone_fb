@@ -372,20 +372,24 @@
         //notifications
         notification.define();
         //generate a notificationn & handle_notification
-        socket.on('create_notification', (data) => {
+        socket.on('create_notification', (data, callback) => {
             if (data) {
                 console.log('data', data)
                 if (data.type === "invited_joinChat") {
-                    notification.generate_notification(data, "Thông báo", "invited_joinChat");
+                    notification.generate_notification(data, "Thông báo", "invited_joinChat", socket);
                 }
                 else if (data.type === "follow") {
-                    notification.generate_notification(data, "Thông báo", "follow");
+                    notification.generate_notification(data, "Thông báo", "follow", socket);
                 } else {
-                    notification.generate_notification(data, "Thông báo", "unknownType");
+                    //notification.generate_notification(data, "Thông báo", "unknownType");
                 }
             }
             else {
                 console.log('khong ton tai data.content');
+                // Vẫn gửi acknowledgment nếu có callback nhưng data không hợp lệ
+                if (callback && typeof callback === 'function') {
+                    callback({ received: false });
+                }
             }
         });
 

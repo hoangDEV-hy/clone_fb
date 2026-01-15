@@ -8,20 +8,28 @@ export async function sendNotificationWhenOnline(
     socketId: string,
     notification: NotificationServerTake
 ): Promise<NotificationServerTake> {
-    ioInstance.to(socketId).emit(
+    // Lấy socket instance từ socketId
+    const socket = ioInstance.sockets.sockets.get(socketId);
+
+    if (!socket) {
+        console.error(`Socket ${socketId} not found`);
+        // Nếu socket không tồn tại, có thể emit badge_increment trực tiếp
+        ioInstance.to(socketId).emit('badge_increment', 1);
+        return notification;
+    }
+
+    // Dùng socket.emit() với callback để nhận acknowledgment
+    socket.emit(
         'create_notification',
-        notification,
-        async (ack: { received: boolean }) => {
-            if (ack?.received) {
-                await methodsNotifications.delete(notification.id);
-            } else {
-                ioInstance.to(socketId).emit(
-                    'badge_increment',
-                    1
-                );
-            }
-        }
+        notification
     );
+    socket.on('notification_clicked', async (received)=>{
+        if (received) {
+            await methodsNotifications.delete(notification.id);
+        } else {
+            socket.emit('badge_increment', 1);
+        }
+    })
 
     return notification;
 }

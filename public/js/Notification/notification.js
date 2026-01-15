@@ -11,7 +11,7 @@ const notification = {
         }
         console.log("define notification runned")
     },
-    generate_notification(data, title = "Thông báo", type) {
+    generate_notification(data, title = "Thông báo", type, socket) {
         console.log('data', data)
         const container = document.getElementById("toast-container");
 
@@ -37,6 +37,11 @@ const notification = {
         toast.addEventListener('click', () => {
             if (type === "invited_joinChat") {
                 notification.handler_InvitedNotification(chat_memberValue, chat_memberValue.id);
+                toast.remove();
+            }
+            else if (type === "follow") {
+                // Gửi acknowledgment về server để xác nhận đã nhận được
+                socket.emit('notification_clicked', { received: true });
                 toast.remove();
             }
             else {
