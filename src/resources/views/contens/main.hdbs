@@ -374,8 +374,15 @@
         //generate a notificationn & handle_notification
         socket.on('create_notification', (data) => {
             if (data) {
-                console.log('data', data);
-                notification.generate_notification(data, "Thông báo", "invited_joinChat");
+                console.log('data', data)
+                if (data.type === "invited_joinChat") {
+                    notification.generate_notification(data, "Thông báo", "invited_joinChat");
+                }
+                else if (data.type === "follow") {
+                    notification.generate_notification(data, "Thông báo", "follow");
+                } else {
+                    notification.generate_notification(data, "Thông báo", "unknownType");
+                }
             }
             else {
                 console.log('khong ton tai data.content');

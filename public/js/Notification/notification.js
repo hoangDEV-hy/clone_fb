@@ -11,7 +11,8 @@ const notification = {
         }
         console.log("define notification runned")
     },
-    generate_notification(chat_memberValue, title = "Thông báo", type) {
+    generate_notification(data, title = "Thông báo", type) {
+        console.log('data', data)
         const container = document.getElementById("toast-container");
 
         let toast = document.createElement('div');
@@ -27,7 +28,7 @@ const notification = {
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-            ${chat_memberValue.content}
+            ${data.content}
         </div>
     `;
 
@@ -37,7 +38,8 @@ const notification = {
             if (type === "invited_joinChat") {
                 notification.handler_InvitedNotification(chat_memberValue, chat_memberValue.id);
                 toast.remove();
-            } else {
+            }
+            else {
                 console.log("không tồn tại");
             }
         });
