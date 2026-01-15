@@ -57,6 +57,11 @@
         position: absolute;
         background: white;
         border: 1px solid #ccc;
+        z-index: 1000;
+    }
+
+    .menu.active {
+        display: block;
     }
 </style>
 
@@ -64,51 +69,68 @@
     <div id="bd_ct_news_cmd_tuongTac_nenMo"></div>
     <div class="header">
         <ul class="navbar">
-            <li><img src="./img/Facebook_Logo_(2019).png" alt="logo"></li>
-            <li><input type="text" placeholder="Tìm kiếm..."></li>
+            <li class="logo">
+                <img src="./img/Facebook_Logo_(2019).png" alt="logo">
+            </li>
+
+            <li class="search">
+                <input type="text" placeholder="Tìm kiếm...">
+            </li>
+
             <li><a href="">Trang chủ</a></li>
             <li><a href="./friend.html">Bạn bè</a></li>
             <li><a href="./video.html">Phim</a></li>
 
-
-            <li onclick="hienMenu('mes')">Tin nhắn
+            <!-- Tin nhắn -->
+            <li class="menu-btn" data-menu="mes">
+                Tin nhắn
                 <ul class="mes menu">
-                    <li>Tin Nhắn</li>
-                    <li>-------------</li>
-                    <li><a href="">Nguyễn Hoàng</a></li>
-                    <li><a href="">Bùi Huy</a></li>
-                    <li><a href="">Văn Hiệu</li>
-                    <li><a href="">Quảng Nam</a></li>
+                    <li><strong>Tin Nhắn</strong></li>
+                    <li class="divider"></li>
+                    <li><a href="#">Nguyễn Hoàng</a></li>
+                    <li><a href="#">Bùi Huy</a></li>
+                    <li><a href="#">Văn Hiệu</a></li>
+                    <li><a href="#">Quảng Nam</a></li>
                 </ul>
             </li>
-            <li onclick="hienMenu('thongBao')">Thông Báo
+
+            <!-- Thông báo -->
+            <li class="menu-btn" data-menu="thongBao">
+                Thông Báo
+                <span id="unreadBadge" class="badge"></span>
                 <ul class="thongBao menu">
-                    <li>Thông Báo</li>
-                    <li>-------------</li>
-                    <li class="avt"> Nguyễn Hoàng: gửi tin nhắn</li>
-                    <li class="avt"> Nguyễn Hoàng: mời bạn tham gia nhóm</li>
+                    <li><strong>Thông Báo</strong></li>
+                    <li class="divider"></li>
+                    <li id="notificationList">Đang tải...</li>
                 </ul>
             </li>
-            <li class="my_profile" onclick="hienMenu('submenu')">
+
+            <!-- Profile -->
+            <li class="my_profile menu-btn" data-menu="submenu">
                 <a href="profile.htm">
                     <img src="/{{user.avatar}}" alt="ảnh đại diện">
                     Tài khoản
                 </a>
                 <ul class="submenu menu">
                     <li>{{user.name}}</li>
-                    <li><input type="hidden" value="{{user.id}}"></li>
+                    <li>
+                        <input type="hidden" value="{{user.id}}">
+                    </li>
                 </ul>
             </li>
-            <li onclick="hienMenu('subsubmenu')">Cài đặt
-                <ul class="subsubmenu menu">Ngôn Ngữ</ul>
+
+            <!-- Settings -->
+            <li class="menu-btn" data-menu="subsubmenu">
+                Cài đặt
+                <ul class="subsubmenu menu">
+                    <li>Ngôn Ngữ</li>
+                </ul>
             </li>
+
             <li><a href="#">Trợ giúp và hỗ trợ</a></li>
             <li><a href="#">Màn hình và trợ năng</a></li>
             <li><a href="#">Đóng góp ý kiến</a></li>
             <li><a href="#">Đăng xuất</a></li>
-        </ul>
-        </li>
-
         </ul>
 
     </div>
@@ -259,7 +281,11 @@
     import interactions from '/js/interactions/run_interactionFunctions.js'
     import loadHandleConfig_chat from '/js/chat/loadHandleConfig_chat.js'
     import featureOfChat from '/js/chat/featureOfChat.js'
-    import notification from '/js/notification.js'
+    import notification from '/js/Notification/notification.js'
+    import NotificationCenter from '/js/Notification/NotificationCenter.js';
+    // expose ra global để HTML onclick dùng được
+    window.NotificationCenter = NotificationCenter;
+
     document.addEventListener('DOMContentLoaded', async () => {
         // xử lý ảnh base64 từ hidden input
         handle_image('.bd_ct_news_title', '.image_src_img', '.image_src_input');
@@ -383,21 +409,60 @@
             })
             document.querySelector(nameContainIframe).appendChild(close_buttonIframe);
         })
-    })
-</script>
-<script>
-    function hienMenu(className) {
-        // Ẩn tất cả menu trước
+
+        // ================= MENU / NOTIFICATION =================
         const menus = document.querySelectorAll('.menu');
-        menus.forEach(menu => menu.style.display = 'none');
+        const menuButtons = document.querySelectorAll('.menu-btn');
 
-        // Hiện menu được click
-        const menu = document.querySelector('.' + className);
-        if (menu) {
-            menu.style.display = 'block';
+        function closeAllMenus() {
+            menus.forEach(menu => menu.classList.remove('active'));
         }
-    }
-</script>
 
+        menuButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // ⛔ rất quan trọng
+
+                const className = btn.dataset.menu;
+                if (!className) return;
+
+                const menu = document.querySelector(`.${className}`);
+                if (!menu) return;
+
+                const isOpen = menu.classList.contains('active');
+
+                // đóng tất cả trước
+                closeAllMenus();
+
+                // toggle
+                if (!isOpen) {
+                    menu.classList.add('active');
+
+                    // load notification khi mở thông báo
+                    if (className === 'thongBao') {
+                        NotificationCenter.loadNotifications(id_user, 1);
+                    }
+                }
+            });
+        });
+
+        // Click bên trong menu (nút xoá, item…) → KHÔNG đóng
+        menus.forEach(menu => {
+            menu.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+        // Click ra ngoài → đóng tất cả menu
+        document.addEventListener('click', () => {
+            closeAllMenus();
+        });
+
+        // Khởi tạo khi trang load
+        window.addEventListener('load', () => {
+            NotificationCenter.init(id_user, 1);
+        });
+    })
+
+</script>
 
 </html>
