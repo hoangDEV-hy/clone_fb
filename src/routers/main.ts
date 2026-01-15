@@ -1,161 +1,160 @@
-import express from 'express'
+import express, { Router, Request, Response } from 'express';
 import { authenticate } from '../middware/auth';
-import { Response, Request } from 'express';
-import { Group, methods as model_group } from '../models/group';
-import { methods as model_Posts, Posts } from '../models/Posts';
-import { methods as model_user, User } from '../models/user';
-import { Op } from 'sequelize';
-import { user_user } from '../models/user_user';
-import { group_user } from '../models/group_user';
-import { sequelize } from '../configs/sql';
-import { Json } from 'sequelize/types/utils';
-let route = express.Router();
+import { FeedController } from '../constrollers/Ctrl_Feed';
 
-route.get('/', authenticate.user_auth, async (req: any, res: Response): Promise<any> => {
+const router: Router = express.Router();
+const feedController = new FeedController();
+
+/**
+ * @route   GET /feed
+ * @desc    Get user feed with view rendering
+ * @access  Private
+ */
+
+//cursor: respone đầu trả về nextcursor, đưa nextcursor vào req thứ 2 thì sẽ lấy dc các bản ghi phía sau bản ghi cuối cùng
+router.get('/', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
-        const idUser = req.admin.id;
-        let user = await model_user.selectUser(req.admin.id);
-        interface users extends Posts {
-            users: User[];
+        const userId = (req as any).admin?.id;
+
+        // Check authentication
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized - Please login'
+            });
+            return;
         }
 
-        const userPosts = await Posts.findAll({
-            where: {
-                [Op.and]: [
-                    { user_id: idUser },
-                    {
-                        [Op.or]: [
-                            { scope: 'only_me' },
-                            { scope: 'public' }
-                        ]
-                    }
-                ]
-            },
-            include: [
-                {
-                    model: User,
-                    as: 'users',
-                    required: true
-                }
-            ]
-        }) as users[];
-
-        interface userWithPosts extends user_user {
-            Posts: Posts[];
+        // Validate and parse parameters
+        let limit: number;
+        try {
+            limit = feedController.validateLimit(req.query.limit);
+        } catch (error: any) {
+            res.status(400).json({
+                success: false,
+                error: error.message
+            });
+            return;
         }
 
-        const friendPosts = await user_user.findAll({
-            where: { id_userA: idUser },
-            include: [
-                {
-                    model: Posts,
-                    as: 'Posts',
-                    required: true, // inner join
-                    on: {
-                        '$Posts.user_id$': { [Op.eq]: sequelize.col('user_user.id_userB') }
-                    },
-                    where: {
-                        [Op.or]: [
-                            { scope: 'friend' },
-                            { scope: 'public' }
-                        ]
-                    },
-                    include: [
-                        {
-                            model: User,
-                            as: 'users',
-                            required: true,
-                        }
-                    ]
-                }
-            ]
-        }) as userWithPosts[];
-        interface groupWithPosts extends group_user {
-            Posts: Posts[];
-        }
-        const groupPosts = await group_user.findAll({
-            where: { id_userA: idUser },
-            include: [
-                {
-                    model: Posts,
-                    as: 'Posts',
-                    required: true, // inner join
-                    on: {
-                        '$Posts.group_id$': { [Op.eq]: sequelize.col('group_user.id_group') }
-                    },
-                    where: {
-                        [Op.or]: [
-                            { scope: 'group' },
-                            { scope: 'public' }
-                        ]
-                    },
-                    include: [
-                        {
-                            model: Group,
-                            as: 'groups',
-                            required: true
-                        },
-                        {
-                            model: User,
-                            as: 'users',
-                            required: true
-                        }
-                    ]
-                }
-            ]
-        }) as groupWithPosts[];
-        const allPosts = [
-            ...(userPosts || []),
-            ...friendPosts.flatMap(f => f.Posts || []),
-            ...groupPosts.flatMap(g => g.Posts || [])
-        ].filter((Post, index, self) =>
-            index === self.findIndex(e => e.id === Post.id)
-        );
-        const tranAllPosts = allPosts.map((b: any) => b.toJSON());
-        tranAllPosts.map((f: any) => {
-            f.contens = JSON.parse(f.contens);
-            if (typeof (f.contens) === "string") f.contens = JSON.parse(f.contens);
+        const cursor = req.query.cursor as string;
 
-            f.contens = {
-                text: f.contens.text,
-                image: f.contens.image
-            }
-        })
+        // Get user data
+        const user = await feedController.getUser(userId);
 
+        // Get feed posts
+        const feedResult = await feedController.getFeed({
+            userId: user.id,
+            limit,
+            cursor
+        });
 
-        //for chatting
-        let friend_array: any = await user_user.findAll({
-            where: {
-                status: 'done',
-                [Op.or]: [
-                    { id_userA: idUser },
-                    { id_userB: idUser }
-                ]
-            }, attributes: ['id_userB', 'id_userA'],
-            include: [
-                {
-                    model: User,
-                    as: 'userA',
-                    attributes: ['id', 'name', 'avatar']
-                },
-                {
-                    model: User,
-                    as: 'userB',
-                    attributes: ['id', 'name', 'avatar']
-                }
-            ]
-        })
-        const friendList = friend_array.map((f: any) =>
-            f.id_userA === idUser ? f.userB : f.userA
-        );
+        // Get friend list
+        const friendList = await feedController.getFriendList(userId);
 
-        res.render('contens/main', { allPosts: tranAllPosts, user: user.toJSON(), friend_array: friendList.map((e: any) => e.toJSON()) })
+        // Render view
+        res.render('contens/main', {
+            allPosts: feedResult.posts,
+            user: user,
+            friend_array: friendList
+        });
 
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error })
+    } catch (error: any) {
+        console.error('Feed route error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to fetch feed'
+        });
     }
+});
 
-})
+/**
+ * @route   GET /feed/json
+ * @desc    Get user feed as JSON (for AJAX/API requests)
+ * @access  Private
+ */
+router.get('/json', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = (req as any).admin?.id;
 
-export { route };
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
+            return;
+        }
+
+        // Validate limit
+        let limit: number;
+        try {
+            limit = feedController.validateLimit(req.query.limit);
+        } catch (error: any) {
+            res.status(400).json({
+                success: false,
+                error: error.message
+            });
+            return;
+        }
+
+        const cursor = req.query.cursor as string;
+
+        // Get feed
+        const feedResult = await feedController.getFeed({
+            userId,
+            limit,
+            cursor
+        });
+
+        // Return JSON
+        res.json({
+            success: true,
+            data: feedResult
+        });
+
+    } catch (error: any) {
+        console.error('Feed JSON route error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to fetch feed'
+        });
+    }
+});
+
+/**
+ * @route   POST /feed/clear-cache
+ * @desc    Clear user feed cache for reload
+ * @access  Private
+ */
+
+//cache-luu lai 10 bai, khi reload lai không cần truy vấn nữa
+router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = (req as any).admin?.id;
+
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
+            return;
+        }
+
+        // Clear cache
+        await feedController.clearCache(userId);
+
+        res.json({
+            success: true,
+            message: 'Cache cleared successfully'
+        });
+
+    } catch (error: any) {
+        console.error('Clear cache route error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to clear cache'
+        });
+    }
+});
+
+export { router as route };

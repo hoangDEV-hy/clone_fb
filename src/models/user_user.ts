@@ -1,5 +1,5 @@
 import { sequelize } from "../configs/sql";
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Op } from "sequelize";
 import { Request, Response } from "express";
 
 class user_user extends Model {

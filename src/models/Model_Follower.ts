@@ -2,7 +2,8 @@ import {
     Model,
     DataTypes,
     Optional,
-    Transaction
+    Transaction,
+    Op
 } from 'sequelize';
 import { sequelize } from '../configs/sql';
 
@@ -141,6 +142,27 @@ export const methods = {
             console.error('Error in Model_Follower.selectFollowing:', err);
             throw err;
         }
+    },
+    selectFollowings: async (userId: string) => {
+        return await Follower.findAll({
+            where: { follower_id: userId },
+            attributes: ['following_id']
+        });
+    },
+    selectIdFollowers: async (userId: string) => {
+        return await Follower.findAll({
+            where: { follower_id: userId },
+            attributes: ['following_id']
+        })
+    },
+    sameFollowingUsers: async (followingIds: string[], userId: string) => {
+        return await Follower.findAll({
+            where: {
+                following_id: { [Op.in]: followingIds },
+                follower_id: { [Op.ne]: userId }
+            },
+            attributes: ['follower_id']
+        })
     }
 };
 
