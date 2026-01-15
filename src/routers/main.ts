@@ -56,7 +56,8 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         res.render('contens/main', {
             allPosts: feedResult.posts,
             user: user,
-            friend_array: friendList
+            friend_array: friendList,
+            cursor: feedResult.nextCursor
         });
 
     } catch (error: any) {

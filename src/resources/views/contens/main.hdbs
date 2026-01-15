@@ -190,6 +190,7 @@
             </div>
             {{/each}}
 
+            <button id="loadMoreBtn">Load more</button>
 
         </div>
         <div class="body_right">
@@ -269,6 +270,7 @@
             </div>
         </div>
         <!-- ========== /MODAL ========== -->
+
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <!-- CSS -->
@@ -479,8 +481,39 @@
         });
 
         // Khởi tạo khi trang load
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             NotificationCenter.init(id_user, 1);
+
+            // for reset cache feed
+            const response = await fetch('http://localhost:3000/main/clear-cache', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: id_user })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('Cache cleared successfully');
+            } else {
+                console.error('Clear cache failed:', result.error);
+            }
+        });
+
+        //phan trang bai viet
+        document.getElementById('loadMoreBtn').addEventListener('click', () => {
+            let nextCursor = "{{cursor}}";
+            console.log('nextCursor', nextCursor)
+            const params = new URLSearchParams();
+            params.append('limit', 10);
+
+            if (nextCursor) {
+                params.append('cursor', nextCursor);
+            }
+
+            window.location.href = `/main?${params.toString()}`;
         });
     })
 
