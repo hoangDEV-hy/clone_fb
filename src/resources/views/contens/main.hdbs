@@ -63,6 +63,20 @@
     .menu.active {
         display: block;
     }
+
+    .follow-toggle-btn[data-status="following"] {
+        color: #1877f2;
+        font-weight: 600;
+    }
+
+    .follow-toggle-btn[data-status="not-following"] {
+        color: #050505;
+    }
+
+    .follow-toggle-btn[data-status="loading"] {
+        color: #65676b;
+        font-style: italic;
+    }
 </style>
 
 <body>
@@ -160,7 +174,29 @@
                         {{#if group_id}}
                         <h3>{{groups.name}}</h3>
                         {{/if}}
-                        <h4>{{users.name}} · {{time updatedAt}}</h4>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <!-- Click vào tên để vào trang cá nhân -->
+                            <h4>
+                                <a href="/mess/search/profileUser?userId={{users.id}}"
+                                    style="text-decoration: none; color: inherit;">
+                                    {{users.name}}
+                                </a> · {{time updatedAt}}
+                            </h4>
+
+                            <!-- Menu 3 chấm -->
+                            <div class="post-menu-container" style="position: relative;">
+                                <button class="post-menu-btn" data-user-id="{{users.id}}"
+                                    data-post-id="{{id}}">⋮</button>
+                                <ul class="post-menu" style="display: none;">
+                                    <!-- Button follow/unfollow sẽ được JS thay đổi động -->
+                                    <li class="follow-toggle-btn" data-user-id="{{users.id}}" data-status="loading">
+                                        Đang kiểm tra...
+                                    </li>
+                                    <li class="hide-post-btn" data-post-id="{{id}}">Ẩn bài viết</li>
+                                    <li class="report-post-btn" data-post-id="{{id}}">Báo cáo</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -287,6 +323,7 @@
     import NotificationCenter from '/js/Notification/NotificationCenter.js';
     // expose ra global để HTML onclick dùng được
     window.NotificationCenter = NotificationCenter;
+    import follow from '/js/Follow.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
         // xử lý ảnh base64 từ hidden input
@@ -478,6 +515,60 @@
         // Click ra ngoài → đóng tất cả menu
         document.addEventListener('click', () => {
             closeAllMenus();
+        });
+
+
+        // ========== XỬ LÝ MENU 3 CHẤM VỚI FOLLOW ĐỘNG ==========
+        document.addEventListener('click', async (e) => {
+            // Mở menu khi click nút 3 chấm
+            if (e.target.classList.contains('post-menu-btn')) {
+                e.stopPropagation();
+
+                const targetUserId = e.target.dataset.userId;
+                const menu = e.target.nextElementSibling;
+                const followBtn = menu.querySelector('.follow-toggle-btn');
+
+                // Đóng tất cả menu khác
+                document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
+
+                // Mở menu hiện tại
+                menu.style.display = 'block';
+
+                // Kiểm tra trạng thái follow ngay khi mở menu
+                await follow.checkAndUpdateFollowStatus(followBtn, id_user, targetUserId);
+                return;
+            }
+
+            // Toggle Follow/Unfollow
+            if (e.target.classList.contains('follow-toggle-btn')) {
+                e.stopPropagation();
+                const targetUserId = e.target.dataset.userId;
+                const currentStatus = e.target.dataset.status;
+
+                if (currentStatus === 'following') {
+                    await follow.handleUnfollow(e.target, id_user, targetUserId);
+                } else if (currentStatus === 'not-following') {
+                    await follow.handleFollow(e.target, id_user, targetUserId);
+                }
+                return;
+            }
+
+            // Ẩn bài viết
+            if (e.target.classList.contains('hide-post-btn')) {
+                const postId = e.target.dataset.postId;
+                follow.handleHidePost(postId);
+                return;
+            }
+
+            // Báo cáo
+            if (e.target.classList.contains('report-post-btn')) {
+                const postId = e.target.dataset.postId;
+                follow.handleReport(postId);
+                return;
+            }
+
+            // Click ra ngoài → đóng menu
+            document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
         });
 
         // Khởi tạo khi trang load
