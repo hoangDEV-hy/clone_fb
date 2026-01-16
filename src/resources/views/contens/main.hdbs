@@ -77,6 +77,338 @@
         color: #65676b;
         font-style: italic;
     }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #18191a;
+        color: #e4e6eb;
+        padding: 20px;
+    }
+
+    .suggestions-container {
+        max-width: 680px;
+        margin: 0 auto 20px;
+        background: #242526;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .suggestions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .suggestions-header h2 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .view-all {
+        color: #2d88ff;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .view-all:hover {
+        text-decoration: underline;
+    }
+
+    .suggestions-wrapper {
+        position: relative;
+    }
+
+    .suggestions-scroll {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .suggestions-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .suggestion-card {
+        flex: 0 0 auto;
+        width: 160px;
+        background: #3a3b3c;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s;
+        position: relative;
+    }
+
+    .suggestion-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .card-avatar {
+        width: 100%;
+        height: 160px;
+        position: relative;
+        overflow: hidden;
+        background: #4a4b4c;
+    }
+
+    .card-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .card-info {
+        padding: 12px;
+    }
+
+    .card-name {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mutual-friends {
+        font-size: 13px;
+        color: #b0b3b8;
+        margin-bottom: 12px;
+    }
+
+    .card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn {
+        padding: 8px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: #2d88ff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1877f2;
+    }
+
+    .btn-secondary {
+        background: #3a3b3c;
+        color: #e4e6eb;
+    }
+
+    .btn-secondary:hover {
+        background: #4a4b4c;
+    }
+
+    .nav-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s;
+    }
+
+    .nav-button:hover {
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-button.prev {
+        left: -12px;
+    }
+
+    .nav-button.next {
+        right: -12px;
+    }
+
+    .nav-button svg {
+        width: 20px;
+        height: 20px;
+        fill: #050505;
+    }
+
+    .nav-button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #b0b3b8;
+    }
+
+    .error {
+        text-align: center;
+        padding: 40px;
+        color: #f02849;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .skeleton-card {
+        flex: 0 0 auto;
+        width: 160px;
+        background: #3a3b3c;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .skeleton-avatar {
+        width: 100%;
+        height: 160px;
+        background: #4a4b4c;
+    }
+
+    .skeleton-info {
+        padding: 12px;
+    }
+
+    .skeleton-line {
+        height: 16px;
+        background: #4a4b4c;
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+
+    .skeleton-line.short {
+        width: 60%;
+    }
+
+    .mutual-friends-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mutual-friends-modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #242526;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 16px;
+        border-bottom: 1px solid #3a3b3c;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        font-size: 20px;
+    }
+
+    .close-modal {
+        background: #3a3b3c;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .mutual-friend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+    }
+
+    .mutual-friend-item:hover {
+        background: #3a3b3c;
+    }
+
+    .mutual-friend-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #4a4b4c;
+    }
+
+    .mutual-friend-info h4 {
+        font-size: 15px;
+        font-weight: 600;
+    }
 </style>
 
 <body>
@@ -150,6 +482,70 @@
     </div>
     <div class="body" style="display: flex">
         <div class="body_center">
+            <div class="suggestions-container">
+                <div class="suggestions-header">
+                    <h2>Những người bạn có thể biết</h2>
+                    <a href="#" class="view-all">Xem tất cả</a>
+                </div>
+
+                <div class="suggestions-wrapper">
+                    <button class="nav-button prev" id="prevBtn" disabled>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                    </button>
+
+                    <div class="suggestions-scroll" id="suggestionsScroll">
+                        <!-- Loading skeleton -->
+                        <div class="skeleton-card skeleton">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-card skeleton">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-card skeleton">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="nav-button next" id="nextBtn">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal hiển thị bạn chung -->
+            <div class="mutual-friends-modal" id="mutualFriendsModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">Bạn chung</h3>
+                        <button class="close-modal" id="closeModal">✕</button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                        <!-- Nội dung bạn chung sẽ được load ở đây -->
+                    </div>
+                </div>
+            </div>
             <div id="think">
                 <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
                 <a href="/Posts">tạo tin</a>
@@ -608,6 +1004,327 @@
         });
     })
 
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:3000'; // Thay đổi theo server của bạn
+    let currentUserId = null; // Sẽ được lấy từ authentication
+
+    // State management
+    let suggestions = [];
+    let mutualFriendsCache = {};
+
+    // DOM Elements
+    const suggestionsScroll = document.getElementById('suggestionsScroll');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const modal = document.getElementById('mutualFriendsModal');
+    const modalBody = document.getElementById('modalBody');
+    const modalTitle = document.getElementById('modalTitle');
+    const closeModal = document.getElementById('closeModal');
+
+    // Initialize
+    async function init() {
+        // Lấy userId từ DOM (giống như code gốc)
+        const userInput = document.querySelector('.my_profile input');
+        if (userInput) {
+            currentUserId = userInput.value;
+        }
+
+        await loadSuggestions();
+        setupScrollButtons();
+        setupModalHandlers();
+    }
+
+    // Load friend suggestions
+    async function loadSuggestions() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/mutualfriend?limit=10&type=all`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                suggestions = result.data.users;
+                renderSuggestions(suggestions);
+
+                // Preload mutual friends count cho mỗi user
+                suggestions.forEach(user => {
+                    loadMutualFriendsCount(user.id);
+                });
+            } else {
+                showError('Không thể tải gợi ý kết bạn');
+            }
+        } catch (error) {
+            console.error('Error loading suggestions:', error);
+            showError('Đã có lỗi xảy ra');
+        }
+    }
+
+    // Load mutual friends count
+    async function loadMutualFriendsCount(targetUserId) {
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/mutualfriend/friends?targetUserId=${targetUserId}&limit=3&type=all`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }
+            );
+
+            const result = await response.json();
+
+            if (result.success) {
+                mutualFriendsCache[targetUserId] = result.data;
+                updateMutualFriendsDisplay(targetUserId, result.data.total);
+            }
+        } catch (error) {
+            console.error('Error loading mutual friends:', error);
+        }
+    }
+
+    // Update mutual friends display
+    function updateMutualFriendsDisplay(userId, count) {
+        const card = document.querySelector(`[data-user-id="${userId}"]`);
+        if (card) {
+            const mutualElement = card.querySelector('.mutual-friends');
+            if (count > 0) {
+                mutualElement.textContent = `${count} bạn chung`;
+                mutualElement.style.cursor = 'pointer';
+                mutualElement.onclick = () => showMutualFriends(userId);
+            } else {
+                mutualElement.textContent = 'Chưa có bạn chung';
+            }
+        }
+    }
+
+    // Render suggestions
+    function renderSuggestions(users) {
+        suggestionsScroll.innerHTML = users.map(user => {
+            const firstLetter = user.name.charAt(0).toUpperCase();
+            const avatarHtml = user.avatar
+                ? `<img src="${user.avatar}" alt="${user.name}">`
+                : `<div class="card-avatar-placeholder">${firstLetter}</div>`;
+
+            return `
+                    <div class="suggestion-card" data-user-id="${user.id}">
+                        <div class="card-avatar">
+                            ${avatarHtml}
+                        </div>
+                        <div class="card-info">
+                            <div class="card-name">${user.name}</div>
+                            <div class="mutual-friends">Đang tải...</div>
+                            <div class="card-actions">
+                                <button class="btn btn-primary" onclick="addFriend('${user.id}')">
+                                    Thêm bạn bè
+                                </button>
+                                <button class="btn btn-secondary" onclick="removeSuggestion('${user.id}')">
+                                    Gỡ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        }).join('');
+    }
+
+    // Show mutual friends modal
+    async function showMutualFriends(targetUserId) {
+        modal.classList.add('active');
+        modalBody.innerHTML = '<div class="loading">Đang tải...</div>';
+
+        const user = suggestions.find(u => u.id === targetUserId);
+        modalTitle.textContent = `Bạn chung với ${user.name}`;
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/mutualfriend/friends?targetUserId=${targetUserId}&limit=50&type=all`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }
+            );
+
+            const result = await response.json();
+
+            if (result.success && result.data.users.length > 0) {
+                modalBody.innerHTML = result.data.users.map(friend => {
+                    const firstLetter = friend.name.charAt(0).toUpperCase();
+                    const avatarSrc = friend.avatar || '';
+
+                    return `
+                            <div class="mutual-friend-item">
+                                <img src="${avatarSrc}" 
+                                     alt="${friend.name}" 
+                                     class="mutual-friend-avatar"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="card-avatar-placeholder" style="display:none; width:60px; height:60px; border-radius:50%; font-size:24px;">
+                                    ${firstLetter}
+                                </div>
+                                <div class="mutual-friend-info">
+                                    <h4>${friend.name}</h4>
+                                </div>
+                            </div>
+                        `;
+                }).join('');
+            } else {
+                modalBody.innerHTML = '<div class="loading">Không có bạn chung</div>';
+            }
+        } catch (error) {
+            console.error('Error loading mutual friends:', error);
+            modalBody.innerHTML = '<div class="error">Không thể tải danh sách bạn chung</div>';
+        }
+    }
+
+    // Setup scroll buttons
+    function setupScrollButtons() {
+        prevBtn.addEventListener('click', () => {
+            suggestionsScroll.scrollBy({ left: -340, behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+            suggestionsScroll.scrollBy({ left: 340, behavior: 'smooth' });
+        });
+
+        suggestionsScroll.addEventListener('scroll', updateScrollButtons);
+        updateScrollButtons();
+    }
+
+    // Update scroll buttons state
+    function updateScrollButtons() {
+        const { scrollLeft, scrollWidth, clientWidth } = suggestionsScroll;
+
+        prevBtn.disabled = scrollLeft <= 0;
+        nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 1;
+    }
+
+    // Setup modal handlers
+    function setupModalHandlers() {
+        closeModal.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    }
+
+    // Add friend
+    async function addFriend(userId) {
+        try {
+            // Gọi API thêm bạn bè của bạn
+            const response = await fetch(`${API_BASE_URL}/friends/request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ targetUserId: userId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Hiển thị thông báo thành công
+                showToast('Đã gửi lời mời kết bạn');
+
+                // Cập nhật UI
+                const card = document.querySelector(`[data-user-id="${userId}"]`);
+                if (card) {
+                    const btn = card.querySelector('.btn-primary');
+                    btn.textContent = 'Đã gửi lời mời';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.6';
+                }
+            } else {
+                showToast('Không thể gửi lời mời kết bạn', 'error');
+            }
+        } catch (error) {
+            console.error('Error adding friend:', error);
+            showToast('Đã có lỗi xảy ra', 'error');
+        }
+    }
+
+    // Remove suggestion
+    function removeSuggestion(userId) {
+        const card = document.querySelector(`[data-user-id="${userId}"]`);
+        if (card) {
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.8)';
+
+            setTimeout(() => {
+                card.remove();
+                updateScrollButtons();
+            }, 300);
+        }
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#f02849' : '#31a24c'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    // Add animations
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+    document.head.appendChild(style);
 </script>
 
 </html>
