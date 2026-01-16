@@ -699,10 +699,16 @@
                     <button id="btnCancelConfirm">Huỷ</button>
                     <button id="btnOkConfirm">Đồng ý</button>
                 </div>
-            </div>
-        </div>
-        <!-- ========== /MODAL ========== -->
-
+                </divS /div>
+                <!-- ========== /MODAL ========== -->
+                <!-- Friend Suggestions Scripts -->
+                <script src="/js/Suggestion/ApiService.js"></script>
+                <script src="/js/Suggestion/UiService.js"></script>
+                <script src="/js/Suggestion/ToastService.js"></script>
+                <script src="/js/Suggestion/ModalService.js"></script>
+                <script src="/js/Suggestion/ScrollService.js"></script>
+                <script src="/js/Suggestion/SuggestionsController.js"></script>
+                <script src="/js/Suggestion/SuggestionActions.js"></script>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <!-- CSS -->
@@ -719,7 +725,10 @@
     import NotificationCenter from '/js/Notification/NotificationCenter.js';
     // expose ra global để HTML onclick dùng được
     window.NotificationCenter = NotificationCenter;
+
     import follow from '/js/Follow.js';
+
+
 
     document.addEventListener('DOMContentLoaded', async () => {
         // xử lý ảnh base64 từ hidden input
@@ -793,7 +802,7 @@
 
 
         //featureOfChat
-        //delete event 
+        //delete event
         const chatHead = document.querySelector('[data-role="chatHead"]');
         const head_option = chatHead.querySelector('[data-role="head_option"]');
 
@@ -1004,327 +1013,37 @@
         });
     })
 
-    // API Configuration
-    const API_BASE_URL = 'http://localhost:3000'; // Thay đổi theo server của bạn
-    let currentUserId = null; // Sẽ được lấy từ authentication
-
-    // State management
-    let suggestions = [];
-    let mutualFriendsCache = {};
-
-    // DOM Elements
-    const suggestionsScroll = document.getElementById('suggestionsScroll');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const modal = document.getElementById('mutualFriendsModal');
-    const modalBody = document.getElementById('modalBody');
-    const modalTitle = document.getElementById('modalTitle');
-    const closeModal = document.getElementById('closeModal');
-
-    // Initialize
-    async function init() {
-        // Lấy userId từ DOM (giống như code gốc)
+    async function initFriendSuggestions() {
+        // Lấy userId từ DOM
         const userInput = document.querySelector('.my_profile input');
-        if (userInput) {
-            currentUserId = userInput.value;
+        if (!userInput) {
+            console.error('User input not found');
+            return;
         }
 
-        await loadSuggestions();
-        setupScrollButtons();
-        setupModalHandlers();
-    }
-
-    // Load friend suggestions
-    async function loadSuggestions() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/mutualfriend?limit=10&type=all`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                suggestions = result.data.users;
-                renderSuggestions(suggestions);
-
-                // Preload mutual friends count cho mỗi user
-                suggestions.forEach(user => {
-                    loadMutualFriendsCount(user.id);
-                });
-            } else {
-                showError('Không thể tải gợi ý kết bạn');
-            }
-        } catch (error) {
-            console.error('Error loading suggestions:', error);
-            showError('Đã có lỗi xảy ra');
+        const userId = userInput.value;
+        if (!userId) {
+            console.error('User ID not found');
+            return;
         }
+
+        // Khởi tạo animations
+        toastService.addAnimations();
+
+        // Khởi tạo các services
+        modalService.init();
+        scrollService.init('suggestionsScroll', 'prevBtn', 'nextBtn');
+
+        // Khởi tạo controller và load suggestions
+        await suggestionsController.init(userId);
     }
 
-    // Load mutual friends count
-    async function loadMutualFriendsCount(targetUserId) {
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/mutualfriend/friends?targetUserId=${targetUserId}&limit=3&type=all`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                }
-            );
-
-            const result = await response.json();
-
-            if (result.success) {
-                mutualFriendsCache[targetUserId] = result.data;
-                updateMutualFriendsDisplay(targetUserId, result.data.total);
-            }
-        } catch (error) {
-            console.error('Error loading mutual friends:', error);
-        }
-    }
-
-    // Update mutual friends display
-    function updateMutualFriendsDisplay(userId, count) {
-        const card = document.querySelector(`[data-user-id="${userId}"]`);
-        if (card) {
-            const mutualElement = card.querySelector('.mutual-friends');
-            if (count > 0) {
-                mutualElement.textContent = `${count} bạn chung`;
-                mutualElement.style.cursor = 'pointer';
-                mutualElement.onclick = () => showMutualFriends(userId);
-            } else {
-                mutualElement.textContent = 'Chưa có bạn chung';
-            }
-        }
-    }
-
-    // Render suggestions
-    function renderSuggestions(users) {
-        suggestionsScroll.innerHTML = users.map(user => {
-            const firstLetter = user.name.charAt(0).toUpperCase();
-            const avatarHtml = user.avatar
-                ? `<img src="${user.avatar}" alt="${user.name}">`
-                : `<div class="card-avatar-placeholder">${firstLetter}</div>`;
-
-            return `
-                    <div class="suggestion-card" data-user-id="${user.id}">
-                        <div class="card-avatar">
-                            ${avatarHtml}
-                        </div>
-                        <div class="card-info">
-                            <div class="card-name">${user.name}</div>
-                            <div class="mutual-friends">Đang tải...</div>
-                            <div class="card-actions">
-                                <button class="btn btn-primary" onclick="addFriend('${user.id}')">
-                                    Thêm bạn bè
-                                </button>
-                                <button class="btn btn-secondary" onclick="removeSuggestion('${user.id}')">
-                                    Gỡ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-        }).join('');
-    }
-
-    // Show mutual friends modal
-    async function showMutualFriends(targetUserId) {
-        modal.classList.add('active');
-        modalBody.innerHTML = '<div class="loading">Đang tải...</div>';
-
-        const user = suggestions.find(u => u.id === targetUserId);
-        modalTitle.textContent = `Bạn chung với ${user.name}`;
-
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/mutualfriend/friends?targetUserId=${targetUserId}&limit=50&type=all`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                }
-            );
-
-            const result = await response.json();
-
-            if (result.success && result.data.users.length > 0) {
-                modalBody.innerHTML = result.data.users.map(friend => {
-                    const firstLetter = friend.name.charAt(0).toUpperCase();
-                    const avatarSrc = friend.avatar || '';
-
-                    return `
-                            <div class="mutual-friend-item">
-                                <img src="${avatarSrc}" 
-                                     alt="${friend.name}" 
-                                     class="mutual-friend-avatar"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                                <div class="card-avatar-placeholder" style="display:none; width:60px; height:60px; border-radius:50%; font-size:24px;">
-                                    ${firstLetter}
-                                </div>
-                                <div class="mutual-friend-info">
-                                    <h4>${friend.name}</h4>
-                                </div>
-                            </div>
-                        `;
-                }).join('');
-            } else {
-                modalBody.innerHTML = '<div class="loading">Không có bạn chung</div>';
-            }
-        } catch (error) {
-            console.error('Error loading mutual friends:', error);
-            modalBody.innerHTML = '<div class="error">Không thể tải danh sách bạn chung</div>';
-        }
-    }
-
-    // Setup scroll buttons
-    function setupScrollButtons() {
-        prevBtn.addEventListener('click', () => {
-            suggestionsScroll.scrollBy({ left: -340, behavior: 'smooth' });
-        });
-
-        nextBtn.addEventListener('click', () => {
-            suggestionsScroll.scrollBy({ left: 340, behavior: 'smooth' });
-        });
-
-        suggestionsScroll.addEventListener('scroll', updateScrollButtons);
-        updateScrollButtons();
-    }
-
-    // Update scroll buttons state
-    function updateScrollButtons() {
-        const { scrollLeft, scrollWidth, clientWidth } = suggestionsScroll;
-
-        prevBtn.disabled = scrollLeft <= 0;
-        nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 1;
-    }
-
-    // Setup modal handlers
-    function setupModalHandlers() {
-        closeModal.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-    }
-
-    // Add friend
-    async function addFriend(userId) {
-        try {
-            // Gọi API thêm bạn bè của bạn
-            const response = await fetch(`${API_BASE_URL}/friends/request`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ targetUserId: userId })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Hiển thị thông báo thành công
-                showToast('Đã gửi lời mời kết bạn');
-
-                // Cập nhật UI
-                const card = document.querySelector(`[data-user-id="${userId}"]`);
-                if (card) {
-                    const btn = card.querySelector('.btn-primary');
-                    btn.textContent = 'Đã gửi lời mời';
-                    btn.disabled = true;
-                    btn.style.opacity = '0.6';
-                }
-            } else {
-                showToast('Không thể gửi lời mời kết bạn', 'error');
-            }
-        } catch (error) {
-            console.error('Error adding friend:', error);
-            showToast('Đã có lỗi xảy ra', 'error');
-        }
-    }
-
-    // Remove suggestion
-    function removeSuggestion(userId) {
-        const card = document.querySelector(`[data-user-id="${userId}"]`);
-        if (card) {
-            card.style.transition = 'opacity 0.3s, transform 0.3s';
-            card.style.opacity = '0';
-            card.style.transform = 'scale(0.8)';
-
-            setTimeout(() => {
-                card.remove();
-                updateScrollButtons();
-            }, 300);
-        }
-    }
-
-    // Show toast notification
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'error' ? '#f02849' : '#31a24c'};
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-            `;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-
-
-    // Initialize when DOM is ready
+    // Auto initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', initFriendSuggestions);
     } else {
-        init();
+        initFriendSuggestions();
     }
-
-    // Add animations
-    const style = document.createElement('style');
-    style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-    document.head.appendChild(style);
 </script>
 
 </html>

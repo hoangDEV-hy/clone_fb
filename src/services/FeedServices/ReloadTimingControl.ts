@@ -25,6 +25,7 @@ class CacheManager {
         this.cache.clear();
     }
 
+    //delete all cache of pattern
     clearPattern(pattern: string): void {
         for (const key of this.cache.keys()) {
             if (key.includes(pattern)) {

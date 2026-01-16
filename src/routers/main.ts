@@ -129,6 +129,7 @@ router.get('/json', authenticate.user_auth, async (req: Request, res: Response):
  */
 
 //cache-luu lai 10 bai, khi reload lai không cần truy vấn nữa
+//clear all cache cua admin( pattern co userId)
 router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).admin?.id;
