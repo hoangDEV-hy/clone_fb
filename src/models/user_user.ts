@@ -68,5 +68,16 @@ export let methods = {
                 where: key
             }
         );
+    },
+    selectFriends: async (userId: string) => {
+        return await user_user.findAll({
+            where: {
+                [Op.or]: [
+                    { id_userA: userId, status: 'done' },
+                    { id_userB: userId, status: 'done' }
+                ]
+            },
+            attributes: ['id_userA', 'id_userB']
+        });
     }
 }

@@ -1,4 +1,4 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, Op } from "sequelize";
 import { sequelize } from '../configs/sql';
 
 
@@ -47,7 +47,7 @@ group_user.hasMany(Posts, {
 });
 export { group_user };
 
-export let method = {
+export let methods = {
     addGroup: (req: any, res: Response): void => {
         const { id_group, id_userA } = req.body;
         group_user.create({
@@ -76,6 +76,25 @@ export let method = {
                 where: key
             }
         );
+    },
+    selectGroups: async (userId: string) => {
+        return await group_user.findAll({
+            where: {
+                id_userA: userId,
+                status: 'active'
+            },
+            attributes: ['id_group']
+        });
+    },
+    selectGroupMembers: async (mutualGroupIds: number[], userId: string) => {
+        return await group_user.findAll({
+            where: {
+                id_group: { [Op.in]: mutualGroupIds },
+                status: 'active',
+                id_userA: { [Op.notIn]: [userId] }
+            },
+            attributes: ['id_userA']
+        });
     }
 }
 //thông báo: viết khi nào xong giao diện

@@ -1,7 +1,7 @@
 import { methods as postMethods } from '../../models/Posts'
 import transformPosts from './TransformPosts'
 import { methods as followerMethods } from '../../models/Model_Follower'
-import feedCache from './ReloadTimingControl'
+import CacheManager from './ReloadTimingControl'
 
 import { WhereOptions, Op } from 'sequelize';
 export class PostService {
@@ -9,6 +9,10 @@ export class PostService {
     /**
      * Calculate engagement score for posts
      */
+    private feedCache:CacheManager;
+    constructor(){
+        this.feedCache = new CacheManager()
+    }
     private calculateEngagementScore(post: any): number {
         const now = Date.now();
         const postTime = new Date(post.createdAt).getTime();
@@ -34,6 +38,7 @@ export class PostService {
 
         return engagementPoints * timeFactor * recentBoost;
     }
+    
 
 
     /**
@@ -41,7 +46,7 @@ export class PostService {
      */
     async getOwnPosts(userId: string, limit: number, cursor?: string): Promise<any[]> {
         const cacheKey = `own:${userId}:${cursor || 'start'}`;
-        const cached = feedCache.get(cacheKey);
+        const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
         const whereClause: WhereOptions = {
@@ -67,7 +72,7 @@ export class PostService {
             .sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0))
             .slice(0, limit);
 
-        feedCache.set(cacheKey, sorted);
+        this.feedCache.set(cacheKey, sorted);
         return sorted;
     }
 
@@ -76,7 +81,7 @@ export class PostService {
      */
     async getFollowingPosts(userId: string, limit: number, cursor?: string): Promise<any[]> {
         const cacheKey = `following:${userId}:${cursor || 'start'}`;
-        const cached = feedCache.get(cacheKey);
+        const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
         const followings = await followerMethods.selectFollowings(userId);
@@ -106,7 +111,7 @@ export class PostService {
             .sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0))
             .slice(0, limit);
 
-        feedCache.set(cacheKey, sorted);
+        this.feedCache.set(cacheKey, sorted);
         return sorted;
     }
 
@@ -115,7 +120,7 @@ export class PostService {
      */
     async getFriendsPosts(userId: string, limit: number, cursor?: string): Promise<any[]> {
         const cacheKey = `friends:${userId}:${cursor || 'start'}`;
-        const cached = feedCache.get(cacheKey);
+        const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
         const friends = await postMethods.selectFriendsPost(userId);
@@ -144,7 +149,7 @@ export class PostService {
             .sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0))
             .slice(0, limit);
 
-        feedCache.set(cacheKey, sorted);
+        this.feedCache.set(cacheKey, sorted);
         return sorted;
     }
 
@@ -153,7 +158,7 @@ export class PostService {
      */
     async getGroupPosts(userId: string, limit: number, cursor?: string): Promise<any[]> {
         const cacheKey = `group:${userId}:${cursor || 'start'}`;
-        const cached = feedCache.get(cacheKey);
+        const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
         const userGroups = await postMethods.selectGroupsPost(userId);
@@ -182,7 +187,7 @@ export class PostService {
             .sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0))
             .slice(0, limit);
 
-        feedCache.set(cacheKey, sorted);
+        this.feedCache.set(cacheKey, sorted);
         return sorted;
     }
 
@@ -191,7 +196,7 @@ export class PostService {
      */
     async getInterestBasedPosts(userId: string, limit: number, cursor?: string): Promise<any[]> {
         const cacheKey = `interest:${userId}:${cursor || 'start'}`;
-        const cached = feedCache.get(cacheKey);
+        const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
         const userGroups = await postMethods.selectIdGroups(userId);
@@ -238,7 +243,7 @@ export class PostService {
             .sort((a, b) => (b.engagementScore || 0) - (a.engagementScore || 0))
             .slice(0, limit);
 
-        feedCache.set(cacheKey, sorted);
+        this.feedCache.set(cacheKey, sorted);
         return sorted;
     }
 }

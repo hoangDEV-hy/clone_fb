@@ -191,6 +191,13 @@ const methods = {
             }
         )
         return user;
+    },
+    selectUsersWithOrder: async (id: string[]) => {
+        return await User.findAll({
+            where: { id: { [Op.in]: id } },
+            attributes: ['id', 'name', 'alias', 'avatar', 'thumbnail'],
+            order: [['id', 'ASC']]
+        });
     }
 
 };

@@ -1,6 +1,6 @@
 class CacheManager {
     private cache: Map<string, { data: any; expiry: number }> = new Map();
-    private readonly TTL = 10 * 60 * 1000; // 10 minutes
+    public readonly TTL = 10 * 60 * 1000; // 10 minutes
 
     set(key: string, data: any, ttl?: number): void {
         this.cache.set(key, {
@@ -45,6 +45,5 @@ class CacheManager {
     }
 }
 
-const feedCache = new CacheManager();
-feedCache.startCleanup();
-export default feedCache
+
+export default CacheManager;

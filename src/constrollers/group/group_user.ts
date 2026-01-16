@@ -1,5 +1,5 @@
 import { Request, response, Response } from "express"
-import { group_user, method as method_group_user } from "../../models/group_user"
+import { group_user, methods as methodsGroupUser } from "../../models/group_user"
 import { Group } from "../../models/group";
 import { Op, where, fn, col, literal } from 'sequelize';
 export let method = {
@@ -28,11 +28,11 @@ export let method = {
     },
     show_joined: (req: any): Promise<any> => {
         const id = req.admin.id;
-        return method_group_user.select({ id_userA: id, status: 'done' })
+        return methodsGroupUser.select({ id_userA: id, status: 'done' })
     },
     show_waited: (req: any): Promise<any> => {
         const id = req.admin.id;
-        return method_group_user.select({ id_userA: id, status: 'pendding' })
+        return methodsGroupUser.select({ id_userA: id, status: 'pendding' })
     },
 
 }

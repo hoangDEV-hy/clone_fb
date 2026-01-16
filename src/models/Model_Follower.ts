@@ -163,6 +163,15 @@ export const methods = {
             },
             attributes: ['follower_id']
         })
+    },
+    othersSameFollowingUsers: async (mutualFollowingIds: string[], userId: string) => {
+        return await Follower.findAll({
+            where: {
+                following_id: { [Op.in]: mutualFollowingIds },
+                follower_id: { [Op.notIn]: [userId] }
+            },
+            attributes: ['follower_id']
+        });
     }
 };
 

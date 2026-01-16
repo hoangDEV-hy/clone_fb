@@ -1,14 +1,15 @@
 import { PostService } from "./PostService";
-import feedCache from "./ReloadTimingControl";
+import CacheManager from "./ReloadTimingControl";
 
 import FeedConfig from "../../types/Type_FeedConfig";
 import { Posts } from "../../models/Posts";
 
 export class FeedAggregatorService {
     private postService: PostService;
-
+    private feedCache: CacheManager;
     constructor() {
         this.postService = new PostService();
+        this.feedCache = new CacheManager();
     }
 
     async aggregateFeed(config: FeedConfig): Promise<{
@@ -88,12 +89,10 @@ export class FeedAggregatorService {
     }
 
     clearCache(): void {
-        feedCache.clear();
+        this.feedCache.clear();
     }
 
     clearUserCache(userId: string): void {
-        feedCache.clearPattern(userId);
+        this.feedCache.clearPattern(userId);
     }
 }
-
-export { feedCache };
