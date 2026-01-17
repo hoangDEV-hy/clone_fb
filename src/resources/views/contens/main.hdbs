@@ -453,9 +453,15 @@
 
             <!-- Profile -->
             <li class="my_profile menu-btn" data-menu="submenu">
-                <a href="profile.htm">
-                    <img src="/{{user.avatar}}" alt="ảnh đại diện">
-                    Tài khoản
+                <form action="http://localhost:3000/page_manager/user" method="POST" style="display: inline;">
+                    <input type="hidden" name="selectedTargetId" value="{{user.id}}">
+                    <button type="submit"
+                        style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; padding: 0; font: inherit;">
+                        Trang cá nhân
+                    </button>
+                </form>
+                <img src="/{{user.avatar}}" alt="ảnh đại diện">
+                Tài khoản
                 </a>
                 <ul class="submenu menu">
                     <li>{{user.name}}</li>
@@ -573,10 +579,15 @@
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <!-- Click vào tên để vào trang cá nhân -->
                             <h4>
-                                <a href="/mess/search/profileUser?userId={{users.id}}"
-                                    style="text-decoration: none; color: inherit;">
-                                    {{users.name}}
-                                </a> · {{time updatedAt}}
+                                <form action="http://localhost:3000/page_manager/user" method="POST"
+                                    style="display: inline;">
+                                    <input type="hidden" name="selectedTargetId" value="{{users.id}}">
+                                    <button type="submit"
+                                        style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; padding: 0; font: inherit;">
+                                        Trang cá nhân
+                                    </button>
+                                </form>
+                                <h5>{{users.name}} · {{time updatedAt}}</h5>
                             </h4>
 
                             <!-- Menu 3 chấm -->

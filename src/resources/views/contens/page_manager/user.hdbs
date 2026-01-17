@@ -66,6 +66,7 @@
         </select>
         {{#each Posts}}
         <div class="news">
+
             <form action="/Post/interactions/share/delete=DELETE" method="Post" style="display:inline">
                 <input type="hidden" name="id" value="{{id}}">
                 <button type="submit">delete</button>
@@ -75,6 +76,7 @@
                 <input type="hidden" name="PostId_original" value="{{PostId_original}}">
                 <button type="submit">update</button>
             </form>
+
             <div class="bd_ct_news_nguoiDang">
                 <table>
                     <tr>
@@ -136,7 +138,7 @@
 
             //for sorting
             document.querySelector('.body select[name="sort"]').addEventListener('change', () => {
-                let url = `/page_manager/user/sort?sort=${document.querySelector('.body select[name="sort"]').value}`;
+                let url = `/page_manager/user/sort?sort=${document.querySelector('.body select[name="sort"]').value}&selectedTargetId={{user.id}}`;
                 window.location.href = url;
             })
             //for load_Posts, change_like

@@ -18,9 +18,10 @@ declare module "express-serve-static-core" {
 }
 route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): Promise<any> => {
     const id = req.admin?.id;
+    const selectedTargetId: string = req.query.selectedTargetId as string;
+    //for where in the query
+    let sort: string = req.query.sort as string;
     try {
-        //for where in the query
-        let sort: string = req.query.sort as string;
         let post: any = await Posts.findAll({
             attributes: {
                 include: [
@@ -35,7 +36,7 @@ route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): 
                     ]
                 ]
             },
-            where: { user_id: id },
+            where: { user_id: selectedTargetId },
             include: [
                 {
                     model: Group,
@@ -50,7 +51,7 @@ route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): 
             ],
             order: [[sequelize.literal('interactionCount'), 'DESC']]
         })
-        const user = await User.findOne({ where: { id } });
+        const user = await User.findOne({ where: { id: selectedTargetId } });
         // Chuyển từng instance Sequelize thành object thuần và xử lý contens
         const tranAllPosts = post.map((Post: any) => {
             const obj = Post.toJSON ? Post.toJSON() : Post;
@@ -79,9 +80,11 @@ route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): 
 
             return obj;
         });
+        const config_interface = String(id) === String(selectedTargetId);
         return res.render('contens/page_manager/user', {
             Posts: tranAllPosts,
-            user: user?.toJSON()
+            user: user?.toJSON(),
+            config_interface
         });
     } catch (error) {
         console.error(error);
@@ -89,61 +92,75 @@ route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): 
     }
 
 })
-route.get('/', authenticate.user_auth, async (req: any, res: any) => {
-    const id = req.admin?.id;
-    try {
-        const user = await User.findOne({ where: { id } });
 
-        const post = await Posts.findAll({
-            where: { user_id: id },
+
+route.post('/', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+    const id = req.admin?.id;
+    const { selectedTargetId } = req.body || {};
+
+    try {
+        if (!id) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const user = await User.findOne({
+            where: { id: selectedTargetId }
+        });
+
+        const posts = await Posts.findAll({
+            where: { user_id: selectedTargetId },
             include: [
                 { model: Group, as: 'groups', required: false },
                 { model: User, as: 'users', required: false }
             ]
         });
 
-
-
-
-        // Chuyển từng instance Sequelize thành object thuần và xử lý contens
-        const tranAllPosts = post.map((Post: any) => {
-            const obj = Post.toJSON ? Post.toJSON() : Post;
+        const tranAllPosts = posts.map((postItem: any) => {
+            const obj = postItem.toJSON ? postItem.toJSON() : postItem;
 
             try {
-                let parsed = JSON.parse(obj.contens || '{}');
+                let parsed: any = JSON.parse(obj.contens || '{}');
+
                 if (typeof parsed === 'string') {
                     parsed = JSON.parse(parsed);
                 }
 
-                let imageValue = parsed.image || null;
+                let imageValue = parsed.image ?? null;
 
-                if (imageValue && typeof imageValue === "object") {
-                    // Nếu là object → stringify
+                if (imageValue && typeof imageValue === 'object') {
                     imageValue = JSON.stringify(imageValue);
                 }
 
-                // Nếu đã là string thì giữ nguyên
                 obj.contens = {
                     text: parsed.text || '',
                     image: imageValue
                 };
-            } catch {
-                obj.contens = { text: '', image: 'null' };
+            } catch (err) {
+                obj.contens = {
+                    text: '',
+                    image: null
+                };
             }
 
             return obj;
         });
+
+        const config_interface = String(id) === String(selectedTargetId);
+
         return res.render('contens/page_manager/user', {
             Posts: tranAllPosts,
             user: user?.toJSON(),
-            config_interface: true
+            config_interface
         });
 
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error' });
+        return;
     }
 });
+
 
 
 route.post('/update', authenticate.user_auth, method.updateUser);
