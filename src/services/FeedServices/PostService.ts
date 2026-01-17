@@ -1,4 +1,4 @@
-import { methods as postMethods } from '../../models/Posts'
+import { methods as postMethods } from '../../models/Model_Post'
 import transformPosts from './TransformPosts'
 import { methods as followerMethods } from '../../models/Model_Follower'
 import CacheManager from './ReloadTimingControl'
@@ -9,8 +9,8 @@ export class PostService {
     /**
      * Calculate engagement score for posts
      */
-    private feedCache:CacheManager;
-    constructor(){
+    private feedCache: CacheManager;
+    constructor() {
         this.feedCache = new CacheManager()
     }
     private calculateEngagementScore(post: any): number {
@@ -38,7 +38,7 @@ export class PostService {
 
         return engagementPoints * timeFactor * recentBoost;
     }
-    
+
 
 
     /**

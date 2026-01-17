@@ -1,5 +1,5 @@
-import { methods as methodsNotifications } from '../models/notifications';
-import { sendNotification as sendNotificationBySocket } from '../socket/index';
+import { methods as methodsNotifications } from '../models/Model_Notifications';
+import { sendNotification as sendNotificationBySocket } from '../sockets/index';
 import { Transaction } from 'sequelize';
 
 import NotificationServerTake from '../types/Type_Notification';

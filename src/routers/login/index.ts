@@ -1,5 +1,5 @@
 import express from 'express';
-import { method as methods } from '../../constrollers/login/login';
+import { method as methods } from '../../controllers/login/Ctrl_Login';
 type MethodType = {
     check: ({ }, res: any) => void;
     getPass: (req: any, res: any) => void;

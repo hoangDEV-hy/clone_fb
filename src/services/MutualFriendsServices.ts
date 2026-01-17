@@ -1,8 +1,8 @@
 import CacheManager from "./FeedServices/ReloadTimingControl";
-import { methods as methodsUserUser } from "../models/user_user";
+import { methods as methodsUserUser } from "../models/Model_UserUser";
 import { methods as methodsGroupUser } from "../models/group_user";
 import { methods as methodsFollower } from "../models/Model_Follower";
-import { methods as methodsUser, User } from "../models/user";
+import { methods as methodsUser, User } from "../models/Model_User";
 
 import MutualFriendsParams from "../types/Type_MutualFriendsParams";
 import MutualFriendsResult from "../types/Type_MutualFriendsResult";

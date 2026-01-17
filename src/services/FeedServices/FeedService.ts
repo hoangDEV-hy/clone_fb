@@ -2,7 +2,7 @@ import { PostService } from "./PostService";
 import CacheManager from "./ReloadTimingControl";
 
 import FeedConfig from "../../types/Type_FeedConfig";
-import { Posts } from "../../models/Posts";
+import { Posts } from "../../models/Model_Post";
 
 export class FeedAggregatorService {
     private postService: PostService;

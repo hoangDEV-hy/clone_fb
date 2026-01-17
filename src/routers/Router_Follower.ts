@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import FollowerController from '../constrollers/Ctrl_Follower';
+import FollowerController from '../controllers/Ctrl_Follower';
 
 import NotificationServerTake from "../types/Type_Notification";
 

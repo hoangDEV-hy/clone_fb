@@ -1,7 +1,7 @@
 import express from 'express'
-import { authenticate } from '../../middware/auth'
-import { methods } from '../../models/group';
-import { methods as group } from '../../constrollers/group/group'
+import { authenticate } from '../../middlewares/Mid_Auth'
+import { methods } from '../../models/Model_Group';
+import { methods as group } from '../../controllers/group/Ctrl_Group'
 const router = express.Router();
 
 router.get('/create', authenticate.user_auth, (req: any, res: any) => {

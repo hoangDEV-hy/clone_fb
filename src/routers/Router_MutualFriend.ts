@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { mutualFriendsController } from '../constrollers/Ctrl_MutualFriends';
-import { authenticate } from '../middware/auth';
+import { mutualFriendsController } from '../controllers/Ctrl_MutualFriend';
+import { authenticate } from '../middlewares/Mid_Auth';
 
 const router = Router();
 

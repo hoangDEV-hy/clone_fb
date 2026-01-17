@@ -2,13 +2,13 @@
 import { router as login } from './login';
 import { router as group } from './groups';
 import { route as page_manager } from './page_manager'
-import { route as Posts } from './Post'
+import { route as Posts } from './Router_Post'
 import cors from 'cors';
-import { route as main } from './main'
-import { route as interactions } from './interactions'
-import { route as upload } from './upload'
-import { route as chat } from './chat'
-import { route as notification } from './notification'
+import { route as main } from './Router_Main'
+import { route as interactions } from './Router_Interactions'
+import { route as upload } from './Router_Upload'
+import { route as chat } from './Router_Chat'
+import { route as notification } from './Router_Notification'
 import { router as follow } from './Router_Follower'
 import { router as mutualFriend } from './Router_MutualFriend'
 

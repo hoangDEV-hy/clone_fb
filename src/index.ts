@@ -6,7 +6,7 @@ import router from './routers'; // phải là export default từ routers/index.
 //for Messenger 
 import { Server } from 'socket.io'
 import http from 'http'
-import { setup_chat } from './socket/index';
+import { setup_chat } from './sockets/index';
 
 const app: Express = express();
 //change server to ioServer
@@ -70,7 +70,7 @@ sql.connect();
 
 //sync
 import { sequelize } from './configs/sql';
-import './models/chat/chat';
+import './models/chat/Model_Chat';
 
 sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
     .then(() => console.log('Database synced'))
