@@ -39,7 +39,6 @@ import { Posts } from "./Posts";
 export { user_user };
 user_user.belongsTo(User, { foreignKey: 'id_userA', as: 'userA' })
 user_user.belongsTo(User, { foreignKey: 'id_userB', as: 'userB' })
-user_user.belongsTo(User, { foreignKey: 'id_userA' })
 user_user.hasMany(Posts, {
     foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
     as: 'Posts'
