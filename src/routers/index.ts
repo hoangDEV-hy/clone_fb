@@ -11,6 +11,7 @@ import { route as chat } from './chat'
 import { route as notification } from './notification'
 import { router as follow } from './Router_Follower'
 import { router as mutualFriend } from './Router_MutualFriend'
+import { router as searches } from './search'
 
 import { Express } from 'express';
 
@@ -26,6 +27,7 @@ function router(app: Express): void {
     app.use('/notification', notification);
     app.use('/follow', follow);
     app.use('/mutualfriend', mutualFriend);
+    app.use('/searches', searches);
 }
 
 

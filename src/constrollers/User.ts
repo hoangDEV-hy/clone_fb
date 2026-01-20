@@ -8,5 +8,12 @@ export const methods = {
         } catch (err) {
             throwError(err);
         }
+    },
+    selectUsersWithName: async (selectedName: string): Promise<User[] | null> => {
+        try {
+            return await userModel.selectUsers({ name: selectedName });
+        } catch (err) {
+            throwError(err);
+        }
     }
 }

@@ -1,16 +1,20 @@
 <body>
 
     <div data-role="textBox">
-        <input type="text" name="name">
+        <input type="text" name="name" placeholder="Tìm kiếm...">
     </div>
 
     <div data-role="tableValue">
-        <table border="1">
-            <tr>
-                <th>Avatar</th>
-                <th>Name</th>
-                <th>Action</th>
-            </tr>
+        <table border="1" style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Avatar</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
         </table>
     </div>
 
@@ -18,69 +22,56 @@
         let input = document.querySelector('[data-role="textBox"] input');
         let inputBox = document.querySelector('[data-role="textBox"]');
         let data = undefined;
+        let type = null;
+        let timer = null;
 
-        // Nhận dữ liệu từ iframe
         window.addEventListener('message', event => {
             if (event.origin !== window.location.origin) return;
             window.lastChatRoomUser = event.data;
-            console.log('Đã nhận được data từ iframe');
         });
 
-        let timer = null;
-
-        // Gửi request tìm kiếm
         async function send_searchResult() {
             const text = input.value.trim();
             if (text === "") return;
 
             data = window.lastChatRoomUser;
+            let search_values;
+
             if (!data) {
-                console.log("⚠ Chưa nhận được postMessage từ iframe → chưa submit");
-                return;
+                type = "normal";
+                const params = new URLSearchParams({ name: text });
+                const res = await fetch('/searches/get?' + params);
+                search_values = await res.json();
+            } else {
+                type = "mess";
+                const params = new URLSearchParams({
+                    idUser: data.idUser,
+                    chat_roomId: data.chat_roomId,
+                    name: text
+                });
+                const res = await fetch('/searches/chatmember?' + params);
+                search_values = await res.json();
             }
 
-            const params = new URLSearchParams({
-                idUser: data.idUser,
-                chat_roomId: data.chat_roomId,
-                name: text
-            });
 
-            let search_values = await fetch('/mess/search?' + params);
-            search_values = await search_values.json();
-
-            let table = document.querySelector('[data-role="tableValue"] table');
-            table.innerHTML = `
-                <tr>
-                    <th>Avatar</th>
-                    <th>Name</th>
-                    <th>Action</th>
-                </tr>
-            `;
-
-            handle_searchValues(search_values.friendList);
+            // SỬA TẠI ĐÂY: Truyền search_values.list thay vì search_values
+            // Nếu server trả về key khác (như friendList), hãy đổi tên cho đúng
+            const actualList = search_values.list || search_values.friendList || [];
+            handle_searchValues(actualList, type);
         }
 
-        // Delay khi nhập
         input.addEventListener('input', () => {
             clearTimeout(timer);
             timer = setTimeout(send_searchResult, 1000);
         });
 
-        // Click ra ngoài → chạy tìm kiếm
         document.addEventListener('click', (e) => {
-            try {
-
-                if (!inputBox.contains(e.target)) {
-                    clearTimeout(timer);
-                    send_searchResult();
-                }
-            } catch (err) {
-                console.log("lỗi trong xử lý client", err);
-                alert('thêm thành viên không thành công');
+            if (!inputBox.contains(e.target)) {
+                clearTimeout(timer);
+                send_searchResult();
             }
         });
 
-        // Thêm user vào phòng
         async function addTo_room(userId) {
             const chat_memberValue = {
                 chat_id: data.chat_roomId,
@@ -96,79 +87,65 @@
             };
 
             try {
-                // Gửi request tạo notification
-                const response_add_notification = await fetch('/notification/chat_members', {
+                const resNotify = await fetch('/notification/chat_members', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ notification_value })
                 });
+                if (!resNotify.ok) throw new Error("Lỗi tạo thông báo");
 
-                // Kiểm tra lỗi HTTP
-                if (!response_add_notification.ok) {
-                    const errorBody = await response_add_notification.text();
-                    console.error("❌ Lỗi khi tạo notification:", errorBody);
-                    throw new Error("Không thể tạo notification");
-                }
-                else {
-                    alert("thành công")
-                }
-
-                // Gửi request thêm chat member
-                const response_add_chat_member = await fetch('/mess/chat_room/people', {
+                const resAdd = await fetch('/mess/chat_room/people', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ chat_memberValue })
                 });
+                if (!resAdd.ok) throw new Error("Lỗi thêm thành viên");
 
-                if (!response_add_chat_member.ok) {
-                    const errorBody = await response_add_chat_member.text();
-                    console.error("❌ Lỗi khi thêm người vào phòng:", errorBody);
-                    throw new Error("Không thể thêm người vào chat room");
-                }
-
-                const chatMemberJson = await response_add_chat_member.json();
-                console.log('👥 Add chat member response:', chatMemberJson);
-
+                alert("Gửi lời mời thành công!");
             } catch (err) {
-                console.error("🔥 Lỗi trong addTo_room:", err);
-
-                // Tùy bạn xử lý UI
-                alert("Có lỗi xảy ra khi gửi lời mời vào phòng chat.");
+                console.error(err);
+                alert("Có lỗi xảy ra.");
             }
         }
 
+        function handle_searchValues(list, type) {
+            let tbody = document.querySelector('[data-role="tableValue"] table tbody');
+            tbody.innerHTML = "";
 
-        // Render danh sách
-        function handle_searchValues(list) {
-            let table = document.querySelector('[data-role="tableValue"] table');
-
-            if (!list || list.length === 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td colspan="3" style="text-align:center">No data</td>
-                `;
-                table.appendChild(tr);
+            if (!Array.isArray(list) || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center">No data</td></tr>`;
                 return;
             }
 
             list.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        ${item.avatar ? `<img src="/${item.avatar}" width="40" height="40">` : ''}
-                    </td>
-                    <td>
-                        <a href="/mess/search/profileUser?userId=${item.id}">
-                            ${item.name || ''}
-                        </a>
-                    </td>
-                    <td>
-                        <button onclick="addTo_room('${item.id}')">Add to room</button>
-                    </td>
+                const avatarHtml = item.avatar ? `<img src="/${item.avatar}" width="40" height="40" style="object-fit:cover">` : '';
+                const profileLinkHtml = `
+                    <form action="http://localhost:3000/page_manager/user" method="POST" style="display: inline;">
+                        <input type="hidden" name="selectedTargetId" value="${item.id}">
+                        <button type="submit" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer; padding:0;">
+                            Trang cá nhân
+                        </button>
+                    </form>
                 `;
-                table.appendChild(tr);
+
+                if (type === 'mess') {
+                    tr.innerHTML = `
+                        <td align="center">${avatarHtml}</td>
+                        <td>${profileLinkHtml}</td>
+                        <td align="center"><button onclick="addTo_room('${item.id}')">Add to room</button></td>
+                    `;
+                } else if (type === 'normal') {
+                    tr.innerHTML = `
+                        <td align="center">${avatarHtml}</td>
+                        <td>${profileLinkHtml}</td>
+                        <td align="center"><small>N/A</small></td>
+                    `;
+                } else {
+                    tr.innerHTML = `<td colspan="3" style="text-align:center; color:red;">Định dạng không hợp lệ</td>`;
+                }
+                tbody.appendChild(tr);
             });
         }
     </script>
-
 </body>

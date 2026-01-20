@@ -420,7 +420,7 @@
             </li>
 
             <li class="search">
-                <input type="text" placeholder="Tìm kiếm...">
+                <a href="/searches">Tìm kiếm</a>
             </li>
 
             <li><a href="./friend.html">Bạn bè</a></li>

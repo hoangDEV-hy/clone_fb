@@ -3,13 +3,12 @@ import { chat_member } from "../models/chat/chat_members";
 import { user_user } from "../models/user_user";
 import { Op } from "sequelize";
 import { User } from "../models/user";
-import { authenticate } from '../middware/auth'
-import { Posts } from "../models/Posts";
-import { Group } from '../models/group';
+import { methods as groupController } from "../constrollers/group/group";
+import { methods as userController } from "../constrollers/User"
 
-const route: Router = express.Router();
+const router: Router = express.Router();
 
-route.get('/', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/chatmember', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const name = req.query.name as string;
         const idUser = req.query.idUser as string;
@@ -94,56 +93,84 @@ route.get('/', async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 });
-route.get('/profileUser', async (req: Request, res: Response) => {
-    const targetId = req.query.userId;
-    let config_interface = false;
+// router.get('/profileUser', async (req: Request, res: Response) => {
+//     const targetId = req.query.userId;
+//     let config_interface = false;
 
-    const user = await User.findOne({ where: { id: targetId }, attributes: ['name', 'avatar', 'thumbnail'] });
+//     const user = await User.findOne({ where: { id: targetId }, attributes: ['name', 'avatar', 'thumbnail'] });
 
-    let posts = await Posts.findAll({
-        where: { user_id: targetId, scope: 'public' },
-        include: [
-            { model: Group, as: 'groups', required: false },
-            { model: User, as: 'users', required: false }
-        ]
-    })
-    posts = posts.map((post: any) => {
-        const obj = post.toJSON ? post.toJSON() : post;
+//     let posts = await Posts.findAll({
+//         where: { user_id: targetId, scope: 'public' },
+//         include: [
+//             { model: Group, as: 'groups', required: false },
+//             { model: User, as: 'users', required: false }
+//         ]
+//     })
+//     posts = posts.map((post: any) => {
+//         const obj = post.toJSON ? post.toJSON() : post;
 
-        try {
-            let parsed = JSON.parse(obj.contens);
+//         try {
+//             let parsed = JSON.parse(obj.contens);
 
-            // Nếu parsed là string → parse lại
-            if (typeof parsed === "string") {
-                parsed = JSON.parse(parsed);
-            }
+//             // Nếu parsed là string → parse lại
+//             if (typeof parsed === "string") {
+//                 parsed = JSON.parse(parsed);
+//             }
 
-            // Lấy image
-            let imageValue = parsed?.image;
+//             // Lấy image
+//             let imageValue = parsed?.image;
 
-            // Nếu image là object → stringify
-            if (imageValue && typeof imageValue === "object") {
-                imageValue = JSON.stringify(imageValue);
-            }
+//             // Nếu image là object → stringify
+//             if (imageValue && typeof imageValue === "object") {
+//                 imageValue = JSON.stringify(imageValue);
+//             }
 
-            obj.contens = {
-                text: parsed?.text ?? "",
-                image: imageValue ?? ""
-            };
-        } catch (err) {
-            // JSON lỗi → fallback
-            obj.contens = { text: "", image: "" };
-        }
+//             obj.contens = {
+//                 text: parsed?.text ?? "",
+//                 image: imageValue ?? ""
+//             };
+//         } catch (err) {
+//             // JSON lỗi → fallback
+//             obj.contens = { text: "", image: "" };
+//         }
 
-        return obj;
+//         return obj;
+//     });
+
+//     return res.render('contens/page_manager/user', {
+//         Posts: posts,
+//         user: user?.toJSON(),
+//         config_interface
+//     });
+// })
+router.get('/get', async (req: Request, res: Response): Promise<void> => {
+    const selectedName = req.query.name as string;
+
+    const selectedGroups = await groupController.selectGroupsWithName(selectedName) || [];
+    const selectedUsers = await userController.selectUsersWithName(selectedName) || [];
+
+    // Gộp 2 mảng
+    const merged = [...selectedGroups, ...selectedUsers];
+
+    // Lọc trùng theo name
+    const uniqueList = Array.from(
+        new Map(merged.map(item => [item.name, item])).values()
+    );
+
+    // Convert sang JSON thuần (Sequelize safe)
+    const result = uniqueList.map(item =>
+        item.toJSON ? item.toJSON() : item
+    );
+
+    res.send({
+        list: result
     });
+});
 
-    return res.render('contens/page_manager/user', {
-        Posts: posts,
-        user: user?.toJSON(),
-        config_interface
-    });
+router.get('/', (req: Request, res: Response) => {
+    res.render('contens/search')
 })
 
 
-export { route };
+
+export { router };

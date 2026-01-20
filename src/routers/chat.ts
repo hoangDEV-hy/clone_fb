@@ -10,7 +10,7 @@ import { createOrUpdateOrLoad_chat } from "../constrollers/chat/chat"
 import { methods as methodsFriends, user_user } from "../models/user_user"
 import { methods as methodsChat_members, chat_member } from "../models/chat/chat_members"
 import { Op, where } from "sequelize";
-import { route as routerOfSearch } from "./search";
+
 
 interface del_mesData {
     id: number,
@@ -81,8 +81,7 @@ route.get('/chat_room/people', (req: Request, res: Response) => {
 })
 export { route }
 
-//get members of chatroom
-route.use('/search', routerOfSearch);
+
 
 //post add a member to a chatroom
 route.post('/chat_room/people', async (req: Request, res: Response) => {

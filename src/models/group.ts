@@ -93,12 +93,20 @@ let methods = {
             return res.status(500).json({ error: 'Failed to create group' });
         }
     },
-    selectGroup: async (id: number): Promise<Group | null> => {
+    selectGroup: async (data: Partial<Group>): Promise<Group | null> => {
         try {
-            return await Group.findOne({ where: { id } });
+            return await Group.findOne({ where: data });
         } catch (err) {
             throwError(err);
         }
     },
+    selectGroups: async (data: Partial<Group>): Promise<Group[]> => {
+        try {
+            return await Group.findAll({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
+    }
+
 }
 export { methods };

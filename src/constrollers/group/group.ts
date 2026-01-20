@@ -56,10 +56,17 @@ let methods = {
     },
     selectGroup: async (id: number): Promise<Group | null> => {
         try {
-            return await groupModel.selectGroup(id);
+            return await groupModel.selectGroup({ id: id });
         } catch (err) {
             throwError(err);
         }
-    }
+    },
+    selectGroupsWithName: async (selectedName: string): Promise<Group[] | null> => {
+        try {
+            return await groupModel.selectGroups({ name: selectedName });
+        } catch (err) {
+            throwError(err);
+        }
+    },
 }
 export { methods };

@@ -105,11 +105,20 @@ User.hasMany(user_user, { foreignKey: 'id_userB', as: 'userB' })
 const methods = {
 
     selectUser: async (
-        conditions: Record<string, any>
+        data: Partial<User>
     ): Promise<User | null> => {
         try {
             return await User.findOne({
-                where: conditions
+                where: data
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectUsers: async (data: Partial<User>): Promise<User[]> => {
+        try {
+            return await User.findAll({
+                where: data
             });
         } catch (err) {
             throwError(err);
