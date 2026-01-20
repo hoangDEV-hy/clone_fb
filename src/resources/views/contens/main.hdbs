@@ -416,14 +416,13 @@
     <div class="header">
         <ul class="navbar">
             <li class="logo">
-                <img src="./img/Facebook_Logo_(2019).png" alt="logo">
+                <img src="../../../../public/pictures/image-1754515454077-261962452.png" alt="logo">
             </li>
 
             <li class="search">
                 <input type="text" placeholder="Tìm kiếm...">
             </li>
 
-            <li><a href="">Trang chủ</a></li>
             <li><a href="./friend.html">Bạn bè</a></li>
             <li><a href="./video.html">Phim</a></li>
 
@@ -738,6 +737,7 @@
     window.NotificationCenter = NotificationCenter;
 
     import follow from '/js/Follow.js';
+    import reloadMain from '/js/ReloadMain.js'
 
 
 
@@ -992,21 +992,10 @@
             NotificationCenter.init(id_user, 1);
 
             // for reset cache feed
-            const response = await fetch('http://localhost:3000/main/clear-cache', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: id_user })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                console.log('Cache cleared successfully');
-            } else {
-                console.error('Clear cache failed:', result.error);
-            }
+            await reloadMain(id_user);
+        });
+        document.querySelector('.logo').addEventListener('click', async () => {
+            await reloadMain(id_user);
         });
 
         //phan trang bai viet

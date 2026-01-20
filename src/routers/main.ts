@@ -2,8 +2,6 @@ import express, { Router, Request, Response } from 'express';
 import { authenticate } from '../middware/auth';
 import { FeedController } from '../constrollers/Ctrl_Feed';
 
-import { User } from '../models/user';
-
 const router: Router = express.Router();
 const feedController = new FeedController();
 
