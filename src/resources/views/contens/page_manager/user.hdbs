@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../../../../css/contens/page_manager/user.css">
+    <link rel="stylesheet" href="/css/contens/page_manager/user.css">
     <style>
     </style>
 </head>
@@ -20,6 +20,7 @@
                 <th>
                     <table>
                         <img src="/{{user.avatar}}" alt="avt">
+                        <button>Kết Bạn</button>
                         {{#if config_interface}}
                         <th style="width: 10%;">
                             <form action="/page_manager/user/upload/thumbnail" method="Post"

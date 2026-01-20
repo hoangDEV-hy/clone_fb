@@ -1,6 +1,9 @@
 <div style="display: flex; gap: 20px;">
     <div>
         <div>
+            <a href="/main">Main</a>
+        </div>
+        <div>
             <a href="/page_manager/friends/joined">Đã kết bạn</a>
         </div>
         <div>

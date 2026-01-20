@@ -1,6 +1,7 @@
 import { sequelize } from "../configs/sql";
-import { DataTypes, Model, Op } from "sequelize";
+import { DataTypes, Model, Op, Transaction } from "sequelize";
 import { Request, Response } from "express";
+
 
 class user_user extends Model {
     declare id: number;
@@ -106,5 +107,72 @@ export let methods = {
         } catch (err) {
             throwError(err);
         }
+    },
+    // Gửi lời mời kết bạn
+    sendFriendRequest: async (
+        id_userA: string,
+        id_userB: string,
+        transaction?: Transaction
+    ): Promise<user_user> => {
+        return await user_user.create(
+            {
+                id_userA,
+                id_userB,
+                status: 'pending'
+            },
+            { transaction }
+        );
+    },
+
+    // Chấp nhận lời mời kết bạn
+    acceptFriendRequest: async (
+        id_userA: string,
+        id_userB: string,
+        transaction?: Transaction
+    ): Promise<number> => {
+        const [affectedRows] = await user_user.update(
+            { status: 'done' },
+            {
+                where: {
+                    [Op.or]: [
+                        { id_userA, id_userB, status: 'pending' },
+                        { id_userA: id_userB, id_userB: id_userA, status: 'pending' }
+                    ]
+                },
+                transaction
+            }
+        );
+
+        return affectedRows;
+    },
+
+    // Xóa bạn bè hoặc từ chối lời mời
+    deleteFriendRequest: async (
+        id_userA: string,
+        id_userB: string,
+        transaction?: Transaction
+    ): Promise<number> => {
+        return await user_user.destroy({
+            where: {
+                [Op.or]: [
+                    { id_userA, id_userB },
+                    { id_userA: id_userB, id_userB: id_userA }
+                ]
+            },
+            transaction
+        });
+    },
+    checkFriendship: async (
+        userA: string,
+        userB: string
+    ): Promise<user_user | null> => {
+        return await user_user.findOne({
+            where: {
+                [Op.or]: [
+                    { id_userA: userA, id_userB: userB },
+                    { id_userA: userB, id_userB: userA }
+                ]
+            }
+        });
     },
 }

@@ -416,7 +416,7 @@
     <div class="header">
         <ul class="navbar">
             <li class="logo">
-                <img src="../../../../public/pictures/image-1754515454077-261962452.png" alt="logo">
+                <img src="/pictures/image-1754515454077-261962452.png" alt="logo">
             </li>
 
             <li class="search">
@@ -424,7 +424,6 @@
             </li>
 
             <li><a href="/page_manager/friends/joined">Bạn bè</a></li>
-            <li><a href="./video.html">Phim</a></li>
 
             <!-- Tin nhắn -->
             <li class="menu-btn" data-menu="mes">
