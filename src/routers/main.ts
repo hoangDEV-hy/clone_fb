@@ -2,6 +2,8 @@ import express, { Router, Request, Response } from 'express';
 import { authenticate } from '../middware/auth';
 import { FeedController } from '../constrollers/Ctrl_Feed';
 
+import { User } from '../models/user';
+
 const router: Router = express.Router();
 const feedController = new FeedController();
 
@@ -41,7 +43,12 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
 
         // Get user data
         const user = await feedController.getUser(userId);
-
+        if (!user) {
+            res.status(400).json({
+                success: false
+            });
+            return;
+        }
         // Get feed posts
         const feedResult = await feedController.getFeed({
             userId: user.id,

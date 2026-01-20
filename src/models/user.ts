@@ -5,6 +5,7 @@ import {
 } from 'sequelize';
 import { sequelize as db } from '../configs/sql';
 import { Request, Response } from 'express';
+import throwError from '../helpers/ThrowErrorOfSqlQuery';
 
 
 // 3. Khai báo class model với generic Model<UserAttributes, UserCreationAttributes>
@@ -104,100 +105,54 @@ User.hasMany(user_user, { foreignKey: 'id_userB', as: 'userB' })
 
 const methods = {
 
-    checkUser: async (conditions: { [key: string]: any }, res: Response): Promise<any> => {
+    selectUser: async (
+        conditions: Record<string, any>
+    ): Promise<User | null> => {
         try {
-
-            const user = await User.findOne({
+            return await User.findOne({
                 where: conditions
             });
-
-            if (!user) {
-                return res.status(401).json({ message: 'Invalid ' });
-            }
-
         } catch (err) {
-            console.error(err);
-            return res.status(500).send({ error: 'Internal Server Error' });
+            throwError(err);
         }
     },
 
-    getPass: async (req: Request, res: Response): Promise<any> => {
-        const inputPhone = req.query.phone as string;
-        const user = await User.findOne({ where: { phoneNumber: inputPhone } });
 
-        if (!user) {
-            return res.send({ error: "Account does not exist." });
-        } else {
-            res.render('contens/login_dangKi/setPass', { inputPhone });
-        }
-    },
-
-    setPass: async (req: Request, res: Response): Promise<any> => {
-        const inputPhone = req.query.phone as string;
+    updateUser: async (data: Partial<User>, id: string): Promise<number> => {
         try {
-            const user = await User.findOne({ where: { phoneNumber: inputPhone } });
-            const { password } = req.body;
-
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-
-            user.password = password;
-            await user.save();
-
-            return res.status(200).json({ message: 'Password updated' });
-
-        } catch (err) {
-            console.log(err);
-            return res.status(500).json({ error: 'Failed to update password' });
-        }
-    },
-
-    createUser: async (req: Request, res: Response): Promise<any> => {
-        const { phone, password } = req.body;
-        try {
-            const existingUser = await User.findOne({ where: { phoneNumber: phone } });
-
-            if (existingUser) {
-                return res.status(400).json({ message: 'Phone number already registered' });
-            }
-
-            const avatar: string = 'pictures/avatar.jpg';
-            const thumbnail: string = 'pictures/avatar.jpg'
-            const newUser = await User.create({ phoneNumber: phone, password, avatar: avatar, thumbnail: thumbnail });
-
-            return res.status(201).json({ message: 'User created', user: newUser });
-
-        } catch (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Failed to create user' });
-        }
-    },
-
-    updateUser: async (data: { [key: string]: string }, id: any, res: Response): Promise<any> => {
-        await User.update(
-            data,
-            {
-                where: {
-                    id: id
+            const [affectedRows] = await User.update(
+                data,
+                {
+                    where: { id }
                 }
-            }
-        )
+            );
+            return affectedRows;
+        } catch (err) {
+            throwError(err);
+        }
     },
-    selectUser: async (id: string): Promise<any> => {
-        let user = await User.findOne(
-            {
-                where: { id }
-            }
-        )
-        return user;
+
+    selectUsersWithOrder: async (ids: string[]): Promise<User[]> => {
+        try {
+            return await User.findAll({
+                where: {
+                    id: {
+                        [Op.in]: ids
+                    }
+                },
+                attributes: ['id', 'name', 'alias', 'avatar', 'thumbnail'],
+                order: [['id', 'ASC']]
+            });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    selectUsersWithOrder: async (id: string[]) => {
-        return await User.findAll({
-            where: { id: { [Op.in]: id } },
-            attributes: ['id', 'name', 'alias', 'avatar', 'thumbnail'],
-            order: [['id', 'ASC']]
-        });
+    createUser: async (data: Partial<User>):Promise<User|null>=>{
+        try{
+            return await User.create(data);
+        }catch(err){
+            throwError(err);
+        }
     }
 
 };

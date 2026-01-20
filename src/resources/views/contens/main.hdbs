@@ -482,7 +482,7 @@
             <li><a href="#">Trợ giúp và hỗ trợ</a></li>
             <li><a href="#">Màn hình và trợ năng</a></li>
             <li><a href="#">Đóng góp ý kiến</a></li>
-            <li><a href="#">Đăng xuất</a></li>
+            <li><a href="/logout">Đăng xuất</a></li>
         </ul>
 
     </div>

@@ -4,7 +4,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "npx ts-node src/index.ts",
     "watch": "sass --watch src\\resources\\scss\\app.scss:public\\css\\app.css"
   },
@@ -15,6 +15,7 @@
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-handlebars": "^8.0.2",
     "express-session": "^1.18.2",
@@ -31,13 +32,16 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/method-override": "^3.0.0",
     "@types/multer": "^2.0.0",
     "concurrently": "^9.1.2",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "sass": "^1.89.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   }
 }

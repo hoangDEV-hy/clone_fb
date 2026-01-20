@@ -1,315 +1,185 @@
 import { Request, Response } from "express";
-import { Group, methods as model_group } from '../../models/group';
-import { methods as model_Posts, Posts } from '../../models/Posts';
 import { authenticate } from '../../middware/auth'
 import express from "express"
-import { methods as model_user, User } from '../../models/user';
-import { sequelize } from '../../configs/sql';
+import { methods as pageManagerPostController } from '../../constrollers/page_manager/Post'
+import transformPosts from "../../helpers/TransformerPost";
+
+import ExtendRequest from "../../types/Type_ExtendRequest";
+import throwError from "../../helpers/ThrowErrorOfRouter";
+
+
 let route = express.Router();
-declare module "express-serve-static-core" {
-    interface Request {
-        admin?: {
-            id: string
-        },
-        session?: {
-            admin: string
-        }
-    }
-}
-interface contentOfPost {
-    text: string,
-    image: string
-}
-interface contain_posts extends Omit<Posts, 'contens'> {
-    users?: User,
-    contens: string | contentOfPost,
-    groups?: Group
-}
 
-
-route.get('/', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+route.get('/', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
-        const idUser: string | undefined = req.admin?.id;
-        const isAdmin: string | undefined = req.session?.admin;
-        //const idGroup = req.session.currentGroupId;
-        const idGroup = 1;
-        //vi 1 group nhung nhieu bai viet nen khong chung du lieu dc
-        let group: Group = await model_group.select(idGroup);
-        let contain_posts: contain_posts[] = await Posts.findAll({
-            where: { user_id: idUser, group_id: idGroup, scope: 'group' },
-            include: [
-                { model: User, as: 'users', required: true, right: true }]
-        })
-        const transformer_post: contain_posts[] = contain_posts.map((b: contain_posts) => {
+        // 1. Lấy dữ liệu từ request (có optional chaining)
+        const selectedIdUser = req.admin?.id ?? null;
+        const selectedIdGroup = req.session?.currentGroupId ?? null;
 
-            b = b.toJSON() as contain_posts;
+        // 2. Xác định quyền admin
+        const isAdmin: boolean = req.session?.admin ? true : false;
 
-            let contenObj: contentOfPost | string = b.contens;
-            while (typeof contenObj === 'string') {
-                contenObj = JSON.parse(contenObj);
-            }
-
-            b.contens = {
-                text: contenObj.text,
-                image: JSON.stringify(contenObj.image)
-            }
-            return b
-        }
-        )
-        res.render('contens/page_manager/Post', { groups: group.toJSON(), Posts: transformer_post, isAdmin: true })
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error })
-    }
-
-})
-route.get('/admin/Post', async (req: Request, res: Response): Promise<void> => {
-    try {
-
-        const isAdmin = req.session?.admin;
-
-        //const idGroup:number = req.session.currentGroupId;
-        const idGroup = 1;
-        let group: Group = await model_group.select(idGroup);
-        let contain_posts: contain_posts[] = await Posts.findAll({
-            where: { group_id: idGroup, scope: 'group' },
-            include: [{
-                model: User,
-                as: 'users',
-                required: true,
-                right: true
-            }]
-        });
-
-
-        const transformer_post: contain_posts[] = contain_posts.map((b: contain_posts) => {
-            b = b.toJSON() as contain_posts;
-            let contenObj: contentOfPost | string = b.contens;
-            while (typeof contenObj === 'string') {
-                contenObj = JSON.parse(contenObj);
-            }
-
-            b.contens = {
-                text: contenObj.text,
-                image: JSON.stringify(contenObj.image)
-            }
-            return b;
-        })
-        res.render('contens/page_manager/Post', { groups: group.toJSON(), Posts: transformer_post, isAdmin: true })
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error })
-    }
-})
-route.delete('/del', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
-    const id = req.body;
-    await model_Posts.des(id);
-    const idUser: string | undefined = req.admin?.id;
-    const isAdmin: string | undefined = req.session?.admin;
-    //const idGroup = req.session.currentGroupId;
-    const idGroup = 1;
-    let group: Group = await model_group.select(idGroup);
-    let contain_posts: contain_posts[] = await Posts.findAll({
-        where: { group_id: idGroup, scope: 'group' },
-        include: [{
-            model: User,
-            as: 'users',
-            required: true,
-            right: true
-        }]
-    });
-
-
-    const transformer_post: contain_posts[] = contain_posts.map((b: contain_posts) => {
-        b = b.toJSON() as contain_posts;
-        let contenObj: contentOfPost | string = b.contens;
-        while (typeof contenObj === 'string') {
-            contenObj = JSON.parse(contenObj);
+        // 3. Validate dữ liệu đầu vào
+        if (!selectedIdUser) {
+            res.status(401).json({ message: 'User not authenticated' });
+            return;
         }
 
-        b.contens = {
-            text: contenObj.text,
-            image: JSON.stringify(contenObj.image)
+        if (!selectedIdGroup) {
+            res.status(400).json({ message: 'Group not selected' });
+            return;
         }
-        return b;
-    })
-    res.render('contens/page_manager/Post', { groups: group.toJSON(), Posts: transformer_post, isAdmin: true })
-})
-route.post('/update', async (req: Request, res: Response): Promise<void> => {
-    //check req.body
-    const { id } = req.body;
-    const isAdmin: string | undefined = req.session?.admin;
-    let post: contain_posts | null = await Posts.findOne({
-        where: { id: id },
-        include: [
-            {
-                model: User,
-                as: 'users',
-                required: true
 
-            },
-            {
-                model: Group,
-                as: 'groups',
-                required: false
-            }
-        ]
-    });
-    post = post!.toJSON() as contain_posts;
-    let contenObj: contentOfPost | string = post.contens;
-    while (typeof contenObj === 'string') {
-        contenObj = JSON.parse(contenObj);
-    }
+        const selectedGroup = await pageManagerPostController.selectGroup(selectedIdGroup);
+        if (!selectedGroup) {
+            res.status(404).json({ message: 'Group not found' });
+            return;
+        }
 
-    post.contens = {
-        text: contenObj.text,
-        image: JSON.stringify(contenObj.image)
-    }
+        const transformer_post =
+            await pageManagerPostController.loadPosts(
+                selectedIdUser,
+                selectedIdGroup
+            );
 
-    res.render('contens/Post/Post', { Post: post, isAdmin: true })
-})
-
-route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
-    const id = req.admin?.id;
-    //const idGroup:number = req.session.currentGroupId;
-    const idGroup = 1;
-    try {
-        //for where in the query
-        let sort: string = req.query.sort as string;
-        let post: contain_posts[] = await Posts.findAll({
-            attributes: {
-                include: [
-                    [
-                        sequelize.literal(`(
-                SELECT COUNT(*)
-                FROM interactions AS i
-                WHERE i.id_Posts = Posts.id
-                  AND i.classify LIKE '${sort}'
-            )`),
-                        'interactionCount'
-                    ]
-                ]
-            },
-            where: { user_id: id, group_id: idGroup, scope: 'group' },
-            include: [
-                {
-                    model: User,
-                    as: 'users',
-                    required: false
-                }
-            ],
-            order: [[sequelize.literal('interactionCount'), 'DESC']]
-        })
-        const group = await Group.findOne({ where: { id: idGroup } });
-        // Chuyển từng instance Sequelize thành object thuần và xử lý contens
-        const tranAllPosts = post.map((Post: contain_posts) => {
-            const obj = Post.toJSON ? Post.toJSON() : Post;
-
-            try {
-                let parsed = JSON.parse(obj.contens || '{}');
-                if (typeof parsed === 'string') {
-                    parsed = JSON.parse(parsed);
-                }
-
-                let imageValue = parsed.image || null;
-
-                if (imageValue && typeof imageValue === "object") {
-                    // Nếu là object → stringify
-                    imageValue = JSON.stringify(imageValue);
-                }
-
-                // Nếu đã là string thì giữ nguyên
-                obj.contens = {
-                    text: parsed.text || '',
-                    image: imageValue
-                };
-            } catch {
-                obj.contens = { text: '', image: 'null' };
-            }
-
-            return obj;
-        });
+        // 5. Render view
         return res.render('contens/page_manager/Post', {
-            Posts: tranAllPosts,
-            group: group?.toJSON()
+            groups: selectedGroup.toJSON(),
+            Posts: transformer_post,
+            isAdmin: isAdmin
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
 
+    } catch (err) {
+        throwError(err, res);
+    }
 })
 
-route.get('/admin/Post/sort', async (req: Request, res: Response): Promise<void> => {
-    //const idGroup:number = req.session.currentGroupId;
-    const idGroup = 1;
-    const isAdmin: string | undefined = req.session?.admin;
-    try {
-        //for where in the query
-        let sort: string = req.query.sort as string;
-        let post: contain_posts[] = await Posts.findAll({
-            attributes: {
-                include: [
-                    [
-                        sequelize.literal(`(
-                SELECT COUNT(*)
-                FROM interactions AS i
-                WHERE i.id_Posts = Posts.id
-                  AND i.classify LIKE '${sort}'
-            )`),
-                        'interactionCount'
-                    ]
-                ]
-            },
-            where: { group_id: idGroup, scope: 'group' },
-            include: [
-                {
-                    model: User,
-                    as: 'users',
-                    required: false
-                }
-            ],
-            order: [[sequelize.literal('interactionCount'), 'DESC']]
-        })
-        const group = await Group.findOne({ where: { id: idGroup } });
-        // Chuyển từng instance Sequelize thành object thuần và xử lý contens
-        const tranAllPosts = post.map((Post: contain_posts) => {
-            const obj = Post.toJSON ? Post.toJSON() : Post;
+route.delete(
+    '/del',
+    authenticate.user_auth,
+    async (req: Request, res: Response): Promise<void> => {
+        try {
+            const isAdmin: boolean = req.session?.admin ? true : false;
 
-            try {
-                let parsed = JSON.parse(obj.contens || '{}');
-                if (typeof parsed === 'string') {
-                    parsed = JSON.parse(parsed);
-                }
-
-                let imageValue = parsed.image || null;
-
-                if (imageValue && typeof imageValue === "object") {
-                    // Nếu là object → stringify
-                    imageValue = JSON.stringify(imageValue);
-                }
-
-                // Nếu đã là string thì giữ nguyên
-                obj.contens = {
-                    text: parsed.text || '',
-                    image: imageValue
-                };
-            } catch {
-                obj.contens = { text: '', image: 'null' };
+            if (!isAdmin) {
+                res.status(401).send('dont allowed');
+                return;
             }
 
-            return obj;
-        });
+            const { id } = req.body;
+            if (!id) {
+                res.status(400).send('ID is required');
+                return;
+            }
+
+            await pageManagerPostController.delPost(id);
+
+            res.redirect('/');
+        } catch (err) {
+            throwError(err, res);
+        }
+    }
+);
+
+route.post('/update', async (req: Request, res: Response): Promise<void> => {
+    try {
+
+        const isAdmin: boolean = req.session?.admin ? true : false;
+        if (isAdmin) res.redirect('/');//update
+        else {
+            res.status(401).send('dont allowed');
+            return;
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
+})
+
+route.get(
+    '/sort',
+    authenticate.user_auth,
+    async (req: ExtendRequest, res: Response): Promise<void> => {
+        try {
+            const selectedIdUser = req.admin?.id;
+            const selectedIdGroup = req.session?.currentGroupId;
+            let sort: string = req.query.sort as string;
+
+            if (!selectedIdUser) {
+                res.status(401).send('Unauthorized');
+                return;
+            }
+
+            if (!selectedIdGroup) {
+                res.status(400).send('Group not selected');
+                return;
+            }
+
+            if (!sort) sort = 'like';
+
+            // ===== Query =====
+            const post =
+                await pageManagerPostController
+                    .selectPostsWithFilter_InteractionAndUser(
+                        selectedIdGroup,
+                        'group',
+                        sort,
+                        selectedIdUser
+                    );
+
+            const group =
+                await pageManagerPostController
+                    .selectGroup(selectedIdGroup);
+
+            if (!post || !group) {
+                res.status(404).send('Data not found');
+                return;
+            }
+
+            // ===== Transform =====
+            const tranAllPosts = transformPosts(post);
+
+            res.render('contens/page_manager/Post', {
+                Posts: tranAllPosts,
+                group: group.toJSON()
+            });
+
+        } catch (err) {
+            throwError(err, res);
+        }
+    }
+);
+
+
+route.get('/admin/Post/sort', async (req: ExtendRequest, res: Response): Promise<void> => {
+    try {
+        const isAdmin: boolean = req.session?.admin ? true : false;
+        const selectedIdGroup = req.session?.currentGroupId;
+        let sort: string = req.query.sort as string;
+        if (!selectedIdGroup) {
+            res.status(400).send('Group not selected');
+            return;
+        }
+
+        if (!sort) sort = 'like';
+        //for where in the query
+        let post = await pageManagerPostController.selectPostsWithFilter_InteractionAndUser(selectedIdGroup, 'group', sort);
+        const group =
+            await pageManagerPostController.selectGroup(selectedIdGroup);
+
+        if (!post || !group) {
+            res.status(404).send('Data not found');
+            return;
+        }
+        // ===== Transform =====
+        const tranAllPosts = transformPosts(post);
+
         return res.render('contens/page_manager/Post', {
             Posts: tranAllPosts,
             group: group?.toJSON(),
-            isAdmin: true
+            isAdmin: isAdmin
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+    } catch (err) {
+        throwError(err, res);
     }
 
 })

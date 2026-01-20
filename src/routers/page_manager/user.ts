@@ -1,22 +1,18 @@
 import express, { Request, Response } from 'express'
 import { authenticate } from '../../middware/auth'
-import { method } from '../../constrollers/page_manager/user';
+import { methods as page_managerController } from '../../constrollers/page_manager/user';
 import { User } from '../../models/user';
 import { upload } from '../../middware/updateImage';
 import { Group } from '../../models/group';
 import { Posts } from '../../models/Posts';
 import { sequelize } from '../../configs/sql';
+import throwError from '../../helpers/ThrowErrorOfRouter';
+
+import ExtendRequest from '../../types/Type_ExtendRequest';
 
 let route = express.Router();
 //for sorting
-declare module "express-serve-static-core" {
-    interface Request {
-        admin?: {
-            id: string
-        };
-    }
-}
-route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): Promise<any> => {
+route.get('/sort', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<any> => {
     const id = req.admin?.id;
     const selectedTargetId: string = req.query.selectedTargetId as string;
     //for where in the query
@@ -94,7 +90,7 @@ route.get('/sort', authenticate.user_auth, async (req: Request, res: Response): 
 })
 
 
-route.post('/', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+route.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     const id = req.admin?.id;
     const { selectedTargetId } = req.body || {};
 
@@ -163,9 +159,82 @@ route.post('/', authenticate.user_auth, async (req: Request, res: Response): Pro
 
 
 
-route.post('/update', authenticate.user_auth, method.updateUser);
-route.post('/upload/avatar', upload.single('image'), method.handleUpload, authenticate.user_auth, method.updateAvatarUser);
-route.post('/upload/thumbnail', upload.single('image'), method.handleUpload, authenticate.user_auth, method.updateThumbnailUser);
+route.post(
+    '/update',
+    authenticate.user_auth,
+    async (req: ExtendRequest, res: Response): Promise<void> => {
+        try {
+            const { name } = req.body;
+            const id = req.admin?.id;
+
+            if (!id) {
+                res.status(401).json({ message: 'Not allowed' });
+                return;
+            }
+
+            if (!name) {
+                res.status(400).json({ message: 'Name is required' });
+                return;
+            }
+
+            const result = await page_managerController.updateUser(id, name);
+
+            if (result !== 0) {
+                res.status(200).json({ message: 'Updated successfully' });
+            } else {
+                res.status(500).json({ message: 'Update error' });
+            }
+        } catch (err) {
+            throwError(err, res);
+        }
+    }
+);
+route.post('/upload/avatar', upload.single('image'), page_managerController.handleUpload, authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
+    try {
+        const id = req.admin?.id;
+        const imagePath = `/pictures/${req.file?.filename}`;
+        if (!id) {
+            res.status(401).json({ message: 'Not allowed' });
+            return;
+        }
+
+        if (!imagePath) {
+            res.status(400).json({ message: 'imagePath is required' });
+            return;
+        }
+        const result = await page_managerController.updateAvatarUser(id, imagePath);
+        if (result !== 0) {
+            res.status(200).json({ message: 'Updated successfully' });
+        } else {
+            res.status(500).json({ message: 'Update error' });
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
+});
+route.post('/upload/thumbnail', upload.single('image'), page_managerController.handleUpload, authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
+    try {
+        const id = req.admin?.id;
+        const imagePath = `/pictures/${req.file?.filename}`;
+        if (!id) {
+            res.status(401).json({ message: 'Not allowed' });
+            return;
+        }
+
+        if (!imagePath) {
+            res.status(400).json({ message: 'imagePath is required' });
+            return;
+        }
+        const result = await page_managerController.updateThumbnailUser(id, imagePath);
+        if (result !== 0) {
+            res.status(200).json({ message: 'Updated successfully' });
+        } else {
+            res.status(500).json({ message: 'Update error' });
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
+});
 
 
 export { route }

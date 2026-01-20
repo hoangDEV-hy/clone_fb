@@ -1,47 +1,70 @@
-import { methods, User } from '../../models/user';
-import { Request, Response } from 'express';
+import { methods as modelUser, User } from '../../models/user';
+import throwError from '../../helpers/ThrowErrorOfController';
 import jwt from 'jsonwebtoken';
 
-const key = 'hoang1';
-async function auth(req: Request, res: Response) {
-    const { phone, password } = req.body;
 
-    try {
-        const user = await User.findOne({
-            where: {
+const key = process.env.JWT_SECRET as string;
+const methods = {
+    auth: async (phone: string, password: string): Promise<string> => {
+        try {
+            const user = await modelUser.selectUser({
                 phoneNumber: phone,
                 password: password
+            });
+
+            if (!user) {
+                throw new Error('User not found');
             }
-        });
 
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid phone number or password' });
+            const id = user.id;
+
+            return jwt.sign({ id }, key, { expiresIn: '1h' });
+        } catch (err) {
+            throwError(err);
         }
-
-        const id = user.id;
-        const token = jwt.sign({ id }, key, { expiresIn: '1h' });
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'strict',
-            maxAge: 3600000,
-        });
-
-        res.json({ message: 'Đăng nhập thành công' });
-
-    } catch (err) {
-        console.error(err);
-        return res.status(500).send({ error: 'Internal Server Error' });
+    },
+    checkUser: async (id: string): Promise<User | null> => {
+        try {
+            return await modelUser.selectUser({ id: id })
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    updateUser: async (data: Partial<User>, id: string): Promise<Number> => {
+        try {
+            return await modelUser.updateUser(data, id);
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    getPass: async (inputPhone: string): Promise<string | undefined> => {
+        try {
+            const user = await modelUser.selectUser({ phoneNumber: inputPhone });
+            return user?.id;
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    setPass: async (id: string, password: string): Promise<number> => {
+        try {
+            return await modelUser.updateUser({ password: password }, id)
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    createUser: async (phone: string, password: string): Promise<User | null> => {
+        try {
+            const existingUser = await modelUser.selectUser({ phoneNumber: phone });
+            if (existingUser) {
+                return null;
+            }
+            const avatar: string = 'pictures/avatar.jpg';
+            const thumbnail: string = 'pictures/avatar.jpg'
+            return await modelUser.createUser({ phoneNumber: phone, password, avatar: avatar, thumbnail: thumbnail });
+        } catch (err) {
+            throwError(err);
+        }
     }
-}
 
-let method = {
-    check: methods.checkUser,
-    getPass: methods.getPass,
-    setPass: methods.setPass,
-    createUser: methods.createUser,
-    auth: auth
 };
-
-export { method };
+export { methods };

@@ -1,13 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { mutualFriendsController } from '../constrollers/Ctrl_MutualFriends';
 import { authenticate } from '../middware/auth';
+import ExtendRequest from '../types/Type_ExtendRequest';
 
 const router = Router();
 
 router.get(
     '/',
     authenticate.user_auth,
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: ExtendRequest, res: Response): Promise<void> => {
         try {
             const userId = req.admin?.id;
 
@@ -86,7 +87,7 @@ router.get(
 router.get(
     '/friends',
     authenticate.user_auth,
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: ExtendRequest, res: Response): Promise<void> => {
         try {
             const userId = req.admin?.id;
 
@@ -173,7 +174,7 @@ router.get(
 router.delete(
     '/cache',
     authenticate.user_auth,
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: ExtendRequest, res: Response): Promise<void> => {
         try {
             const userId = req.admin?.id;
 
@@ -232,7 +233,7 @@ router.delete(
 router.delete(
     '/cache',
     authenticate.user_auth,
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: ExtendRequest, res: Response): Promise<void> => {
         try {
             const userId = req.admin?.id;
 

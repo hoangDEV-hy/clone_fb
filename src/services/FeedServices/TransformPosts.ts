@@ -1,13 +1,15 @@
-export default function transformPosts(posts: any[]): any[] {
-    const tranPosts = posts.map((p: any) => p.toJSON ? p.toJSON() : p);
+import { Posts } from "../../models/Posts";
+import contentOfPost from '../../types/ContentOfPost';
+import contain_posts from '../../types/ContainPost';
 
-    tranPosts.forEach((post: any) => {
+export default function transformPosts(posts: Posts[]): contain_posts[] {
+    const tranPosts = posts.map((p: contain_posts) => p.toJSON ? p.toJSON() : p);
+
+    tranPosts.forEach((post: contain_posts) => {
         // Parse contens if it's a string
         if (typeof post.contens === 'string') {
             try {
-                post.contens = JSON.parse(post.contens);
-                // Double parse if needed
-                if (typeof post.contens === 'string') {
+                while (typeof post.contens === 'string') {
                     post.contens = JSON.parse(post.contens);
                 }
             } catch (e) {
@@ -18,8 +20,8 @@ export default function transformPosts(posts: any[]): any[] {
         // Ensure contens has correct structure
         if (post.contens && typeof post.contens === 'object') {
             post.contens = {
-                text: post.contens.text || '',
-                image: post.contens.image || []
+                text: post.contens.text,
+                image: post.contens.image
             };
         }
     });

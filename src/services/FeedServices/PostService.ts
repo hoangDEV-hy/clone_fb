@@ -1,4 +1,4 @@
-import { methods as postMethods } from '../../models/Posts'
+import { methods as postController } from '../../constrollers/Posts'
 import transformPosts from './TransformPosts'
 import { methods as followerMethods } from '../../models/Model_Follower'
 import CacheManager from './ReloadTimingControl'
@@ -9,8 +9,8 @@ export class PostService {
     /**
      * Calculate engagement score for posts
      */
-    private feedCache:CacheManager;
-    constructor(){
+    private feedCache: CacheManager;
+    constructor() {
         this.feedCache = new CacheManager()
     }
     private calculateEngagementScore(post: any): number {
@@ -38,7 +38,7 @@ export class PostService {
 
         return engagementPoints * timeFactor * recentBoost;
     }
-    
+
 
 
     /**
@@ -58,7 +58,7 @@ export class PostService {
             whereClause.createdAt = { [Op.lt]: new Date(cursor) };
         }
 
-        const posts = await postMethods.selectPosts(whereClause, limit)
+        const posts = await postController.selectPostsWithUserAndInteraction(whereClause, limit)
 
         // Transform and calculate engagement
         const transformed = transformPosts(posts);
@@ -98,7 +98,7 @@ export class PostService {
             whereClause.createdAt = { [Op.lt]: new Date(cursor) };
         }
 
-        const posts = await postMethods.selectPosts(whereClause, limit);
+        const posts = await postController.selectPostsWithUserAndInteraction(whereClause, limit);
 
         const transformed = transformPosts(posts);
         const postsWithScore = transformed.map((post: any) => {
@@ -123,7 +123,7 @@ export class PostService {
         const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
-        const friends = await postMethods.selectFriendsPost(userId);
+        const friends = await postController.selectFriendsPost(userId);
 
         // Flatten posts from friends
         const allPosts = friends.flatMap((f: any) => f.Posts || []);
@@ -161,7 +161,7 @@ export class PostService {
         const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
-        const userGroups = await postMethods.selectGroupsPost(userId);
+        const userGroups = await postController.selectGroupsPost(userId);
 
         // Flatten posts from groups
         const allPosts = userGroups.flatMap((g: any) => g.Posts || []);
@@ -199,11 +199,11 @@ export class PostService {
         const cached = this.feedCache.get(cacheKey);
         if (cached) return cached;
 
-        const userGroups = await postMethods.selectIdGroups(userId);
+        const userGroups = await postController.selectIdGroups(userId);
 
         const groupIds = userGroups.map(ug => ug.id_group);
 
-        const sameGroupUsers = await postMethods.selectSameGroupUsers(groupIds, userId);
+        const sameGroupUsers = await postController.selectSameGroupUsers(userId, groupIds);
 
         const userFollowing = await followerMethods.selectIdFollowers(userId);
 
@@ -229,7 +229,7 @@ export class PostService {
             whereClause.createdAt = { [Op.lt]: new Date(cursor) };
         }
 
-        const posts = await postMethods.selectPosts(whereClause, limit);
+        const posts = await postController.selectPostsWithUserAndInteraction(whereClause, limit);
 
         const transformed = transformPosts(posts);
         const postsWithScore = transformed.map((post: any) => {

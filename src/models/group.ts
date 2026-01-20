@@ -39,14 +39,9 @@ Group.hasMany(group_user, { foreignKey: 'id_group', as: 'groups' });
 export { Group };
 
 
-type methods = {
-    create: any,
-    edit: any,
-    destroy: any,
-    select: any
-}
 
 import { Request, Response } from 'express';
+import throwError from '../helpers/ThrowErrorOfSqlQuery';
 
 async function check(req: Request, res: Response): Promise<any> {
     const { name } = req.body;
@@ -54,7 +49,7 @@ async function check(req: Request, res: Response): Promise<any> {
         return res.status(400).json({ message: 'Name already registered' });
     };
 }
-let methods: methods = {
+let methods = {
 
     create: async (req: Request, res: Response): Promise<any> => {
 
@@ -98,8 +93,12 @@ let methods: methods = {
             return res.status(500).json({ error: 'Failed to create group' });
         }
     },
-    select: async (id: number) => {
-        return await Group.findOne({ where: { id } });
+    selectGroup: async (id: number): Promise<Group | null> => {
+        try {
+            return await Group.findOne({ where: { id } });
+        } catch (err) {
+            throwError(err);
+        }
     },
 }
 export { methods };

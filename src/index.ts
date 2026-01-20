@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+import "./types/session";
+
 import express, { Express } from 'express';
 import path from 'path';
 const expressHandlebars = require('express-handlebars');
@@ -7,6 +12,7 @@ import router from './routers'; // phải là export default từ routers/index.
 import { Server } from 'socket.io'
 import http from 'http'
 import { setup_chat } from './socket/index';
+import { sequelize } from './configs/sql';
 
 const app: Express = express();
 //change server to ioServer
@@ -65,16 +71,9 @@ app.use(session({
     }
 }));
 
-// Kết nối CSDL nếu cần
-sql.connect();
 
-//sync
-import { sequelize } from './configs/sql';
-import './models/chat/chat';
 
-sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
-    .then(() => console.log('Database synced'))
-    .catch(console.error);
+
 
 //make the data of body
 app.use(express.urlencoded({ extended: true }));
@@ -82,7 +81,6 @@ app.use(express.json());
 
 //add delete, update methods
 import methodOverride from 'method-override';
-import { createServer } from 'http';
 
 app.use(methodOverride('_method'));
 
@@ -92,6 +90,18 @@ router(app);
 //for listening to  client login
 setup_chat(io);
 
-server.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
-});
+
+
+if (process.env.NODE_ENV !== 'test') {
+    // Kết nối CSDL nếu cần
+    sql.connect();
+
+    //sync
+    sequelize.sync() // Tạo bảng nếu chưa có, giữ dữ liệu cũ
+        .then(() => console.log('Database synced'))
+        .catch(console.error);
+
+    server.listen(port, () => {
+        console.log(`Example app listening at http://localhost:${port}`);
+    });
+}

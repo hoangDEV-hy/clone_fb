@@ -1,34 +1,25 @@
 import { NextFunction, Request, Response } from 'express';
-import { User, methods } from '../../models/user'; // đường dẫn model tùy theo dự án của bạn
+import { User, methods as userModel } from '../../models/user'; // đường dẫn model tùy theo dự án của bạn
+import throwError from '../../helpers/ThrowErrorOfController';
 
-export let method = {
-    takeUser: async (req: any, res: Response): Promise<void> => {
-        const id = req.admin.id; // bạn cần đảm bảo `req.admin` đã được middleware gán trước đó
+
+export let methods = {
+    takeUser: async (id: string): Promise<User | null> => {
         try {
-            const user = await User.findOne({
-                where: {
-                    id: id
-                }
-            });
-
-            if (!user) {
-                res.status(401).json({ message: 'Invalid user ID' });
-            } else res.json({ user });// trả về user với key rõ ràng hơn
+            return await userModel.selectUser({ id: id });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
+            throwError(err);
         }
+        // if (!user) {
+        //     res.status(401).json({ message: 'Invalid user ID' });
+        // } else res.json({ user });
     },
-    updateUser: async (req: any, res: Response): Promise<any> => {
+    updateUser: async (id: string, name: string): Promise<number> => {
         try {
-
-            const { name, hastag } = req.body;
-            const id = req.admin.id;
-            await methods.updateUser({ name: name, hastag: hastag }, id, res);
-            return res.json({ message: 'updated' })
-        } catch (error) {
-            console.error('Update error:', error);
-            return res.status(500).json({ error: 'Update failed', detail: error });
+            return userModel.updateUser({ name: name }, id);
+        }
+        catch (err) {
+            throwError(err);
         }
     },
     handleUpload: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -37,33 +28,25 @@ export let method = {
             return;
         }
         next();
-
-
     },
-    updateAvatarUser: async (req: any, res: Response): Promise<any> => {
+    updateAvatarUser: async (id: string, imagePath: string): Promise<number> => {
         try {
-            const id = req.admin.id;
-            const imagePath = `/pictures/${req.file.filename}`;
-            await methods.updateUser({ avatar: imagePath }, id, res);
-            return res.json({ message: 'updated' })
-        } catch (error) {
-            console.error('Update error:', error);
-            return res.status(500).json({ error: 'Update failed', detail: error });
+
+            return await userModel.updateUser({ avatar: imagePath }, id);
+        } catch (err) {
+            throwError(err);
         }
     },
-    updateThumbnailUser: async (req: any, res: Response): Promise<any> => {
+    updateThumbnailUser: async (id: string, imagePath: string): Promise<number> => {
         try {
-            const id = req.admin.id;
-            const imagePath = `/pictures/${req.file.filename}`;
-            await methods.updateUser({ thumbnail: imagePath }, id, res);
-            return res.json({ message: 'updated' })
-        } catch (error) {
-            console.error('Update error:', error);
-            return res.status(500).json({ error: 'Update failed', detail: error });
-        }
-    },
 
+            return await userModel.updateUser({ thumbnail: imagePath }, id);
+        } catch (err) {
+            throwError(err);
+        }
+    }
 }
+
 
 
 

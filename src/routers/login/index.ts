@@ -1,38 +1,82 @@
 import express from 'express';
-import { method as methods } from '../../constrollers/login/login';
-type MethodType = {
-    check: ({ }, res: any) => void;
-    getPass: (req: any, res: any) => void;
-    setPass: (req: any, res: any) => void;
-    createUser: (req: any, res: any) => void;
-    auth: (req: any, res: any) => void;
-};
+import { methods as loginController } from '../../constrollers/login/login';
+import { authenticate } from '../../middware/auth';
+import throwError from '../../helpers/ThrowErrorOfRouter';
 
-let method: MethodType = {
-    check: methods.check,
-    getPass: methods.getPass,
-    setPass: methods.setPass,
-    createUser: methods.createUser,
-    auth: methods.auth
-};
+import { Response, Request } from 'express';
 
 const router = express.Router();
 
-// không cần tạo lại object mới nếu không cần
-router.get('/login', (req: any, res: any) => {
+router.get('/login', (req: Request, res: Response) => {
     res.render('contens/login_dangKi/login');
+});
+
+router.post('/login', authenticate.rendToken, (req: Request, res: Response) => {
+    res.redirect('/main');
+});
+
+router.get('/logout', authenticate.user_auth, (req: Request, res: Response) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).json({ message: 'Logout failed' });
+        }
+
+        res.clearCookie('token'); // tên cookie mặc định
+        res.redirect('/login');
+    });
+
+})
+
+
+router.get('/login/setPass', async (req: Request, res: Response) => {
+    try {
+        const inputPhone = req.query.phone as string;
+        const result = await loginController.getPass(inputPhone);
+        if (!result) {
+            res.send({ error: "Account does not exist." });
+            return;
+        } else {
+            res.render('contens/login_dangKi/setPass', { inputPhone });
+            return;
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
 
 });
-router.post('/login', method.auth);
+router.post('/login/setPass', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id, password } = req.body;
 
-router.get('/login/setPass', method.getPass);
-router.post('/login/setPass', method.setPass);
+        const result = await loginController.setPass(id, password);
+
+        if (result !== 0) {
+            res.redirect('/');
+        } else {
+            res.status(500).json({ error: 'Failed to update password' });
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
+});
 
 
-router.get('/login/register', (req: any, res: any) => {
+router.get('/login/register', (req: Request, res: Response) => {
     res.render('contens/login_dangKi/dangKi')
 })
-router.post('/login/register', method.createUser)
+router.post('/login/register', async (req: Request, res: Response): Promise<void> => {
+    const { phone, password } = req.body;
+    try {
+        const user = await loginController.createUser(phone, password);
+        if (user) {
+            res.redirect('/main')
+        } else {
+            res.status(500).json({ error: 'Failed to create user' });
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
+})
 
 export { router };
 

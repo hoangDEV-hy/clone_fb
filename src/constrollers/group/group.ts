@@ -1,9 +1,10 @@
 import { group_user } from "../../models/group_user";
-import { Group } from "../../models/group";
+import { Group, methods as groupModel } from "../../models/group";
 import { Posts } from "../../models/Posts";
 import { Op } from "sequelize";
 import { sequelize } from "../../configs/sql";
 import { User } from "../../models/user";
+import throwError from "../../helpers/ThrowErrorOfController";
 let methods = {
     joinGroup_list: async (id: string): Promise<any> => {
         const resuil = await group_user.findAll({
@@ -53,5 +54,12 @@ let methods = {
         })
         return resuil;
     },
+    selectGroup: async (id: number): Promise<Group | null> => {
+        try {
+            return await groupModel.selectGroup(id);
+        } catch (err) {
+            throwError(err);
+        }
+    }
 }
 export { methods };

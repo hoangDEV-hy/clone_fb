@@ -1,10 +1,13 @@
 import { FeedAggregatorService } from '../services/FeedServices/FeedService';
-import { methods as model_user } from '../models/user';
-import { User } from '../models/user';
-import { user_user } from '../models/user_user';
+import { methods as userController } from '../constrollers/User';
+
 import { Op } from 'sequelize';
 import { Posts } from '../models/Posts';
 
+
+import { User } from '../models/user';
+import { user_user } from '../models/user_user';
+import throwError from '../helpers/ThrowErrorOfController';
 interface FeedOptions {
     userId: string;
     limit: number;
@@ -47,14 +50,19 @@ export class FeedController {
      * Get user by ID
      * @throws Error if user not found
      */
-    async getUser(userId: string): Promise<any> {
-        const user = await model_user.selectUser(userId);
+    async getUser(userId: string): Promise<User | null> {
+        try {
 
-        if (!user) {
-            throw new Error('User not found');
+            const user = await userController.selectUser(userId);
+
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            return user;
+        } catch (err) {
+            throwError(err);
         }
-
-        return user.toJSON();
     }
 
     /**

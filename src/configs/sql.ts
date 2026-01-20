@@ -1,17 +1,22 @@
 const { Sequelize } = require('sequelize');
 
 
-const sequelize = new Sequelize('cloneFB', 'sa', '19072005', {
-    host: 'localhost',
-    dialect: 'mssql',
-    dialectOptions: {
-        options: {
-            encrypt: false,
-            trustServerCertificate: true,
+const sequelize = new Sequelize(
+    process.env.DB_NAME as string,
+    process.env.DB_USER as string,
+    process.env.DB_PASSWORD as string,
+    {
+        host: process.env.DB_HOST,
+        dialect: 'mssql',
+        port: Number(process.env.DB_PORT),
+        dialectOptions: {
+            options: {
+                encrypt: false,
+                trustServerCertificate: true,
+            }
         }
-    },
-    port: 1433
-});
+    }
+);
 
 async function connect() {
     try {

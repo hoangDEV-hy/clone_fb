@@ -50,7 +50,7 @@
                 <!-- Phần link Quên mật khẩu và Đăng ký -->
                 <div class="flex justify-between items-center mt-6">
                     <a id="setPass" href="#" class="text-sm text-blue-600 hover:underline">Quên mật khẩu?</a>
-                    <a href="/login/dk" class="text-sm text-blue-600 hover:underline">Đăng Ký</a>
+                    <a href="/login/register" class="text-sm text-blue-600 hover:underline">Đăng Ký</a>
                 </div>
             </form>
         </div>

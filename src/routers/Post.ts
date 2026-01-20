@@ -1,53 +1,80 @@
 import express from "express";
-import { methods } from "../models/user";
-import { Posts, methods as model_Posts } from "../models/Posts"
 import { authenticate } from "../middware/auth";
 import { Response, Request } from "express";
-import { User } from "../models/user";
-import { Group } from "../models/group";
+import { methods as postController } from "../constrollers/Posts";
+import throwError from "../helpers/ThrowErrorOfRouter";
 
+import ExtendRequest from "../types/Type_ExtendRequest";
 let route = express.Router();
 
-route.get('/', authenticate.user_auth, async (req: any, res: Response) => {
-    const user = await methods.selectUser(req.admin.id);
-    const group_id = req.session.currentGroupId;
-    res.render('contens/Post/Post', { user: user.toJSON(), group_id: group_id });
-})
-
-route.post('/update', authenticate.user_auth, async (req: any, res: Response) => {
-    const { PostId_curtain, PostId_original } = req.body;
-    const post = await Posts.findOne({
-
-        where: { id: PostId_curtain },
-        include: [
-            {
-                model: User,
-                as: 'users',
-                required: false // inner join
-
-            },
-            {
-                model: Group,
-                as: 'groups',
-                required: false
+route.get(
+    '/',
+    authenticate.user_auth,
+    async (req: ExtendRequest, res: Response): Promise<void> => {
+        try {
+            const selectedIdUser = req.admin?.id;
+            const selectedGroupId = req.session?.currentGroupId;
+            if (!selectedIdUser) {
+                res.status(401).send('Unauthorized');
+                return;
             }
-        ]
-    });
-    let contens = JSON.parse(post!.contens);
 
-    contens = {
-        text: contens.text,
-        //image: JSON.stringify(contens.image) // giữ nguyên object/array thay vì stringify
-        image: contens.image
-    };
-    post!.contens = contens;
-    let Post = post?.toJSON();
-    if (Post.PostId_origin) res.render('contens/Post/Extend_Post', { Post: Post })
-    else res.render('contens/Post/Post', { Post: Post })
+            if (!selectedGroupId) {
+                res.status(400).send('Group not found');
+                return;
+            }
+
+            const user = await postController.selectUser(selectedIdUser);
+            if (!user) {
+                res.status(401).send('Unauthorized');
+                return;
+            } else {
+                res.render('contens/Post/Post', {
+                    user: user.toJSON(),
+                    group_id: selectedGroupId
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Internal Server Error');
+        }
+    }
+);
+
+
+route.post('/update', authenticate.user_auth, async (req: any, res: Response): Promise<void> => {
+    try {
+
+        const { PostId_curtain } = req.body;
+        if (!PostId_curtain) {
+            res.status(400).json({
+                message: 'PostId_curtain is required'
+            });
+            return;
+        }
+        const post = await postController.selectPostWithUserAndGroup(PostId_curtain);
+        if (!post) {
+            res.status(404).json({
+                message: 'Post not found'
+            });
+            return;
+        }
+        let contens = JSON.parse(post!.contens);
+
+        contens = {
+            text: contens.text,
+            //image: JSON.stringify(contens.image) // giữ nguyên object/array thay vì stringify
+            image: contens.image
+        };
+        post!.contens = contens;
+        let Post = post?.toJSON();
+        if (Post.PostId_origin) res.render('contens/Post/Extend_Post', { Post: Post })
+        else res.render('contens/Post/Post', { Post: Post })
+    } catch (err) {
+        throwError(err, res);
+    }
 })
 import multer from 'multer';
-
-
 let uploadfile = multer({ storage: multer.memoryStorage() });
 
 route.post('/upload', uploadfile.single('file'), (req: any, res) => {
@@ -59,8 +86,8 @@ route.post('/upload', uploadfile.single('file'), (req: any, res) => {
         base64
     });
 });
-import { methods as consto_Posts } from "../constrollers/Posts"
-import { json } from "sequelize";
+
+
 
 
 let uploadForm = multer({
@@ -70,21 +97,24 @@ let uploadForm = multer({
     }
 });
 
-route.post('/save', uploadForm.none(), async (req: Request, res: Response): Promise<any> => {
+route.post('/save', uploadForm.none(), async (req: Request, res: Response): Promise<void> => {
     try {
 
-        let { PostId_original, PostId_curtain, userId, groupId, conten, scope, think } = req.body;
-        if (groupId === '') groupId = null;
+        let { selectedPostIdOrigin, selectedPostIdCurtain, selectedUserId, selectedGroupId, selectedConten, selectedScope, selectedThink } = req.body;
+        if (selectedPostIdOrigin === '') selectedPostIdOrigin = null;
 
-        if (!PostId_curtain) await model_Posts.create({ PostId_origin: PostId_original, user_id: userId, group_id: groupId, contens: conten, scope: scope, think: think });
+        if (!selectedPostIdCurtain) await postController.create(selectedPostIdOrigin, selectedUserId, selectedGroupId, selectedConten, selectedScope, selectedThink);
         else {
-            await model_Posts.up({ PostId_original: PostId_original, contens: conten, scope: scope, think: think }, { id: PostId_curtain });
+            await postController.update(selectedPostIdOrigin, selectedPostIdCurtain, selectedConten, selectedScope, selectedThink);
         }
-        return res.json({ status: 'ok' });
+        res.status(200).json({
+            status: 'ok',
+            message: 'Lưu bài viết thành công'
+        });
+        return;
     }
     catch (error) {
-        console.log(error);
-        return res.json(error);
+        throwError(error, res);
     }
 });
 export { route };

@@ -52,6 +52,7 @@ import { Group } from './group';
 import { user_user } from './user_user';
 import { group_user } from './group_user';
 import { interactions } from './interactions';
+import throwError from '../helpers/ThrowErrorOfSqlQuery';
 Posts.belongsTo(User, { as: 'users', foreignKey: 'user_id' })
 Posts.belongsTo(Group, {
     as: 'groups', foreignKey: {
@@ -66,19 +67,27 @@ Posts.hasMany(interactions, { as: 'interactions', foreignKey: 'id_Posts' })
 export { Posts }
 
 export let methods = {
-    create: async (value: { [key: string]: string }) => {
-        return await Posts.create(value);
+    create: async (data: Partial<Posts>) => {
+        return await Posts.create(data);
     },
-    select: async (value: { [key: string]: any }) => {
-        return await Posts.findAll({ where: value });
+    selectPosts: async (data: Partial<Posts>) => {
+        try {
+            return await Posts.findAll({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    des: async (value: { [key: string]: any }) => {
-        return await Posts.destroy({ where: value });
+    des: async (data: Partial<Posts>) => {
+        try {
+            return await Posts.destroy({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    up: async (value: { [key: string]: any }, conditions: { [key: string]: any }) => {
-        return await Posts.update(value, { where: conditions });
+    up: async (data: Partial<Posts>, conditions: { [key: string]: any }) => {
+        return await Posts.update(data, { where: conditions });
     },
-    selectPosts: async (whereClause: WhereOptions, limit: number) => {
+    selectPostsWithUserAndInteraction: async (whereClause: WhereOptions, limit: number) => {
         return await Posts.findAll({
             where: whereClause,
             include: [
@@ -190,5 +199,74 @@ export let methods = {
             attributes: ['id_group']
         })
     },
+    selectPostWithUserAndGroup: async (selectedPostIdCurtain: number): Promise<Posts | null> => {
+        try {
+            return await Posts.findOne({
+
+                where: { id: selectedPostIdCurtain },
+                include: [
+                    {
+                        model: User,
+                        as: 'users',
+                        required: false
+
+                    },
+                    {
+                        model: Group,
+                        as: 'groups',
+                        required: false
+                    }
+                ]
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPostsWithUser: async (data: Partial<Posts>) => {
+        try {
+            return await Posts.findAll({
+                where: data,
+                include: [
+                    {
+                        model: User,
+                        as: 'users',
+                        required: true
+                    }
+                ]
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPostsWithFilter_InteractionAndUser: async (data: Partial<Posts>, sort: string): Promise<Posts[]> => {
+        try {
+            return await Posts.findAll({
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM interactions AS i
+                WHERE i.id_Posts = Posts.id
+                  AND i.classify LIKE '${sort}'
+            )`),
+                            'interactionCount'
+                        ]
+                    ]
+                },
+                where: data,
+                include: [
+                    {
+                        model: User,
+                        as: 'users',
+                        required: false
+                    }
+                ],
+                order: [[sequelize.literal('interactionCount'), 'DESC']]
+            })
+        } catch (err) {
+            throwError(err);
+        }
+    }
 }
 
