@@ -2,12 +2,61 @@
 // UNIT TESTS - Chỉ test Business Logic
 // ============================================
 
-import { methods as loginController } from '../../constrollers/login/login';
-import { methods as modelUser } from '../../models/user';
 import jwt from 'jsonwebtoken';
 
-// Mock model để test controller độc lập
-jest.mock('../../models/user');
+// Mock Sequelize để tránh lỗi initialization
+jest.mock('../../configs/sql', () => ({
+    sequelize: {
+        define: jest.fn(),
+    }
+}));
+
+// Mock model trước khi import controller
+jest.mock('../../models/user', () => ({
+    methods: {
+        selectUser: jest.fn(),
+        createUser: jest.fn(),
+        updateUser: jest.fn()
+    }
+}));
+
+// Mock throwError helper - giữ nguyên error để test có thể kiểm tra message
+jest.mock('../../helpers/ThrowErrorOfController', () => ({
+    __esModule: true,
+    default: (err: unknown) => {
+        // Giữ nguyên Error instance để test có thể kiểm tra message
+        if (err instanceof Error) {
+            throw err;
+        }
+        // Nếu là string, convert thành Error
+        if (typeof err === 'string') {
+            throw new Error(err);
+        }
+        throw new Error('Unknown error');
+    }
+}));
+
+// Mock các models khác để tránh Sequelize initialization issues
+jest.mock('../../models/interactions', () => ({
+    interactions: {},
+    methods: {}
+}));
+
+jest.mock('../../models/Posts', () => ({
+    Posts: {},
+    methods: {}
+}));
+
+jest.mock('../../models/user_user', () => ({
+    user_user: {},
+    methods: {}
+}));
+
+// Set JWT_SECRET cho test environment
+process.env.JWT_SECRET = 'test-secret-key-for-jwt';
+
+import { methods as loginController } from '../../constrollers/login/login';
+import { methods as modelUser } from '../../models/user';
 
 describe('LoginController - Unit Tests', () => {
 
