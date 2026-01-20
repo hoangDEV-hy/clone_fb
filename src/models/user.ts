@@ -4,7 +4,6 @@ import {
     Model
 } from 'sequelize';
 import { sequelize as db } from '../configs/sql';
-import { Request, Response } from 'express';
 import throwError from '../helpers/ThrowErrorOfSqlQuery';
 
 
@@ -118,12 +117,12 @@ const methods = {
     },
 
 
-    updateUser: async (data: Partial<User>, id: string): Promise<number> => {
+    updateUser: async (data: Partial<User>, selectedIdUser: string): Promise<number> => {
         try {
             const [affectedRows] = await User.update(
                 data,
                 {
-                    where: { id }
+                    where: { id: selectedIdUser }
                 }
             );
             return affectedRows;
@@ -132,12 +131,12 @@ const methods = {
         }
     },
 
-    selectUsersWithOrder: async (ids: string[]): Promise<User[]> => {
+    selectUsersWithOrder: async (selectedIdUsers: string[]): Promise<User[]> => {
         try {
             return await User.findAll({
                 where: {
                     id: {
-                        [Op.in]: ids
+                        [Op.in]: selectedIdUsers
                     }
                 },
                 attributes: ['id', 'name', 'alias', 'avatar', 'thumbnail'],
@@ -147,10 +146,10 @@ const methods = {
             throwError(err);
         }
     },
-    createUser: async (data: Partial<User>):Promise<User|null>=>{
-        try{
+    createUser: async (data: Partial<User>): Promise<User | null> => {
+        try {
             return await User.create(data);
-        }catch(err){
+        } catch (err) {
             throwError(err);
         }
     }

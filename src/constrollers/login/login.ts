@@ -5,11 +5,11 @@ import jwt from 'jsonwebtoken';
 
 const key = process.env.JWT_SECRET as string;
 const methods = {
-    auth: async (phone: string, password: string): Promise<string> => {
+    auth: async (selectedPhone: string, selectedPassword: string): Promise<string> => {
         try {
             const user = await modelUser.selectUser({
-                phoneNumber: phone,
-                password: password
+                phoneNumber: selectedPhone,
+                password: selectedPassword
             });
 
             if (!user) {
@@ -37,30 +37,30 @@ const methods = {
             throwError(err);
         }
     },
-    getPass: async (inputPhone: string): Promise<string | undefined> => {
+    getPass: async (selectedInputPhone: string): Promise<string | undefined> => {
         try {
-            const user = await modelUser.selectUser({ phoneNumber: inputPhone });
+            const user = await modelUser.selectUser({ phoneNumber: selectedInputPhone });
             return user?.id;
         } catch (err) {
             throwError(err);
         }
     },
-    setPass: async (id: string, password: string): Promise<number> => {
+    setPass: async (id: string, selectedPassword: string): Promise<number> => {
         try {
-            return await modelUser.updateUser({ password: password }, id)
+            return await modelUser.updateUser({ password: selectedPassword }, id)
         } catch (err) {
             throwError(err);
         }
     },
-    createUser: async (phone: string, password: string): Promise<User | null> => {
+    createUser: async (selectedPhone: string, selectedPassword: string): Promise<User | null> => {
         try {
-            const existingUser = await modelUser.selectUser({ phoneNumber: phone });
+            const existingUser = await modelUser.selectUser({ phoneNumber: selectedPhone });
             if (existingUser) {
                 return null;
             }
             const avatar: string = 'pictures/avatar.jpg';
             const thumbnail: string = 'pictures/avatar.jpg'
-            return await modelUser.createUser({ phoneNumber: phone, password, avatar: avatar, thumbnail: thumbnail });
+            return await modelUser.createUser({ phoneNumber: selectedPhone, password: selectedPassword, avatar: avatar, thumbnail: thumbnail });
         } catch (err) {
             throwError(err);
         }

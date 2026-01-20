@@ -30,13 +30,13 @@ router.get('/logout', authenticate.user_auth, (req: Request, res: Response) => {
 
 router.get('/login/setPass', async (req: Request, res: Response) => {
     try {
-        const inputPhone = req.query.phone as string;
-        const result = await loginController.getPass(inputPhone);
+        const selectedInputPhone = req.query.phone as string;
+        const result = await loginController.getPass(selectedInputPhone);
         if (!result) {
             res.send({ error: "Account does not exist." });
             return;
         } else {
-            res.render('contens/login_dangKi/setPass', { inputPhone });
+            res.render('contens/login_dangKi/setPass', { selectedInputPhone });
             return;
         }
     } catch (err) {
@@ -65,10 +65,10 @@ router.get('/login/register', (req: Request, res: Response) => {
     res.render('contens/login_dangKi/dangKi')
 })
 router.post('/login/register', async (req: Request, res: Response): Promise<void> => {
-    const { phone, password } = req.body;
     try {
-        const user = await loginController.createUser(phone, password);
-        if (user) {
+        const { phone, password } = req.body;
+        const selectedUser = await loginController.createUser(phone, password);
+        if (selectedUser) {
             res.redirect('/main')
         } else {
             res.status(500).json({ error: 'Failed to create user' });
