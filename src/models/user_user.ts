@@ -36,6 +36,7 @@ user_user.init({
 })
 import { User } from "./user";
 import { Posts } from "./Posts";
+import throwError from "../helpers/ThrowErrorOfSqlQuery";
 export { user_user };
 user_user.belongsTo(User, { foreignKey: 'id_userA', as: 'userA' })
 user_user.belongsTo(User, { foreignKey: 'id_userB', as: 'userB' })
@@ -57,26 +58,53 @@ export let methods = {
             where: id
         })
     },
-    del: (req: Request, res: Response): void => {
-        const id = req.body;
-        user_user.destroy({ where: id });
+    del: async (data: Partial<user_user>): Promise<number> => {
+        try {
+            return await user_user.destroy({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    select: async (key: { [id: string]: string }): Promise<user_user[]> => {
-        return user_user.findAll(
-            {
-                where: key
-            }
-        );
+    selectFriends: async (data: Partial<user_user>): Promise<user_user[]> => {
+        try {
+
+            return user_user.findAll(
+                {
+                    where: data
+                }
+            );
+        } catch (err) {
+            throwError(err);
+        }
     },
-    selectFriends: async (userId: string) => {
-        return await user_user.findAll({
-            where: {
-                [Op.or]: [
-                    { id_userA: userId, status: 'done' },
-                    { id_userB: userId, status: 'done' }
-                ]
-            },
-            attributes: ['id_userA', 'id_userB']
-        });
-    }
+    selectFriendsDone: async (userId: string) => {
+        try {
+            return await user_user.findAll({
+                where: {
+                    [Op.or]: [
+                        { id_userA: userId, status: 'done' },
+                        { id_userB: userId, status: 'done' }
+                    ]
+                },
+                attributes: ['id_userA', 'id_userB']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectFriendsRequest: async (userId: string) => {
+        try {
+            return await user_user.findAll({
+                where: {
+                    [Op.or]: [
+                        { id_userA: userId, status: 'pending' },
+                        { id_userB: userId, status: 'pending' }
+                    ]
+                },
+                attributes: ['id_userA', 'id_userB']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
 }

@@ -1,32 +1,50 @@
 import { User } from '../../models/user'
 import { Request, Response } from 'express';
 import { Op } from 'sequelize';
-import { methods as methods_user_user } from '../../models/user_user';
+import { methods as friendModel, user_user } from '../../models/user_user';
+import throwError from '../../helpers/ThrowErrorOfController';
+import { methods as userController } from '../User'
 
 export let methods = {
-    search: async (req: Request, res: Response): Promise<void> => {
-        let keyWord = req.query.search?.toString();
-        keyWord = keyWord!.toLowerCase();
-        await User.findAll({
-            where: {
-                [Op.or]: [
-                    { name: { [Op.like]: `%${keyWord}%` } },
-                    { alias: { [Op.like]: `%${keyWord}%` } },
-                    { hometown: { [Op.like]: `%${keyWord}%` } },
-                    { phoneNumber: { [Op.like]: `%${keyWord}%` } }
-                ]
-            }
-        })
+    accepRequest: friendModel.up,
+    sendRequest: friendModel.add,
+    delRequest: friendModel.del,
+    selectFriendsDone: async (id: string): Promise<user_user[]> => {
+        try {
+            const selectedFriended = await friendModel.selectFriendsDone(id);
+            const idfriends = selectedFriended.map((g: any) => g.id_userB);
+
+            const listFriends = await userController.selectUsersWithIdsList(idfriends);
+
+            return listFriends.map((g: any) => g.toJSON());
+        } catch (err) {
+            throwError(err);
+        }
     },
-    accepRequest: methods_user_user.up,
-    sendRequest: methods_user_user.add,
-    delRequest: methods_user_user.del,
-    show_friended: (req: any): Promise<any> => {
-        const id = req.admin.id;
-        return methods_user_user.select({ id_userA: id, status: 'done' })
+    selectFriendsRequest: async (id: string): Promise<user_user[]> => {
+        try {
+            const selectedFriended = await friendModel.selectFriendsRequest(id);
+            const idfriends = selectedFriended.map((g: any) => g.id_userB);
+
+            const listFriends = await userController.selectUsersWithIdsList(idfriends);
+
+            return listFriends.map((g: any) => g.toJSON());
+        } catch (err) {
+            throwError(err);
+        }
     },
-    show_waited: (req: any): Promise<any> => {
-        const id = req.admin.id;
-        return methods_user_user.select({ id_userA: id, status: 'pendding' })
+    delFriend: async (idUserA: string, idUserB: string): Promise<number> => {
+        try {
+            return await friendModel.del({ id_userA: idUserA, id_userB: idUserB, status: 'done' });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    delRequestFriend: async (idUserA: string, idUserB: string): Promise<number> => {
+        try {
+            return await friendModel.del({ id_userA: idUserA, id_userB: idUserB, status: 'pending' });
+        } catch (err) {
+            throwError(err);
+        }
     }
 }

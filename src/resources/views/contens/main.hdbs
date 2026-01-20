@@ -423,7 +423,7 @@
                 <a href="/searches">Tìm kiếm</a>
             </li>
 
-            <li><a href="./friend.html">Bạn bè</a></li>
+            <li><a href="/page_manager/friends/joined">Bạn bè</a></li>
             <li><a href="./video.html">Phim</a></li>
 
             <!-- Tin nhắn -->

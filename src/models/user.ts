@@ -161,6 +161,23 @@ const methods = {
         } catch (err) {
             throwError(err);
         }
+    },
+    selectUsersWithIdsList: async (idsList: string[]): Promise<User[]> => {
+        try {
+            if (!idsList || idsList.length === 0) {
+                return [];
+            }
+
+            return await User.findAll({
+                where: {
+                    id: {
+                        [Op.in]: idsList
+                    }
+                }
+            });
+        } catch (err) {
+            throwError(err);
+        }
     }
 
 };

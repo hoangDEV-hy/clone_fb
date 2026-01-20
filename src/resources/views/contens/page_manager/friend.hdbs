@@ -1,25 +1,36 @@
-<div style="display: flex;">
+<div style="display: flex; gap: 20px;">
     <div>
         <div>
-            <a href="/page_manager/friends/joined"> đã kết bạn</a>
+            <a href="/page_manager/friends/joined">Đã kết bạn</a>
         </div>
         <div>
-            <a href="/page_manager/friends/waited"> đang chờ duyệt</a>
+            <a href="/page_manager/friends/waited">Đang chờ duyệt</a>
         </div>
     </div>
+
     <div>
         {{#if group.length}}
         {{#each group}}
-        <div class="the card">
-            <span data-id="{{this.id}}" style="display: none;"></span>
+        <div class="friend-card" data-user-id="{{this.id}}"
+            style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
             <img src="" alt="">
-            <input type="text" name="name" value="{{this.name}}" readonly>
+            <input type="text" value="{{this.name}}" readonly>
 
-            <div style="display: flex;">
-                <button>Add</button>
-                <div name="more" style="visibility: hidden;">
-                    <a href="">View profile</a>
-                    <a href="">Remove friend</a>
+            <div style="margin-top:8px;">
+                <button type="button" class="toggle-more-btn">More</button>
+
+                <div class="more-actions" style="visibility:hidden; margin-top:6px;">
+                    <form action="http://localhost:3000/page_manager/user" method="POST" style="display:inline;">
+                        <input type="hidden" name="selectedTargetId" value="{{this.id}}">
+                        <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
+                            Trang cá nhân
+                        </button>
+                    </form>
+
+                    <button type="button" class="remove-friend-btn"
+                        style="background:none; border:none; color:red; cursor:pointer;">
+                        Remove friend
+                    </button>
                 </div>
             </div>
         </div>
@@ -28,20 +39,68 @@
         <h1>No friend requests</h1>
         {{/if}}
     </div>
-
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let button = document.getElementsByTagName("button")[0];
-        let moreElement = document.getElementsByName('more')[0];
+    document.addEventListener('DOMContentLoaded', () => {
 
-        button.addEventListener("click", function () {
-            if (moreElement.style.visibility === 'visible') {
-                moreElement.style.visibility = 'hidden';
-            } else {
-                moreElement.style.visibility = 'visible';
+        // Event delegation – chỉ 1 listener
+        document.addEventListener('click', async (e) => {
+
+            /* Toggle more */
+            if (e.target.classList.contains('toggle-more-btn')) {
+                e.preventDefault(); // Thêm dòng này
+                e.stopPropagation(); // Ngăn event bubbling
+
+                const card = e.target.closest('.friend-card');
+                const more = card.querySelector('.more-actions');
+
+                more.style.visibility =
+                    more.style.visibility === 'visible' ? 'hidden' : 'visible';
             }
+
+            /* Remove friend */
+            if (e.target.classList.contains('remove-friend-btn')) {
+                e.preventDefault(); // Ngăn default behavior
+                e.stopPropagation(); // Ngăn event bubbling
+
+                const card = e.target.closest('.friend-card');
+                const userId = card.dataset.userId;
+
+                if (!confirm('Bạn có chắc muốn xoá bạn bè này?')) return;
+
+                // Kiểm tra xem đã đang xử lý chưa
+                if (e.target.dataset.processing === 'true') return;
+                e.target.dataset.processing = 'true';
+                e.target.disabled = true;
+
+                try {
+                    const resJoined = await fetch('/page_manager/friends/joined', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id_userB: userId })
+                    });
+                    const resWaited = await fetch('/page_manager/friends/waited', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id_userB: userId })
+                    });
+
+                    if (resJoined.ok || resWaited.ok) {
+                        card.remove();
+                    } else {
+                        e.target.dataset.processing = 'false';
+                        e.target.disabled = false;
+                        alert('Xoá thất bại');
+                    }
+                } catch (err) {
+                    e.target.dataset.processing = 'false';
+                    e.target.disabled = false;
+                    alert('Lỗi kết nối server');
+                }
+            }
+
         });
+
     });
 </script>
