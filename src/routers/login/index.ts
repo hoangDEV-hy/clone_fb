@@ -4,16 +4,26 @@ import { authenticate } from '../../middware/auth';
 import throwError from '../../helpers/ThrowErrorOfRouter';
 
 import { Response, Request } from 'express';
+import ExtendRequest from '../../types/Type_ExtendRequest';
 
 const router = express.Router();
 
 router.get('/login', (req: Request, res: Response) => {
-    res.render('contens/login_dangKi/login');
+    res.render('contens/login_dangKi/login', { layout: false });
 });
 
 router.post('/login', authenticate.rendToken, (req: Request, res: Response) => {
     res.redirect('/main');
 });
+
+router.get('/userId', authenticate.user_auth, (req: ExtendRequest, res: Response): void => {
+    const id = req.admin?.id;
+    if (!id) {
+        res.status(401).send('not Allow')
+        return;
+    };
+    res.status(200).send({ getedUsedId: id });
+})
 
 router.get('/logout', authenticate.user_auth, (req: Request, res: Response) => {
     req.session.destroy(err => {

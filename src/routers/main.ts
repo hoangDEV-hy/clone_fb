@@ -60,7 +60,7 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         // Render view
         res.render('contens/main', {
             allPosts: feedResult.posts,
-            user: user,
+            user: user.toJSON(),
             friend_array: friendList,
             cursor: feedResult.nextCursor
         });

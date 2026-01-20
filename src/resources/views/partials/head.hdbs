@@ -1,1 +1,74 @@
-<h1>HEAD</h1>
+<link rel="stylesheet" href="/css/contens/Navbar.css">
+
+<div class="header">
+    <ul class="navbar">
+        <li class="logo">
+            <img src="/pictures/image-1754515454077-261962452.png" alt="logo">
+        </li>
+
+        <li class="search">
+            <a href="/searches">Tìm kiếm</a>
+        </li>
+
+        <li><a href="/page_manager/friends/joined">Bạn bè</a></li>
+        <li><a href="./video.html">Phim</a></li>
+
+        <!-- Tin nhắn -->
+        <li class="menu-btn" data-menu="mes">
+            Tin nhắn
+            <ul class="mes menu">
+                <li><strong>Tin Nhắn</strong></li>
+                <li class="divider"></li>
+                <li><a href="#">Nguyễn Hoàng</a></li>
+                <li><a href="#">Bùi Huy</a></li>
+                <li><a href="#">Văn Hiệu</a></li>
+                <li><a href="#">Quảng Nam</a></li>
+            </ul>
+        </li>
+
+        <!-- Thông báo -->
+        <li class="menu-btn" data-menu="thongBao">
+            Thông Báo
+            <span id="unreadBadge" class="badge"></span>
+            <ul class="thongBao menu">
+                <li><strong>Thông Báo</strong></li>
+                <li class="divider"></li>
+                <li id="notificationList">Đang tải...</li>
+            </ul>
+        </li>
+
+        <!-- Profile -->
+        <li class="my_profile menu-btn" data-menu="submenu">
+            <form action="http://localhost:3000/page_manager/user" method="POST" style="display: inline;">
+                <input type="hidden" name="selectedTargetId" value="{{user.id}}">
+                <button type="submit"
+                    style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; padding: 0; font: inherit;">
+                    Trang cá nhân
+                </button>
+            </form>
+            <img src="/{{user.avatar}}" alt="ảnh đại diện">
+            Tài khoản
+            <ul class="submenu menu">
+                <li>{{user.name}}</li>
+                <li>
+                    <input type="hidden" value="{{user.id}}">
+                </li>
+            </ul>
+        </li>
+
+        <!-- Settings -->
+        <li class="menu-btn" data-menu="subsubmenu">
+            Cài đặt
+            <ul class="subsubmenu menu">
+                <li>Ngôn Ngữ</li>
+            </ul>
+        </li>
+
+        <li><a href="#">Trợ giúp và hỗ trợ</a></li>
+        <li><a href="#">Màn hình và trợ năng</a></li>
+        <li><a href="#">Đóng góp ý kiến</a></li>
+        <li><a href="/logout">Đăng xuất</a></li>
+    </ul>
+</div>
+
+<script src="/js/Navbar.js"></script>
