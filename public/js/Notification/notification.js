@@ -37,7 +37,7 @@ const notification = {
                 notification.handler_InvitedNotification(chat_memberValue, chat_memberValue.id);
                 toast.remove();
             }
-            else if (type === "follow") {
+            else if (type === "static") {
                 // Gửi acknowledgment về server để xác nhận đã nhận được
                 socket.emit('notification_clicked', true);
                 toast.remove();

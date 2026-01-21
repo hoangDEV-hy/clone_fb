@@ -1,10 +1,10 @@
-import { User } from '../../models/user'
-import { Request, Response } from 'express';
 import { sequelize } from '../../configs/sql';
 import { methods as friendModel, user_user } from '../../models/user_user';
 import throwError from '../../helpers/ThrowErrorOfController';
 import { methods as userController } from '../User'
 import { addNotification, sendNotification } from '../../services/FollowerService';
+
+
 import NotificationServerTake from '../../types/Type_Notification';
 
 export let methods = {
@@ -26,7 +26,7 @@ export let methods = {
     selectFriendsRequest: async (id: string): Promise<user_user[]> => {
         try {
             const selectedFriended = await friendModel.selectFriendsRequest(id);
-            const idfriends = selectedFriended.map((g: any) => g.id_userB);
+            const idfriends = selectedFriended.map((g: any) => g.id_userA);
 
             const listFriends = await userController.selectUsersWithIdsList(idfriends);
 

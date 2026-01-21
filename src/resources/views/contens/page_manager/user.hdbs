@@ -12,7 +12,7 @@
 
 <body>
     <div class="head">
-        <input type="hidden">
+        <input type="hidden" id="profile_user_id" value="{{user.id}}">
         <img src="/{{user.thumbnail}}" alt="ảnh thumbnai">
 
         <table>
@@ -20,7 +20,10 @@
                 <th>
                     <table>
                         <img src="/{{user.avatar}}" alt="avt">
-                        <button>Kết Bạn</button>
+                        <!-- Button sẽ được cập nhật động -->
+                        <button id="friendActionBtn" data-user-id="{{user.id}}" style="display: none;">
+                            Đang tải...
+                        </button>
                         {{#if config_interface}}
                         <th style="width: 10%;">
                             <form action="/page_manager/user/upload/thumbnail" method="Post"
@@ -28,7 +31,6 @@
                                 <input type="file" name="image" accept="image/*" required>
                                 <button type="submit">Tải lên</button>
                             </form>
-
                         </th>
 
                         <th style="width: 90%;">
@@ -38,16 +40,16 @@
                                 <button type="submit">xác nhận</button>
                             </form>
                         </th>
-
-
+                        {{/if }}
                     </table>
                 </th>
                 <th>
+                    {{#if config_interface}}
                     <div id="head_button">
                         <button>chỉnh sửa trang cá nhân</button>
                     </div>
+                    {{/if}}
                 </th>
-                {{/if }}
             </tr>
         </table>
     </div>
@@ -134,14 +136,198 @@
     <script type="module">
         import handle_image from '/js/support/handle_image.js';
         import functionInteractions from '/js/interactions/functionInteractions.js'
-        document.addEventListener('DOMContentLoaded', () => {
+
+        // ============ FRIEND MANAGEMENT MODULE ============
+        const FriendManager = {
+            currentUserId: null,
+            profileUserId: null,
+            friendshipStatus: null,
+
+            async init() {
+                this.profileUserId = document.getElementById('profile_user_id')?.value;
+
+                // Nếu không phải xem profile của người khác thì ẩn button
+                if (!this.profileUserId) {
+                    return;
+                }
+
+                await this.checkFriendship();
+                this.attachEventListener();
+            },
+
+            async checkFriendship() {
+                try {
+                    const response = await fetch('/page_manager/friends/check', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_userB: this.profileUserId
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.friendshipStatus = result.data;
+                        this.updateButtonUI();
+                    }
+                } catch (error) {
+                    console.error('Error checking friendship:', error);
+                    this.showError('Không thể kiểm tra trạng thái bạn bè');
+                }
+            },
+
+            updateButtonUI() {
+                const btn = document.getElementById('friendActionBtn');
+                if (!btn) return;
+
+                btn.style.display = 'inline-block';
+                btn.disabled = false;
+
+                // Tùy thuộc vào trạng thái friendship
+                if (this.friendshipStatus?.isFriend) {
+                    btn.textContent = 'Xóa bạn bè';
+                    btn.classList.add('btn-remove-friend');
+                    btn.classList.remove('btn-add-friend');
+                } else if (this.friendshipStatus?.isPending) {
+                    btn.textContent = 'Đã gửi lời mời';
+                    btn.disabled = true;
+                    btn.classList.add('btn-pending');
+                } else {
+                    btn.textContent = 'Kết bạn';
+                    btn.classList.add('btn-add-friend');
+                    btn.classList.remove('btn-remove-friend');
+                }
+            },
+
+            attachEventListener() {
+                const btn = document.getElementById('friendActionBtn');
+                if (!btn) return;
+
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+
+                    if (btn.disabled) return;
+
+                    btn.disabled = true;
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Đang xử lý...';
+
+                    try {
+                        if (this.friendshipStatus?.isFriend) {
+                            await this.removeFriend();
+                        } else {
+                            await this.addFriend();
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }
+                });
+            },
+
+            async addFriend() {
+                try {
+                    const response = await fetch('/page_manager/friends', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_userB: this.profileUserId,
+                            notification_value: {
+                                id: null,
+                                selectedIdChatRoom: null,
+                                selectedSenderId: null,
+                                receiver_id: this.profileUserId,
+                                content: `gửi lời mời kết bạn đến ${this.profileUserId}`,
+                                type: 'static'
+                            }
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showSuccess('Đã gửi lời mời kết bạn');
+                        // Cập nhật lại UI
+                        await this.checkFriendship();
+                    } else {
+                        this.showError(result.message || 'Không thể gửi lời mời kết bạn');
+                        const btn = document.getElementById('friendActionBtn');
+                        btn.disabled = false;
+                        this.updateButtonUI();
+                    }
+                } catch (error) {
+                    console.error('Error adding friend:', error);
+                    this.showError('Đã xảy ra lỗi khi gửi lời mời');
+                    throw error;
+                }
+            },
+
+            async removeFriend() {
+                if (!confirm('Bạn có chắc muốn xóa bạn bè này?')) {
+                    const btn = document.getElementById('friendActionBtn');
+                    btn.disabled = false;
+                    this.updateButtonUI();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/joined', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_userB: this.profileUserId
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showSuccess('Đã xóa bạn bè');
+                        // Cập nhật lại UI
+                        await this.checkFriendship();
+                    } else {
+                        this.showError(result.message || 'Không thể xóa bạn bè');
+                        const btn = document.getElementById('friendActionBtn');
+                        btn.disabled = false;
+                        this.updateButtonUI();
+                    }
+                } catch (error) {
+                    console.error('Error removing friend:', error);
+                    this.showError('Đã xảy ra lỗi khi xóa bạn bè');
+                    throw error;
+                }
+            },
+
+            showSuccess(message) {
+                alert(message); // Bạn có thể thay bằng toast notification đẹp hơn
+            },
+
+            showError(message) {
+                alert(message); // Bạn có thể thay bằng toast notification đẹp hơn
+            }
+        };
+
+        // ============ MAIN INITIALIZATION ============
+        document.addEventListener('DOMContentLoaded', async () => {
             handle_image('.bd_ct_news_title', '.image_src_img', '.image_src_input')
+
+            // Initialize Friend Management
+            await FriendManager.init();
 
             //for sorting
             document.querySelector('.body select[name="sort"]').addEventListener('change', () => {
                 let url = `/page_manager/user/sort?sort=${document.querySelector('.body select[name="sort"]').value}&selectedTargetId={{user.id}}`;
                 window.location.href = url;
             })
+
             //for load_Posts, change_like
             const id_user = "{{user.id}}";
 
@@ -166,6 +352,7 @@
                     change_like = functionInteractions.change_like(e, change_like, id_user);
                 })
             });
+
             //send_commends
             const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
             commendButtons.forEach(button => {
@@ -173,6 +360,7 @@
                     functionInteractions.send_commends(e, nameContainIframe, "myIframe", 'form[action="/page_manager/user/upload/thumbnail"] img', id_user, data_load);
                 })
             })
+
             //hander_dataIframe
             window.addEventListener('message', e => {
                 if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
@@ -200,13 +388,6 @@
                 functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
             });
 
-
-
-
-
-
-
-
             //for logic the program
             (async () => {
                 //take ids for load interactions
@@ -217,7 +398,6 @@
                 await functionInteractions.set_like(data_load);
             })();
 
-            //
         });
     </script>
 </body>

@@ -40,7 +40,7 @@ const follow = {
                         selectedSenderId: selectedFollowerID,
                         receiver_id: targetUserId,
                         content: `${selectedFollowerID} đã bắt đầu theo dõi ${targetUserId}`,
-                        type: "follow"
+                        type: "static"
                     }
                 })
             });
@@ -80,7 +80,7 @@ const follow = {
                         selectedSenderId: selectedFollowerID,
                         receiver_id: targetUserId,
                         content: `${selectedFollowerID} đã huỷ theo dõi ${targetUserId}`,
-                        type: "follow"
+                        type: "static"
                     }
                 })
             });

@@ -557,7 +557,6 @@
             <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
                 <iframe id="myIframe" src="/Post/iframe/commend" style="width:100%; height:400px; "></iframe>
             </div>
-            <button onclick="openConfirm()">test show dialog</button>
             <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
 
 
@@ -841,8 +840,8 @@
                 if (data.type === "invited_joinChat") {
                     notification.generate_notification(data, "Thông báo", "invited_joinChat", socket);
                 }
-                else if (data.type === "follow") {
-                    notification.generate_notification(data, "Thông báo", "follow", socket);
+                else if (data.type === "static") {
+                    notification.generate_notification(data, "Thông báo", "static", socket);
                 } else {
                     //notification.generate_notification(data, "Thông báo", "unknownType");
                 }

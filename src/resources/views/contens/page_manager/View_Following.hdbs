@@ -311,7 +311,7 @@
                             selectedSenderId: selectedFollowerID,
                             receiver_id: followerId,
                             content: `${selectedFollowerID} đã huỷ theo dõi ${followerId}`,
-                            type: "follow"
+                            type: "static"
                         }
                     })
                 });
