@@ -18,7 +18,6 @@ class User extends Model {
     declare password: string;
     declare avatar?: any;
     declare thumbnail?: any;
-    declare idGroup?: any;
 }
 
 
@@ -53,10 +52,6 @@ User.init({
         allowNull: true,
     },
     thumbnail: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    idGroup: {
         type: DataTypes.STRING,
         allowNull: true,
     }

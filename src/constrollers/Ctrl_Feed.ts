@@ -93,12 +93,17 @@ export class FeedController {
             ]
         });
 
-        return friendRelations.map((relation: any) => {
-            const friend = relation.id_userA === userId
-                ? relation.userB
-                : relation.userA;
-            return friend.toJSON();
-        });
+        return friendRelations
+            .map((relation: any) => {
+                const friend = relation.id_userA === userId
+                    ? relation.userB
+                    : relation.userA;
+
+                if (!friend) return null; // tránh lỗi
+
+                return friend.toJSON();
+            })
+            .filter(Boolean); // loại bỏ null
     }
 
     /**

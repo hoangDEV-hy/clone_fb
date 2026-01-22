@@ -6,7 +6,7 @@
             <input type="hidden" id="groupId" value="{{group_id}}{{Post.group_id}}">
             <input type="hidden" id="userId" value="{{user.id}}{{Post.user_id}}">
             {{#if user.id}}
-            <img src="/{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
+            <img src="{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
             <h3>{{user.name}}</h3>
             {{/if}}
             {{#if Post.user_id}}
@@ -134,7 +134,7 @@
             const base64 = dataUrl.split(',')[1];
             const mimeType = dataUrl.match(/^data:(.*);base64/)?.[1] || "";[1] || "";
             //conten
-            const conten = {
+            const content = {
                 text: text.value,
                 image: {
                     mimeType: mimeType, // Lấy mimeType
@@ -145,7 +145,7 @@
 
 
             const formData = new FormData();
-            formData.append('PostId', document.getElementById('PostId').value)
+            formData.append('PostId_curtain', document.getElementById('PostId').value)
             formData.append('userId', document.getElementById('userId').value);
             let group_id = document.getElementById('groupId').value;
             let scope = document.getElementById('scope').value;
@@ -153,12 +153,28 @@
             formData.append('groupId', group_id);
             formData.append('scope', scope);
 
-            formData.append('conten', JSON.stringify(conten));
+            formData.append('content', JSON.stringify(content));
 
             fetch('http://localhost:3000/Posts/save', {
-                method: 'Post',
+                method: 'POST',
                 body: formData
             })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        // Cách 1: quay lại trang trước
+                        window.history.back();
+
+                        // Cách 2 (nếu muốn chỉ rõ trang)
+                        // window.location.href = '/Posts';
+                    } else {
+                        alert('Lưu thất bại');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Có lỗi xảy ra');
+                });
         })
 
     });

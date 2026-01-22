@@ -42,7 +42,7 @@ import { Group } from "../models/group";
 import { Posts } from "./Posts";
 group_user.belongsTo(Group, { foreignKey: 'id_group', as: 'groups' });
 group_user.hasMany(Posts, {
-    foreignKey: 'user_id', // cột bất kỳ trong Posts, Sequelize không thực sự kiểm tra ở DB
+    foreignKey: 'group_id',
     as: 'Posts'
 });
 export { group_user };

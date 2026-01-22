@@ -6,6 +6,7 @@ import { User } from "../models/user";
 import { WhereOptions } from "sequelize";
 import { user_user } from "../models/user_user";
 import { group_user } from "../models/group_user";
+import { Group } from "../models/group";
 
 
 export let methods = {
@@ -16,16 +17,16 @@ export let methods = {
             throwError(err);
         }
     },
-    create: async (selectedPostIdOrigin: number, selectedUserId: string, selectedGroupId: number, selectedConten: string, selectedScope: string, selectedThink: string): Promise<Posts | null> => {
+    create: async (selectedPostIdOrigin: number, selectedUserId: string, selectedGroupId: number, selectedContent: string, selectedScope: string, selectedThink: string): Promise<Posts | null> => {
         try {
-            return await postModel.create({ PostId_origin: selectedPostIdOrigin, user_id: selectedUserId, group_id: selectedGroupId, contens: selectedConten, scope: selectedScope, think: selectedThink });
+            return await postModel.create({ PostId_origin: selectedPostIdOrigin, user_id: selectedUserId, group_id: selectedGroupId, contens: selectedContent, scope: selectedScope, think: selectedThink });
         } catch (err) {
             throwError(err);
         }
     },
-    update: async (selectedPostIdOrigin: number, selectedPostIdCurtain: number, selectedConten: string, selectedScope: string, selectedThink: string): Promise<number> => {
+    update: async (selectedPostIdOrigin: number, selectedPostIdCurtain: number, selectedContent: string, selectedScope: string, selectedThink: string): Promise<number> => {
         try {
-            const [affectedCount] = await postModel.up({ PostId_origin: selectedPostIdOrigin, contens: selectedConten, scope: selectedScope, think: selectedThink }, { id: selectedPostIdCurtain })
+            const [affectedCount] = await postModel.up({ PostId_origin: selectedPostIdOrigin, contens: selectedContent, scope: selectedScope, think: selectedThink }, { id: selectedPostIdCurtain })
             return affectedCount;
         } catch (err) {
             throwError(err);
@@ -38,9 +39,9 @@ export let methods = {
             throwError(err);
         }
     },
-    delPost: async (data: Partial<Posts>): Promise<number> => {
+    delPost: async (idPost: number): Promise<number> => {
         try {
-            return postModel.des(data);
+            return postModel.des({ id: idPost });
         } catch (err) {
             throwError(err);
         }

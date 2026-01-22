@@ -58,8 +58,8 @@ const methods = {
             if (existingUser) {
                 return null;
             }
-            const avatar: string = 'pictures/avatar.jpg';
-            const thumbnail: string = 'pictures/avatar.jpg'
+            const avatar: string = '/pictures/avatar.jpg';
+            const thumbnail: string = '/pictures/avatar.jpg'
             return await modelUser.createUser({ phoneNumber: selectedPhone, password: selectedPassword, avatar: avatar, thumbnail: thumbnail });
         } catch (err) {
             throwError(err);

@@ -7,37 +7,69 @@
     <title>Document</title>
     <link rel="stylesheet" href="/css/contens/page_manager/user.css">
     <style>
+        .edit-section {
+            display: none;
+        }
+
+        .edit-section.active {
+            display: block;
+        }
+
+        .user-info-input {
+            border: none;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        .user-info-input.editable {
+            border: 1px solid #ccc;
+            background: white;
+            pointer-events: auto;
+        }
     </style>
 </head>
 
 <body>
     <div class="head">
         <input type="hidden" id="profile_user_id" value="{{user.id}}">
-        <img src="/{{user.thumbnail}}" alt="ảnh thumbnai">
+        <img src="{{user.thumbnail}}" alt="ảnh thumbnai">
 
         <table>
             <tr>
                 <th>
                     <table>
-                        <img src="/{{user.avatar}}" alt="avt">
+                        <img src="{{user.avatar}}" alt="avt">
                         <!-- Button sẽ được cập nhật động -->
                         <button id="friendActionBtn" data-user-id="{{user.id}}" style="display: none;">
                             Đang tải...
                         </button>
+
                         {{#if config_interface}}
-                        <th style="width: 10%;">
+                        <!-- Các form upload ảnh - ẩn mặc định -->
+                        <th style="width: 10%;" class="edit-section" id="editImageSection">
                             <form action="/page_manager/user/upload/thumbnail" method="Post"
                                 enctype="multipart/form-data">
                                 <input type="file" name="image" accept="image/*" required>
-                                <button type="submit">Tải lên</button>
+                                <button type="submit">Thay thế ảnh thumbnail</button>
+                            </form>
+                            <form action="/page_manager/user/upload/avatar" method="Post" enctype="multipart/form-data">
+                                <input type="file" name="image" accept="image/*" required>
+                                <button type="submit">Thay thế ảnh Avatar</button>
                             </form>
                         </th>
 
-                        <th style="width: 90%;">
-                            <form action="/page_manager/user/update/avatar" method="Post">
-                                <input type="text" name="name" value="{{user.name}}">
-                                <input type="text" name="hastag" value="{{user.hastag}}">
-                                <button type="submit">xác nhận</button>
+                        <!-- Form thông tin - luôn hiển thị -->
+                        <th style="width: 90%;" id="editInfoSection">
+                            <form action="/page_manager/user/upload/informationuser" method="Post">
+                                <input type="text" name="name" value="{{user.name}}" class="user-info-input" readonly>
+                                <input type="text" name="hastag" value="{{user.alias}}" class="user-info-input"
+                                    readonly>
+                                <input type="text" name="hometown" value="{{user.hometown}}" class="user-info-input"
+                                    readonly>
+                                <input type="text" name="school" value="{{user.school}}" class="user-info-input"
+                                    readonly>
+
+                                <button type="submit" class="edit-section">xác nhận</button>
                             </form>
                         </th>
                         {{/if }}
@@ -46,7 +78,7 @@
                 <th>
                     {{#if config_interface}}
                     <div id="head_button">
-                        <button>chỉnh sửa trang cá nhân</button>
+                        <button id="toggleEditBtn">Chỉnh sửa trang cá nhân</button>
                     </div>
                     {{/if}}
                 </th>
@@ -57,33 +89,35 @@
     <div class="body">
         {{#if config_interface}}
         <div id="think">
-            <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
-            <button>Tạo tin</button>
+            <form action="/Posts" method="get"> <button>Tạo tin</button> </form>
         </div>
         {{/if}}
+
         <select name="sort">
             <option>--sort by--</option>
             <option value="like">Most Likes</option>
             <option value="commend">Most Commends</option>
             <option value="share">Most Shares</option>
         </select>
+
         {{#each Posts}}
         <div class="news">
-
-            <form action="/Post/interactions/share/delete=DELETE" method="Post" style="display:inline">
-                <input type="hidden" name="id" value="{{id}}">
+            {{#if ../config_interface}}
+            <form action="/Posts/delete" method="POST" style="display:inline" class="edit-section post-edit-controls">
+                <input type="hidden" name="PostId_curtain" value="{{id}}">
                 <button type="submit">delete</button>
             </form>
-            <form action="/Posts/update" method="Post" style="display:inline">
+            <form action="/Posts/update" method="Post" style="display:inline" class="edit-section post-edit-controls">
                 <input type="hidden" name="PostId_curtain" value="{{id}}">
                 <input type="hidden" name="PostId_original" value="{{PostId_original}}">
                 <button type="submit">update</button>
             </form>
+            {{/if}}
 
             <div class="bd_ct_news_nguoiDang">
                 <table>
                     <tr>
-                        <th> <img style="width: 50px;height: 50px;" src="/{{users.avatar}}" alt="ảnh con"></th>
+                        <th> <img style="width: 50px;height: 50px;" src="{{users.avatar}}" alt="ảnh con"></th>
                         <th>
                             <h3>{{users.name}}</h3>
                         </th>
@@ -136,6 +170,52 @@
     <script type="module">
         import handle_image from '/js/support/handle_image.js';
         import functionInteractions from '/js/interactions/functionInteractions.js'
+
+        // ============ EDIT TOGGLE MODULE ============
+        const EditToggle = {
+            isEditMode: false,
+
+            init() {
+                const toggleBtn = document.getElementById('toggleEditBtn');
+                if (!toggleBtn) return;
+
+                toggleBtn.addEventListener('click', () => {
+                    this.toggleEditMode();
+                });
+            },
+
+            toggleEditMode() {
+                this.isEditMode = !this.isEditMode;
+                const editSections = document.querySelectorAll('.edit-section');
+                const toggleBtn = document.getElementById('toggleEditBtn');
+                const userInfoInputs = document.querySelectorAll('.user-info-input');
+
+                // Toggle hiển thị các section ẩn
+                editSections.forEach(section => {
+                    if (this.isEditMode) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                // Toggle khả năng chỉnh sửa input
+                userInfoInputs.forEach(input => {
+                    if (this.isEditMode) {
+                        input.classList.add('editable');
+                        input.removeAttribute('readonly');
+                    } else {
+                        input.classList.remove('editable');
+                        input.setAttribute('readonly', 'readonly');
+                    }
+                });
+
+                // Cập nhật text button
+                if (toggleBtn) {
+                    toggleBtn.textContent = this.isEditMode ? 'Hủy chỉnh sửa' : 'Chỉnh sửa trang cá nhân';
+                }
+            }
+        };
 
         // ============ FRIEND MANAGEMENT MODULE ============
         const FriendManager = {
@@ -307,17 +387,20 @@
             },
 
             showSuccess(message) {
-                alert(message); // Bạn có thể thay bằng toast notification đẹp hơn
+                alert(message);
             },
 
             showError(message) {
-                alert(message); // Bạn có thể thay bằng toast notification đẹp hơn
+                alert(message);
             }
         };
 
         // ============ MAIN INITIALIZATION ============
         document.addEventListener('DOMContentLoaded', async () => {
             handle_image('.bd_ct_news_title', '.image_src_img', '.image_src_input')
+
+            // Initialize Edit Toggle
+            EditToggle.init();
 
             // Initialize Friend Management
             await FriendManager.init();

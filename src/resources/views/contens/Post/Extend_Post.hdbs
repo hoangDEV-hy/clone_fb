@@ -83,9 +83,9 @@
 
 
         document.getElementById('submit').addEventListener('click', async (e) => {
-            e.preventDefault();
+            e.preventDefault();/save
             //conten
-            const conten = {
+            const content = {
                 text: text.value,
                 image: data.value
 
@@ -100,7 +100,7 @@
             let scope = document.getElementById('scope').value;
             if (scope === '') scope = 'only_me';
             formData.append('scope', scope);
-            formData.append('conten', JSON.stringify(conten));
+            formData.append('content', JSON.stringify(conten));
             formData.append('think', document.getElementById('contens').value);
 
             try {

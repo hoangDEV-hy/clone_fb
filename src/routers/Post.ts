@@ -19,11 +19,6 @@ route.get(
                 return;
             }
 
-            if (!selectedGroupId) {
-                res.status(400).send('Group not found');
-                return;
-            }
-
             const user = await postController.selectUser(selectedIdUser);
             if (!user) {
                 res.status(401).send('Unauthorized');
@@ -42,7 +37,7 @@ route.get(
 );
 
 
-route.post('/update', authenticate.user_auth, async (req: any, res: Response): Promise<void> => {
+route.post('/update', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
 
         const { PostId_curtain } = req.body;
@@ -74,6 +69,31 @@ route.post('/update', authenticate.user_auth, async (req: any, res: Response): P
         throwError(err, res);
     }
 })
+
+route.post('/delete', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+    try {
+
+        const { PostId_curtain } = req.body;
+        if (!PostId_curtain) {
+            res.status(400).json({
+                message: 'PostId_curtain is required'
+            });
+            return;
+        }
+        const result = await postController.delPost(PostId_curtain);
+        if (result === 0) {
+            res.status(500).json({
+                message: 'Post not found'
+            });
+            return;
+        }
+        res.redirect('/main');
+    } catch (err) {
+        throwError(err, res);
+    }
+})
+
+
 import multer from 'multer';
 let uploadfile = multer({ storage: multer.memoryStorage() });
 
@@ -100,12 +120,12 @@ let uploadForm = multer({
 route.post('/save', uploadForm.none(), async (req: Request, res: Response): Promise<void> => {
     try {
 
-        let { selectedPostIdOrigin, selectedPostIdCurtain, selectedUserId, selectedGroupId, selectedConten, selectedScope, selectedThink } = req.body;
-        if (selectedPostIdOrigin === '') selectedPostIdOrigin = null;
+        let { PostId_original, PostId_curtain, userId, groupId, content, scope, think } = req.body;
+        if (PostId_original === '') PostId_original = null;
 
-        if (!selectedPostIdCurtain) await postController.create(selectedPostIdOrigin, selectedUserId, selectedGroupId, selectedConten, selectedScope, selectedThink);
+        if (!PostId_curtain) await postController.create(PostId_original, userId, groupId, content, scope, think);
         else {
-            await postController.update(selectedPostIdOrigin, selectedPostIdCurtain, selectedConten, selectedScope, selectedThink);
+            await postController.update(PostId_original, PostId_curtain, content, scope, think);
         }
         res.status(200).json({
             status: 'ok',

@@ -204,7 +204,7 @@ route.post('/upload/avatar', upload.single('image'), page_managerController.hand
         }
         const result = await page_managerController.updateAvatarUser(id, imagePath);
         if (result !== 0) {
-            res.status(200).json({ message: 'Updated successfully' });
+            res.redirect('/main');
         } else {
             res.status(500).json({ message: 'Update error' });
         }
@@ -227,7 +227,7 @@ route.post('/upload/thumbnail', upload.single('image'), page_managerController.h
         }
         const result = await page_managerController.updateThumbnailUser(id, imagePath);
         if (result !== 0) {
-            res.status(200).json({ message: 'Updated successfully' });
+            res.redirect('/main');
         } else {
             res.status(500).json({ message: 'Update error' });
         }
@@ -235,6 +235,27 @@ route.post('/upload/thumbnail', upload.single('image'), page_managerController.h
         throwError(err, res);
     }
 });
+
+
+
+route.post('/upload/informationuser', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
+    try {
+        const id = req.admin?.id;
+        if (!id) {
+            res.status(401).json({ message: 'Not allowed' });
+            return;
+        }
+        const { name, hastag, hometown, school  } = req.body as { name: string, hastag: string, hometown: string, school:string };
+        const result = await page_managerController.updateInformationsUser(id, name, hastag, hometown, school);
+        if (result !== 0) {
+            res.redirect('/main');
+        } else {
+            res.status(500).json({ message: 'Update error' });
+        }
+    } catch (err) {
+        throwError(err, res);
+    }
+})
 
 
 export { route }

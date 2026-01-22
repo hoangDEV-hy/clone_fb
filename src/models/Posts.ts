@@ -145,16 +145,22 @@ export let methods = {
             ]
         })
     },
+
     selectGroupsPost: async (userId: string) => {
         return await group_user.findAll({
-            where: { id_userA: userId, status: 'active' },
+            where: {
+                id_userA: userId,
+                status: 'active'
+            },
             include: [
                 {
                     model: Posts,
                     as: 'Posts',
                     required: true, // inner join
                     on: {
-                        '$Posts.group_id$': { [Op.eq]: sequelize.col('group_user.id_group') }
+                        '$Posts.group_id$': {
+                            [Op.eq]: sequelize.col('group_user.id_group')
+                        }
                     },
                     where: {
                         [Op.or]: [
@@ -181,8 +187,9 @@ export let methods = {
                     ]
                 }
             ]
-        })
+        });
     },
+
     selectSameGroupUsers: async (groupIds: number[], userId: string) => {
         return await group_user.findAll({
             where: {

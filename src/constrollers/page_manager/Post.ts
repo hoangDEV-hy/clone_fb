@@ -53,7 +53,7 @@ export const methods = {
     },
     delPost: async (id: number): Promise<number> => {
         try {
-            return postController.delPost({ id: id })
+            return postController.delPost(id)
         } catch (err) {
             throwError(err);
         }

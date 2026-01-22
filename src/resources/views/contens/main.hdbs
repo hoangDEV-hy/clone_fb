@@ -458,7 +458,7 @@
                         Trang cá nhân
                     </button>
                 </form>
-                <img src="/{{user.avatar}}" alt="ảnh đại diện">
+                <img src="{{user.avatar}}" alt="ảnh đại diện">
                 Tài khoản
                 </a>
                 <ul class="submenu menu">
@@ -566,7 +566,7 @@
                 <div class="bd_ct_news_nguoiDang">
                     <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
                         <div style="top:0%">
-                            <img src="/{{users.avatar}}" alt="avatar">
+                            <img src="{{users.avatar}}" alt="avatar">
                         </div>
                     </div>
                     <div class="bd_ct_n_nguoiDang_name">

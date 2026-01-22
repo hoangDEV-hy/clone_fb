@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+//import { NextFunction, Request, Response } from 'express';
 import { User, methods as userModel } from '../../models/user'; // đường dẫn model tùy theo dự án của bạn
 import throwError from '../../helpers/ThrowErrorOfController';
 
@@ -41,6 +41,13 @@ export let methods = {
         try {
 
             return await userModel.updateUser({ thumbnail: imagePath }, id);
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    updateInformationsUser: async (id: string, name: string, hastag: string, hometown: string, school: string): Promise<number> => {
+        try {
+            return await userModel.updateUser({ name: name,alias:hastag,  hometown: hometown, school: school }, id);
         } catch (err) {
             throwError(err);
         }
