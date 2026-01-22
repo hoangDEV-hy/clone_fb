@@ -102,6 +102,7 @@
 
         {{#each Posts}}
         <div class="news">
+            <input type="hidden" name="news" value="{{id}}">
             {{#if ../config_interface}}
             <form action="/Posts/delete" method="POST" style="display:inline" class="edit-section post-edit-controls">
                 <input type="hidden" name="PostId_curtain" value="{{id}}">
@@ -141,7 +142,7 @@
 
                     <h3>{{contens.text}}</h3>
                     <!-- input ẩn lưu ảnh -->
-                    <input type="hidden" class="image_src_input" value='{{{contens.image}}}'>
+                    <input type="hidden" class="image_src_input" value='{{{json contens.image}}}'>
                     <!-- ảnh hiển thị -->
                     <img class="image_src_img" alt="ảnh news">
                 </div>
@@ -474,7 +475,7 @@
             //for logic the program
             (async () => {
                 //take ids for load interactions
-                const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="id"]');
+                const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
                 //load interactions
                 data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
                 //set like

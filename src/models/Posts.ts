@@ -229,6 +229,64 @@ export let methods = {
             throwError(err);
         }
     },
+    selectPostsWithUserAndGroup: async (selectedTargetId: string): Promise<Posts[]> => {
+        try {
+            return await Posts.findAll({
+
+                where: { user_id: selectedTargetId },
+                include: [
+                    {
+                        model: User,
+                        as: 'users',
+                        required: false
+
+                    },
+                    {
+                        model: Group,
+                        as: 'groups',
+                        required: false
+                    }
+                ]
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPostWithUserGroupAndCountInteraction: async (selectedTargetId: string, selectedSort: string): Promise<Posts[]> => {
+        try {
+            return await Posts.findAll({
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM interactions AS i
+                WHERE i.id_Posts = Posts.id
+                  AND i.classify LIKE '${selectedSort}'
+            )`),
+                            'interactionCount'
+                        ]
+                    ]
+                },
+                where: { user_id: selectedTargetId },
+                include: [
+                    {
+                        model: Group,
+                        as: 'groups',
+                        required: false
+                    },
+                    {
+                        model: User,
+                        as: 'users',
+                        required: false
+                    }
+                ],
+                order: [[sequelize.literal('interactionCount'), 'DESC']]
+            })
+        } catch (err) {
+            throwError(err);
+        }
+    },
     selectPostsWithUser: async (data: Partial<Posts>) => {
         try {
             return await Posts.findAll({

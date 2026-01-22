@@ -1,6 +1,10 @@
-//import { NextFunction, Request, Response } from 'express';
 import { User, methods as userModel } from '../../models/user'; // đường dẫn model tùy theo dự án của bạn
 import throwError from '../../helpers/ThrowErrorOfController';
+import { methods as postController } from '../Posts'
+import transformPosts from '../../helpers/TransformerPost';
+
+import contain_posts from '../../types/ContainPost';
+
 
 
 export let methods = {
@@ -10,9 +14,6 @@ export let methods = {
         } catch (err) {
             throwError(err);
         }
-        // if (!user) {
-        //     res.status(401).json({ message: 'Invalid user ID' });
-        // } else res.json({ user });
     },
     updateUser: async (id: string, name: string): Promise<number> => {
         try {
@@ -21,13 +22,6 @@ export let methods = {
         catch (err) {
             throwError(err);
         }
-    },
-    handleUpload: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        if (!req.file) {
-            res.status(400).send('No file uploaded.');
-            return;
-        }
-        next();
     },
     updateAvatarUser: async (id: string, imagePath: string): Promise<number> => {
         try {
@@ -47,11 +41,50 @@ export let methods = {
     },
     updateInformationsUser: async (id: string, name: string, hastag: string, hometown: string, school: string): Promise<number> => {
         try {
-            return await userModel.updateUser({ name: name,alias:hastag,  hometown: hometown, school: school }, id);
+            return await userModel.updateUser({ name: name, alias: hastag, hometown: hometown, school: school }, id);
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPostWithSort: async (
+        selectedTargetId: string,
+        selectedSort: string
+    ): Promise<contain_posts[] | null> => {
+        try {
+            const selectedPosts =
+                await postController.selectPostWithUserGroupAndCountInteraction(
+                    selectedTargetId,
+                    selectedSort
+                );
+
+            if (selectedPosts.length > 0) {
+                return transformPosts(selectedPosts);
+            }
+
+            return null;
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPosts: async (
+        selectedTargetId: string
+    ): Promise<contain_posts[] | null> => {
+        try {
+            const selectedPosts =
+                await postController.selectPostsWithUserAndGroup(
+                    selectedTargetId
+                );
+
+            if (selectedPosts.length > 0) {
+                return transformPosts(selectedPosts);
+            }
+
+            return null;
         } catch (err) {
             throwError(err);
         }
     }
+
 }
 
 

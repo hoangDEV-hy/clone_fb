@@ -6,13 +6,26 @@ import { User } from "../models/user";
 import { WhereOptions } from "sequelize";
 import { user_user } from "../models/user_user";
 import { group_user } from "../models/group_user";
-import { Group } from "../models/group";
 
 
 export let methods = {
     selectPostWithUserAndGroup: async (selectedPostIdCurtain: number): Promise<Posts | null> => {
         try {
             return await postModel.selectPostWithUserAndGroup(selectedPostIdCurtain);
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPostsWithUserAndGroup: async (selectedTargetId: string): Promise<Posts[]> => {
+        try {
+            return await postModel.selectPostsWithUserAndGroup(selectedTargetId);
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectPostWithUserGroupAndCountInteraction: async (selectedTargetId: string, selectedSort: string): Promise<Posts[]> => {
+        try {
+            return await postModel.selectPostWithUserGroupAndCountInteraction(selectedTargetId, selectedSort);
         } catch (err) {
             throwError(err);
         }
@@ -68,6 +81,7 @@ export let methods = {
             throwError(err);
         }
     },
+
     selectFriendsPost: async (selectedUserId: string): Promise<user_user[]> => {
         try {
             return postModel.selectFriendsPost(selectedUserId);
