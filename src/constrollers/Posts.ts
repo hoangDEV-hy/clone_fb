@@ -109,5 +109,12 @@ export let methods = {
         } catch (err) {
             throwError(err);
         }
+    },
+    selectPostById: async (selectedGroupId: number): Promise<Posts | null> => {
+        try {
+            return await postModel.selectPost({ id: selectedGroupId });
+        } catch (err) {
+            throwError(err);
+        }
     }
 }

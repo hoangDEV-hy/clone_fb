@@ -77,6 +77,13 @@ export let methods = {
             throwError(err);
         }
     },
+    selectPost: async (data: Partial<Posts>) => {
+        try {
+            return await Posts.findOne({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
+    },
     des: async (data: Partial<Posts>) => {
         try {
             return await Posts.destroy({ where: data });

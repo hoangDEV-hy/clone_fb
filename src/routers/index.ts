@@ -5,7 +5,7 @@ import { route as page_manager } from './page_manager'
 import { route as Posts } from './Post'
 import cors from 'cors';
 import { route as main } from './main'
-import { route as interactions } from './interactions'
+import { router as interactions } from './interactions'
 import { route as upload } from './upload'
 import { route as chat } from './chat'
 import { route as notification } from './notification'

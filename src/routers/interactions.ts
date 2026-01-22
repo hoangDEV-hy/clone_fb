@@ -1,28 +1,35 @@
 import express from "express";
 import { authenticate } from "../middware/auth";
-import { methods as model_ExtPosts, interactions } from "../models/interactions";
-import { Response } from "express";
+import { Request, Response } from "express";
 import multer from "multer";
-import { methods as model_Posts, Posts } from '../models/Posts';
-import { User } from "../models/user";
-import { Group } from "../models/group";
-import { where } from "sequelize";
-import { Op } from "sequelize"
-import { QueryTypes } from "sequelize";
-import { sequelize } from "../configs/sql";
+import { methods as interactionsController } from '../constrollers/Ctrl_Interactions'
+import throwError from "../helpers/ThrowErrorOfRouter";
+import { methods as postController } from '../constrollers/Posts'
+import { transformPost } from "../helpers/TransformerPost";
+
+
+import ExtendRequest from "../types/Type_ExtendRequest";
+
+
+
 const upload = multer();
-let route = express.Router();
+let router = express.Router();
 
 
 
 //interactions_load
-route.post('/interactions/load', upload.none(), async (req: any, res: Response): Promise<any> => {
+router.post('/interactions/load', upload.none(), async (req: Request, res: Response): Promise<void> => {
     try {
         const { id_Posts, id_user } = req.body;
+        if (!id_Posts) {
+            res.status(202).json({ ok: "khong co bai viet" });
+            return;
+        }
         const Posts_data = JSON.parse(id_Posts);
         //check id_Posts
-        if (!Array.isArray(Posts_data) || Posts_data.length === 0 || !id_user) {
-            return res.status(400).json({ error: "id_Posts (phải là mảng có ít nhất 1 phần tử) và id_user là bắt buộc" });
+        if (!id_user) {
+            res.status(401).json({ error: "không có quyền" });
+            return;
         }
 
 
@@ -30,50 +37,15 @@ route.post('/interactions/load', upload.none(), async (req: any, res: Response):
         // --------------------------
         // Lấy số like và check user đã like chưa
         // --------------------------
-        const sl_like_check: any = await sequelize.query(
-            `SELECT id_Posts,
-        COUNT(*) AS totalLikes,
-        CASE WHEN SUM(CASE WHEN id_user = :id_user THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END AS likedByUser
-     FROM interactions
-     WHERE id_Posts IN (:Posts_data) AND classify = 'like'
-     GROUP BY id_Posts`,
-            {
-                replacements: { Posts_data, id_user },
-                type: QueryTypes.SELECT
-            }
-        );
+        const sl_like_check = await interactionsController.selectLikeStatus(Posts_data, id_user);
 
 
         // Shares
-        const sl_share: any = await interactions.findAll({
-            attributes: [
-                'id_Posts',
-                [sequelize.fn('COUNT', sequelize.col('id_Posts')), 'totalShares']
-            ],
-            where: {
-                id_Posts: Posts_data, // mảng các id bài viết
-                classify: 'share'
-            },
-            group: ['id_Posts']
-        });
+        const sl_share = await interactionsController.selectedShareCount(Posts_data);
 
 
         // Comments
-        const commend = await interactions.findAll({
-            where: {
-                classify: 'commend',
-                id_Posts: Posts_data
-            },
-            attributes: ['id', 'id_Posts', 'id_user', 'content'], // chỉ các cột có trong interactions
-            include: [
-                {
-                    model: User,
-                    attributes: ['name', 'avatar'], // lấy name, avatar từ bảng users,
-                    required: true
-
-                }
-            ]
-        });
+        const commend = await interactionsController.selectCommendData(Posts_data);
 
 
         // Send response
@@ -81,12 +53,11 @@ route.post('/interactions/load', upload.none(), async (req: any, res: Response):
         res.json(interactions_data);
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Internal server error" });
+        throwError(err, res);
     }
 });
 
-route.post('/like', async (req: any, res: Response) => {
+router.post('/like', async (req: Request, res: Response) => {
     //trans des in db and in req.body
     try {
         // Lấy danh sách ID cần xoá
@@ -95,11 +66,7 @@ route.post('/like', async (req: any, res: Response) => {
             .map((item: any) => item.id_Posts);
         // Xoá trong DB
         if (idsToDelete.length > 0) {
-            await interactions.destroy({
-                where: {
-                    id_Posts: { [Op.in]: idsToDelete },
-                }
-            });
+            await interactionsController.destroyInteractions(idsToDelete);
             for (const key of Object.keys(req.body)) {
                 if (idsToDelete.includes(req.body[key].id_Posts)) {
                     delete req.body[key];
@@ -114,7 +81,7 @@ route.post('/like', async (req: any, res: Response) => {
     }
     try {
         const dataToInsert: any = Object.values(req.body)
-        await interactions.bulkCreate(dataToInsert);
+        await interactionsController.createInteractions(dataToInsert);
     } catch (error) {
         console.log(error);
     }
@@ -124,94 +91,88 @@ route.post('/like', async (req: any, res: Response) => {
 
 
 
-route.post('/share', authenticate.user_auth, async (req: any, res: Response): Promise<any> => {
-    const { id_Post } = req.body;
-    let Post = await Posts.findOne({
-        where: { id: id_Post }
-    });
-    let contenObj = JSON.parse(Post!.contens);
-    if (typeof contenObj === 'string') {
-        contenObj = JSON.parse(contenObj);
-    }
-    const Posts_tranforme = {
-        text: contenObj.text,
-        image: JSON.stringify(contenObj.image)
-    }
-    res.render('contens/Post/Extend_Post', { Post: Post?.toJSON(), conten: Posts_tranforme })
-})
+router.post(
+    '/share',
+    authenticate.user_auth,
+    async (req: Request, res: Response): Promise<void> => {
+        const { id_Post } = req.body;
 
-route.post('/share/save', authenticate.user_auth, upload.none(), async (req: any, res: Response): Promise<any> => {
+        const post = await postController.selectPostById(id_Post);
+
+        if (post === null) {
+            res.status(500).send({ error: 'khong the tim bai viet' });
+            return;
+        }
+
+        const postTransformer = transformPost.transformPostReturnContent(post);
+
+        res.render('contens/Post/Extend_Post', {
+            Post: post.toJSON(),
+            conten: postTransformer,
+        });
+    }
+);
+
+router.post('/share/save', authenticate.user_auth, upload.none(), async (req: ExtendRequest, res: Response): Promise<void> => {
     const { PostId_original } = req.body;
-    const id_user = req.admin.id;
-    await interactions.create({ id_user: id_user, id_Posts: PostId_original, classify: 'share' });
-})
-
-route.delete('/share/delete', authenticate.user_auth, upload.none(), async (req: any, res: Response): Promise<any> => {
-    const { id } = req.body;
-    try {
-        await model_Posts.des(id);
-    } catch (error) {
-        res.send(error);
+    const id_user = req.admin?.id;
+    if (!id_user || !PostId_original) {
+        res.status(500).send({ error: "idUser,idPost khong ton tai" });
+        return;
     }
-    await model_ExtPosts.des({ id_Posts: id });
+    await interactionsController.createInteraction({ id_user: id_user, id_Posts: PostId_original, classify: 'share' });
 })
 
-route.post('/Post/load', authenticate.user_auth, upload.none(), async (req: any, res: Response) => {
+router.delete('/share/delete', authenticate.user_auth, upload.none(), async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.body;
+        if (!id) {
+            res.status(500).send({ error: "khong ton tai id post" });
+        }
+        await postController.delPost(id);
+        await interactionsController.destroyInteractionByIdPost(id);
+    } catch (error) {
+        throwError(error, res);
+    }
+})
+
+router.post('/Post/load', authenticate.user_auth, upload.none(), async (req: Request, res: Response): Promise<void> => {
     const { id_Post } = req.body;
-    const post = await Posts.findOne({
-
-        where: { id: id_Post },
-        include: [
-            {
-                model: User,
-                as: 'users',
-                required: false // inner join
-
-            },
-            {
-                model: Group,
-                as: 'groups',
-                required: false
-            }
-        ]
-    });
-    let contens = JSON.parse(post!.contens);
-
-    //contens = JSON.parse(contens);
-
-    contens = {
-        text: contens.text,
-        //image: JSON.stringify(contens.image) // giữ nguyên object/array thay vì stringify
-        image: typeof contens.image === "string" ? JSON.parse(contens.image) : contens.image
-    };
-    post!.contens = contens;
+    if (!id_Post) {
+        res.status(500).send({ error: "khong ton tai id post" });
+    }
+    let post = await postController.selectPostWithUserAndGroup(id_Post);
+    if (!post) {
+        res.status(500).json({
+            error: 'Post không tồn tại'
+        });
+        return;
+    }
+    (post as any).contens = transformPost.transformPostReturnContent(post);
     let Post = post?.toJSON();
     res.json({ Post });
 })
-route.get('/iframe/commend', (req, res) => {
+router.get('/iframe/commend', (req, res) => {
     res.render('contens/Post/commend_page', { layout: false }); // view sẵn có HTML + CSS
 });
 
-route.post('/commend', upload.none(), (req: any, res: Response) => {
-    if (req.body.length > 0) interactions.bulkCreate(req.body);
+router.post('/commend', upload.none(), (req: Request, res: Response): void => {
+    if (req.body.length > 0) interactionsController.createInteractions(req.body);
+    return;
 })
 
-route.post('/commend/del', upload.none(), (req: any) => {
+router.post('/commend/del', upload.none(), (req: Request) => {
     //using the function destroy
-    interactions.destroy({ where: { id: { [Op.in]: req.body } } })
-
+    interactionsController.destroyInteractions(req.body);
 })
 
-route.post('/commend/up', upload.none(), async (req: any) => {
+router.post('/commend/up', upload.none(), async (req: Request) => {
     //using the function 
     const updatedCommends = req.body;
     await Promise.all(updatedCommends.map((c: any) =>
-        interactions.update(
-            { content: c.content },   // cột cần update
-            { where: { id: c.id } }
-        )
+        interactionsController.updateInteraction(c.id, c.content)
     ));
 
 })
 
-export { route };
+export { router };

@@ -1,6 +1,10 @@
 import { sequelize } from "../configs/sql";
 import { DataTypes, Model } from "sequelize";
 import { User } from "./user";
+import throwError from "../helpers/ThrowErrorOfSqlQuery";
+import { QueryTypes } from "sequelize";
+import { Op } from 'sequelize';
+
 
 class interactions extends Model {
     declare id: number;
@@ -56,16 +60,110 @@ interactions.belongsTo(User, { foreignKey: 'id_user' })
 export { interactions };
 
 export let methods = {
-    create: async (value: { [key: string]: string }) => {
-        return await interactions.create(value);
+    createInteraction: async (data: Partial<interactions>): Promise<interactions> => {
+        try {
+            return await interactions.create(data);
+        } catch (err) {
+            throwError(err);
+        }
     },
-    select: async (value: { [key: string]: any }) => {
-        return await interactions.findAll({ where: value });
+    selectInteractions: async (data: Partial<interactions>): Promise<interactions[]> => {
+
+        try {
+            return await interactions.findAll({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    des: async (value: { [key: string]: any }) => {
-        return await interactions.destroy({ where: value });
+    destroyInteraction: async (data: Partial<interactions>): Promise<number> => {
+        try {
+            return await interactions.destroy({ where: data });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    up: async (value: { [key: string]: any }, conditions: { [key: string]: any }) => {
-        return await interactions.update(value, { where: conditions });
-    }
+    updateInteraction: async (data: Partial<interactions>, conditions: Partial<interactions>): Promise<number> => {
+        try {
+            const [result] = await interactions.update(data, { where: conditions });
+            return result;
+        } catch (err) {
+            throwError(err);
+        }
+
+    },
+    selectLikeStatus: async (selectedIdPosts: number[], selectedIdUser: string): Promise<interactions[]> => {
+        try {
+            return await sequelize.query(
+                `SELECT id_Posts,
+        COUNT(*) AS totalLikes,
+        CASE WHEN SUM(CASE WHEN id_user = :id_user THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END AS likedByUser
+     FROM interactions
+     WHERE id_Posts IN (:Posts_data) AND classify = 'like'
+     GROUP BY id_Posts`,
+                {
+                    replacements: { selectedIdPosts, selectedIdUser },
+                    type: QueryTypes.SELECT
+                }
+            );
+
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectedShareCount: async (selectedIdPosts: number[]): Promise<interactions[]> => {
+        try {
+            return await interactions.findAll({
+                attributes: [
+                    'id_Posts',
+                    [sequelize.fn('COUNT', sequelize.col('id_Posts')), 'totalShares']
+                ],
+                where: {
+                    id_Posts: selectedIdPosts, // mảng các id bài viết
+                    classify: 'share'
+                },
+                group: ['id_Posts']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    selectCommendData: async (selectedIdPosts: number[]): Promise<interactions[]> => {
+        try {
+            return await interactions.findAll({
+                where: {
+                    classify: 'commend',
+                    id_Posts: selectedIdPosts
+                },
+                attributes: ['id', 'id_Posts', 'id_user', 'content'], // chỉ các cột có trong interactions
+                include: [
+                    {
+                        model: User,
+                        attributes: ['name', 'avatar'], // lấy name, avatar từ bảng users,
+                        required: true
+
+                    }
+                ]
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    destroyInteractions: async (selectedInteractionIds: number[]): Promise<number> => {
+        try {
+            return await interactions.destroy({
+                where: {
+                    id: { [Op.in]: selectedInteractionIds },
+                },
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    createInteractions: async (data: Partial<interactions>[]): Promise<interactions[]> => {
+        try {
+            return await interactions.bulkCreate(data);
+        } catch (err) {
+            throwError(err);
+        }
+    },
 }
