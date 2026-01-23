@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { authenticate } from '../../middware/auth'
 import express from "express"
 import { methods as pageManagerPostController } from '../../constrollers/page_manager/Post'
-import transformPosts from "../../helpers/TransformerPost";
+import { transformPostServices } from "../../helpers/TransformerPost";
 
 import ExtendRequest from "../../types/Type_ExtendRequest";
 import throwError from "../../helpers/ThrowErrorOfRouter";
@@ -136,7 +136,7 @@ route.get(
             }
 
             // ===== Transform =====
-            const tranAllPosts = transformPosts(post);
+            const tranAllPosts = transformPostServices.transformPosts(post);
 
             res.render('contens/page_manager/Post', {
                 Posts: tranAllPosts,
@@ -171,7 +171,7 @@ route.get('/admin/Post/sort', async (req: ExtendRequest, res: Response): Promise
             return;
         }
         // ===== Transform =====
-        const tranAllPosts = transformPosts(post);
+        const tranAllPosts = transformPostServices.transformPosts(post);
 
         return res.render('contens/page_manager/Post', {
             Posts: tranAllPosts,

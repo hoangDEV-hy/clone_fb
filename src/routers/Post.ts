@@ -117,13 +117,20 @@ let uploadForm = multer({
     }
 });
 
-route.post('/save', uploadForm.none(), async (req: Request, res: Response): Promise<void> => {
+route.post('/save', authenticate.user_auth, uploadForm.none(), async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
-
-        let { PostId_original, PostId_curtain, userId, groupId, content, scope, think } = req.body;
+        const selectedUserId = req.admin?.id;
+        if (!selectedUserId) {
+            res.status(403).json({
+                status: 'error',
+                message: 'Bạn không có quyền chia sẻ hoặc lưu bài viết'
+            });
+            return;
+        }
+        let { PostId_original, PostId_curtain, groupId, content, scope, think } = req.body;
         if (PostId_original === '') PostId_original = null;
 
-        if (!PostId_curtain) await postController.create(PostId_original, userId, groupId, content, scope, think);
+        if (!PostId_curtain) await postController.create(PostId_original, selectedUserId, groupId, content, scope, think);
         else {
             await postController.update(PostId_original, PostId_curtain, content, scope, think);
         }

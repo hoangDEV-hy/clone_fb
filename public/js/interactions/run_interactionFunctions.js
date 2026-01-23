@@ -14,11 +14,11 @@ export default function interactions(change_like, id_user, nameContainIframe, da
             functionInteractions.send_commends(e, nameContainIframe, "myIframe", '.my_profile img', id_user, data_load);
         })
     })
-    //hander_dataIframe
+    //handle_dataiframe
     window.addEventListener('message', e => {
         if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
 
-        functionInteractions.hander_dataIframe(
+        functionInteractions.handle_dataiframe(
             e,
             add_commends,
             deleted_commends,

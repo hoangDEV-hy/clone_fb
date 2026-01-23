@@ -563,6 +563,7 @@
             {{#each allPosts}}
             <div class="news">
                 <input type="hidden" name="news" value="{{id}}">
+                <input type="hidden" name="post_owner_id" value="{{users.id}}">
                 <div class="bd_ct_news_nguoiDang">
                     <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
                         <div style="top:0%">

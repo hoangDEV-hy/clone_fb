@@ -1,3 +1,4 @@
+import { Transaction } from 'sequelize';
 import throwError from '../helpers/ThrowErrorOfController';
 import { methods as interactionsModel } from '../models/interactions'
 
@@ -40,23 +41,23 @@ export const methods = {
             throwError(err);
         }
     },
-    destroyInteractions: async (selectedInteractionIds: number[]): Promise<number> => {
+    destroyInteractions: async (selectedInteractionIds: number[], transaction?: Transaction): Promise<number> => {
         try {
-            return await interactionsModel.destroyInteractions(selectedInteractionIds);
+            return await interactionsModel.destroyInteractions(selectedInteractionIds, transaction);
         } catch (err) {
             throwError(err);
         }
     },
-    createInteractions: async (addedInteractions: interactions[]): Promise<interactions[]> => {
+    createInteractions: async (addedInteractions: interactions[], transaction?: Transaction): Promise<interactions[]> => {
         try {
-            return await interactionsModel.createInteractions(addedInteractions);
+            return await interactionsModel.createInteractions(addedInteractions, transaction);
         } catch (err) {
             throwError(err);
         }
     },
-    createInteraction: async (data: Partial<interactions>): Promise<interactions> => {
+    createInteraction: async (data: Partial<interactions>, transaction?: Transaction): Promise<interactions> => {
         try {
-            return await interactionsModel.createInteraction(data);
+            return await interactionsModel.createInteraction(data, transaction);
         } catch (err) {
             throwError(err);
         }

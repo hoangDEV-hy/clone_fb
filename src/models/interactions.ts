@@ -1,5 +1,5 @@
 import { sequelize } from "../configs/sql";
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Transaction } from "sequelize";
 import { User } from "./user";
 import throwError from "../helpers/ThrowErrorOfSqlQuery";
 import { QueryTypes } from "sequelize";
@@ -60,9 +60,9 @@ interactions.belongsTo(User, { foreignKey: 'id_user' })
 export { interactions };
 
 export let methods = {
-    createInteraction: async (data: Partial<interactions>): Promise<interactions> => {
+    createInteraction: async (data: Partial<interactions>, transaction?: Transaction): Promise<interactions> => {
         try {
-            return await interactions.create(data);
+            return await interactions.create(data, { transaction });
         } catch (err) {
             throwError(err);
         }
@@ -101,7 +101,10 @@ export let methods = {
      WHERE id_Posts IN (:Posts_data) AND classify = 'like'
      GROUP BY id_Posts`,
                 {
-                    replacements: { selectedIdPosts, selectedIdUser },
+                    replacements: {
+                        id_user: selectedIdUser,
+                        Posts_data: selectedIdPosts
+                    },
                     type: QueryTypes.SELECT
                 }
             );
@@ -148,20 +151,21 @@ export let methods = {
             throwError(err);
         }
     },
-    destroyInteractions: async (selectedInteractionIds: number[]): Promise<number> => {
+    destroyInteractions: async (selectedInteractionIds: number[], transaction?: Transaction): Promise<number> => {
         try {
             return await interactions.destroy({
                 where: {
                     id: { [Op.in]: selectedInteractionIds },
                 },
+                transaction
             });
         } catch (err) {
             throwError(err);
         }
     },
-    createInteractions: async (data: Partial<interactions>[]): Promise<interactions[]> => {
+    createInteractions: async (data: Partial<interactions>[], transaction?: Transaction): Promise<interactions[]> => {
         try {
-            return await interactions.bulkCreate(data);
+            return await interactions.bulkCreate(data, { transaction });
         } catch (err) {
             throwError(err);
         }

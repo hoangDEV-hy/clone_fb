@@ -1,7 +1,7 @@
 import { User, methods as userModel } from '../../models/user'; // đường dẫn model tùy theo dự án của bạn
 import throwError from '../../helpers/ThrowErrorOfController';
 import { methods as postController } from '../Posts'
-import transformPosts from '../../helpers/TransformerPost';
+import { transformPostServices } from '../../helpers/TransformerPost';
 
 import contain_posts from '../../types/ContainPost';
 
@@ -58,7 +58,7 @@ export let methods = {
                 );
 
             if (selectedPosts.length > 0) {
-                return transformPosts(selectedPosts);
+                return transformPostServices.transformPosts(selectedPosts);
             }
 
             return null;
@@ -76,7 +76,7 @@ export let methods = {
                 );
 
             if (selectedPosts.length > 0) {
-                return transformPosts(selectedPosts);
+                return transformPostServices.transformPosts(selectedPosts);
             }
 
             return null;

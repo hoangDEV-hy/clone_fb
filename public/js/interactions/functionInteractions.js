@@ -97,19 +97,29 @@ const functionInteractions = {
         const isCheck = clicked_post.target.checked;
         const id_Post = clicked_post.target.dataset.id;
         const method = isCheck ? "Post" : "DELETE";
+        const postElement = clicked_post.target.closest('.news');
+        const postOwnerIdInput = postElement.querySelector('input[name="post_owner_id"]');
+        const postOwnerId = postOwnerIdInput ? postOwnerIdInput.value : null;
 
         change_like[id_Post] = {
             id_user,
             id_Posts: id_Post,
             classify: 'like',
-            method
+            method,
+            notification_value: isCheck ? {
+                type: 'static',
+                selectedIdChatRoom: null,
+                selectedSenderId: id_user,
+                receiver_id: postOwnerId,
+                content: `${id_user} đã thích bài viết ${id_Post} của ${postOwnerId}`
+            } : null // Không gửi notification khi unlike
         };
 
         console.log('change_like done')
         return change_like;
 
     },
-    hander_dataIframe: (take_data, add_commends, deleted_commends, update_commends, containIframeName, change_like, id_user, onUpdate) => {
+    handle_dataiframe: (take_data, add_commends, deleted_commends, update_commends, containIframeName, change_like, id_user, onUpdate) => {
 
         if (take_data.data.type === 'interactions_an_Post_Data') {
             document.querySelector(containIframeName).style.display = "none";
@@ -119,17 +129,46 @@ const functionInteractions = {
             // Xử lý Like
             if (data.check_like !== undefined) {
                 let method = data.check_like ? 'Post' : 'DELETE';
+                // Lấy post owner từ DOM
+                const postElement = document.querySelector(`input[name="news"][value="${data.id_Posts}"]`)?.closest('.news');
+                const postOwnerIdInput = postElement?.querySelector('input[name="post_owner_id"]');
+                const postOwnerId = postOwnerIdInput ? postOwnerIdInput.value : null;
                 change_like[data.id_Posts] = {
                     id_user,
                     id_Posts: data.id_Posts,
                     classify: 'like',
-                    method
+                    method,
+                    notification_value: isCheck ? {
+                        type: 'static',
+                        selectedIdChatRoom: null,
+                        selectedSenderId: id_user,
+                        receiver_id: postOwnerId,
+                        content: `${id_user} đã thích bài viết ${data.id_Posts} của ${postOwnerId}`
+                    } : null // Không gửi notification khi unlike
                 };
                 document.getElementById(data.id_Posts).checked = data.check_like;
             }
 
 
-            add_commends = data.add_commends ?? [];
+            // Xử lý Comments - thêm notification data
+            if (data.add_commends && data.add_commends.length > 0) {
+                const postElement = document.querySelector(`input[name="news"][value="${data.id_Posts}"]`)?.closest('.news');
+                const postOwnerIdInput = postElement?.querySelector('input[name="post_owner_id"]');
+                const postOwnerId = postOwnerIdInput ? postOwnerIdInput.value : null;
+
+                add_commends = data.add_commends.map(comment => ({
+                    ...comment,
+                    notification_value: {
+                        type: 'comment',
+                        selectedIdChatRoom: null,
+                        selectedSenderId: id_user,
+                        receiver_id: postOwnerId,
+                        content: `${id_user} đã bình luận: "${comment.content.substring(0, 30)}${comment.content.length > 30 ? '...' : ''}" tại bài viết ${data.id_Posts} của ${postOwnerId}`
+                    }
+                }));
+            } else {
+                add_commends = [];
+            }
             deleted_commends = data.deletedCommends ?? [];
             update_commends = data.updateCommends ?? [];
         }
@@ -141,38 +180,96 @@ const functionInteractions = {
             add_commends
         });
 
-        console.log('hander_dataIframe done');
+        console.log('handle_dataiframe done');
 
 
     },
-    save_toDb: (deleted_commends, add_commends, update_commends, change_like) => {
+    save_toDb: async (deleted_commends, add_commends, update_commends, change_like) => {
 
-        // gửi like
-        if (change_like != null) {
+        // Gửi like với notification
+        if (change_like && Object.keys(change_like).length > 0) {
+            try {
+                const response = await fetch('/Post/like', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(change_like)
+                });
 
-            const likeBlob = new Blob([JSON.stringify(change_like)], { type: 'application/json' });
-            navigator.sendBeacon('/Post/like', likeBlob);
+                if (!response.ok) {
+                    console.error('Failed to save likes');
+                }
+            } catch (error) {
+                console.error('Error saving likes:', error);
+                // Fallback to sendBeacon if fetch fails
+                const likeBlob = new Blob([JSON.stringify(change_like)], { type: 'application/json' });
+                navigator.sendBeacon('/Post/like', likeBlob);
+            }
         }
 
-        // gửi comment
+        // Gửi comment với notification
+        if (add_commends && add_commends.length > 0) {
+            try {
+                const response = await fetch('/Post/commend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(add_commends)
+                });
 
-        if (add_commends.length > 0) {
-
-            const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
-            navigator.sendBeacon('/Post/commend', commendBlob);
+                if (!response.ok) {
+                    console.error('Failed to save comments');
+                }
+            } catch (error) {
+                console.error('Error saving comments:', error);
+                // Fallback to sendBeacon
+                const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
+                navigator.sendBeacon('/Post/commend', commendBlob);
+            }
         }
 
-        //send a deleted_commends
-        if (deleted_commends.length > 0) {
+        // Gửi deleted comments
+        if (deleted_commends && deleted_commends.length > 0) {
+            try {
+                const response = await fetch('/Post/commend/del', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(deleted_commends)
+                });
 
-            const delCommends = new Blob([JSON.stringify(deleted_commends)], { type: 'application/json' });
-
-            navigator.sendBeacon('/Post/commend/del', delCommends);
+                if (!response.ok) {
+                    console.error('Failed to delete comments');
+                }
+            } catch (error) {
+                console.error('Error deleting comments:', error);
+                const delCommends = new Blob([JSON.stringify(deleted_commends)], { type: 'application/json' });
+                navigator.sendBeacon('/Post/commend/del', delCommends);
+            }
         }
-        //send a update_commends
-        if (update_commends.length > 0) {
-            const upCommends = new Blob([JSON.stringify(update_commends)], { type: 'application/json' });
-            navigator.sendBeacon('/Post/commend/up', upCommends);
+
+        // Gửi updated comments
+        if (update_commends && update_commends.length > 0) {
+            try {
+                const response = await fetch('/Post/commend/up', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(update_commends)
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to update comments');
+                }
+            } catch (error) {
+                console.error('Error updating comments:', error);
+                const upCommends = new Blob([JSON.stringify(update_commends)], { type: 'application/json' });
+                navigator.sendBeacon('/Post/commend/up', upCommends);
+            }
         }
 
 

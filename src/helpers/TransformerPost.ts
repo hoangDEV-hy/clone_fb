@@ -3,7 +3,7 @@ import transformPosts from "../services/FeedServices/TransformPosts";
 import { Posts } from "../models/Posts";
 import contentOfPost from "../types/ContentOfPost";
 
-export const transformPost = {
+export const transformPostServices = {
     transformPosts: transformPosts,
     transformPostReturnContent: (post: Posts): contentOfPost => {
         let contens: any = post.contens;

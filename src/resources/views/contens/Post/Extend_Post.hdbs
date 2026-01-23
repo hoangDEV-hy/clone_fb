@@ -12,7 +12,7 @@
             <input type="hidden" id="groupId" value="{{group_id}}{{Post.group_id}}">
             <input type="hidden" id="userId" value="{{user.id}}{{Post.user_id}}">
 
-            <img src="/{{user.avatar}}{{Post.users.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
+            <img src="{{user.avatar}}{{Post.users.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">
             <h3>{{user.name}}{{Post.users.name}}</h3>
 
 
@@ -33,7 +33,7 @@
                 <img name="background" src="" alt=""
                     style="position: absolute; z-index: 1; width: 100%; height: 100%; object-fit: cover;">
                 <input name="dataImage" type="hidden"
-                    value='{{#if conten.image}}{{conten.image}}{{else}}{{{Post.contens.image}}}{{/if}}'>
+                    value='{{#if conten.image}}{{{json conten.image}}}{{else}}{{{json Post.contens.image}}}{{/if}}'>
                 <textarea name="text" id="text"
                     style="position: absolute; z-index: 2; width: 100%; height: 100%; background: transparent; resize: none; font-size: 16px; color: black;">{{conten.text}}{{Post.contens.text}}</textarea>
             </div>
@@ -65,47 +65,67 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        let data = document.querySelector('input[name="dataImage"]');
-        let text = document.getElementById('text');
-        let contens = document.getElementById('contens');
-        let emoji = document.getElementById('emoji');
-        let imgData = JSON.parse(data.value);
-        while (typeof imgData === "string") imgData = JSON.parse(imgData);
-        let backgrounds = document.querySelector('img[name="background"]');
-        backgrounds.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
-        // Chèn emoji vào textarea
+        const data = document.querySelector('input[name="dataImage"]');
+        const text = document.getElementById('text');
+        const contens = document.getElementById('contens');
+        const emoji = document.getElementById('emoji');
+        const background = document.querySelector('img[name="background"]');
+
+        if (data.value) {
+            let imgData = JSON.parse(data.value);
+            while (typeof imgData === "string") imgData = JSON.parse(imgData);
+            background.src = `data:${imgData.mimeType};base64,${imgData.base64}`;
+        }
+
         emoji.onchange = function () {
             if (this.value) {
                 contens.value += this.value;
-                this.value = ""; // reset select về mặc định
+                this.value = "";
             }
         };
 
-
         document.getElementById('submit').addEventListener('click', async (e) => {
-            e.preventDefault();/save
-            //conten
-            const content = {
+            e.preventDefault();
+
+            const conten = {
                 text: text.value,
                 image: data.value
+            };
 
-            }
-
+            const selectedUserId = document.getElementById('userId').value;
+            const selectedPostId = document.getElementById('PostId_original').value;
 
             const formData = new FormData();
-            formData.append('PostId_original', document.getElementById('PostId_original').value)
-            formData.append('PostId_curtain', document.getElementById('PostId_curtain').value)
-            formData.append('userId', document.getElementById('userId').value);
+            formData.append('PostId_original', selectedPostId);
+            formData.append('PostId_curtain', document.getElementById('PostId_curtain').value);
+            formData.append('userId', selectedUserId);
             formData.append('groupId', document.getElementById('groupId').value);
-            let scope = document.getElementById('scope').value;
-            if (scope === '') scope = 'only_me';
+
+            let scope = document.getElementById('scope').value || 'only_me';
             formData.append('scope', scope);
+
             formData.append('content', JSON.stringify(conten));
-            formData.append('think', document.getElementById('contens').value);
+            formData.append('think', contens.value);
+
+            formData.append('notification_value', JSON.stringify({
+                id: null,
+                selectedIdChatRoom: null,
+                selectedSenderId: null,
+                receiver_id: selectedUserId,
+                content: `${selectedUserId} đã chia sẻ bài viết ${selectedPostId} của`,
+                type: "static"
+            }));
 
             try {
-                const res1 = await fetch('http://localhost:3000/Posts/save', { method: 'Post', body: formData });
-                const res2 = await fetch('http://localhost:3000/Post/share/save', { method: 'Post', body: formData });
+                const res1 = await fetch('http://localhost:3000/Posts/save', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const res2 = await fetch('http://localhost:3000/Post/share/save', {
+                    method: 'POST',
+                    body: formData
+                });
 
                 if (res1.ok && res2.ok) {
                     alert('Success');
@@ -117,7 +137,6 @@
                 console.error(err);
                 alert('Có lỗi kết nối server');
             }
-        })
-
+        });
     });
 </script>
