@@ -235,6 +235,12 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .news-author:hover {
+            opacity: 0.8;
         }
 
         .news-author img {
@@ -285,6 +291,88 @@
             border-radius: 12px;
             margin-top: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Interactions Section */
+        .bd_ct_news_commend {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .bd_ct_news_commend_thongKe {
+            padding: 8px 0;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .bd_ct_news_commend_tuongTac {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .bd_ct_news_commend_tuongTac input[type="checkbox"] {
+            display: none;
+        }
+
+        .bd_ct_news_commend_tuongTac label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .bd_ct_news_commend_tuongTac label:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .bd_ct_news_commend_tuongTac input[type="checkbox"]:checked+label {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .bd_ct_news_commend_tuongTac button {
+            padding: 8px 16px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .bd_ct_news_commend_tuongTac button:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .bd_ct_news_cmd_tuongTac_pop {
+            width: 100%;
+            margin-top: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .bd_ct_news_cmd_tuongTac_pop iframe {
+            border: none;
+            width: 100%;
+            height: 400px;
         }
 
         /* Members & Requests */
@@ -486,87 +574,6 @@
                 white-space: nowrap;
             }
         }
-
-        /* Edit Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 32px;
-            border-radius: 16px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            margin-bottom: 24px;
-        }
-
-        .modal-header h2 {
-            font-size: 24px;
-            color: #2d3748;
-            font-weight: 700;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #4a5568;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
     </style>
 </head>
 
@@ -654,14 +661,21 @@
                 <div id="posts-container">
                     {{#each Posts}}
                     <div class="news" data-post-id="{{id}}">
+                        <input type="hidden" name="news" value="{{id}}">
+                        <input type="hidden" name="user_post_id" value="{{users.id}}">
+
                         <div class="news-header">
-                            <div class="news-author">
-                                <img src="{{users.avatar}}" alt="avatar">
-                                <div>
-                                    <h3>{{users.name}}</h3>
-                                    <small>{{updatedAt}}</small>
+                            <form action="/page_manager/user" method="GET" style="display: inline;">
+                                <input type="hidden" name="selectedTargetId" value="{{users.id}}">
+                                <div class="news-author" onclick="this.closest('form').submit()">
+                                    <img src="{{users.avatar}}" alt="avatar">
+                                    <div>
+                                        <h3>{{users.name}}</h3>
+                                        <small>{{time updatedAt}}</small>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
+
                             {{#if ../isAdmin}}
                             <div class="news-controls">
                                 <form action="/Posts/delete" method="POST" style="display:inline">
@@ -675,7 +689,7 @@
                                 </form>
                             </div>
                             {{else}}
-                            {{#if (eq user_id ../user_id)}}
+                            {{#if (eq users.id ../user_id)}}
                             <div class="news-controls">
                                 <form action="/Posts/delete" method="POST" style="display:inline">
                                     <input type="hidden" name="PostId_curtain" value="{{id}}">
@@ -690,6 +704,7 @@
                             {{/if}}
                             {{/if}}
                         </div>
+
                         <div class="news-content">
                             {{#if think}}
                             <em>{{think}}</em>
@@ -699,6 +714,28 @@
                             <input type="hidden" class="image_src_input" value='{{{json contens.image}}}'>
                             <img class="image_src_img" alt="post image">
                             {{/if}}
+                        </div>
+
+                        <!-- Interactions Section -->
+                        <div class="bd_ct_news_commend">
+                            <div class="bd_ct_news_commend_thongKe" id="bd_ct_news_commend_thongKe_news{{id}}">
+                                <p id="bd_ct_news_cmd_tk_text_news{{id}}"></p>
+                            </div>
+                            <div class="bd_ct_news_commend_tuongTac">
+                                <input type="checkbox" class="like-checkbox" id="like_{{id}}" data-id="{{id}}">
+                                <label for="like_{{id}}">👍 Thích</label>
+
+                                <button name="commend" data-id="{{id}}">💬 Bình luận</button>
+
+                                <form action="/Post/share" method="POST" style="display: inline;">
+                                    <input type="hidden" name="id_Post" value="{{id}}">
+                                    <button type="submit">🔄 Chia sẻ</button>
+                                </form>
+
+                                <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
+                                    <iframe class="comment-iframe" src="/Post/iframe/commend"></iframe>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {{/each}}
@@ -733,16 +770,24 @@
         </div>
     </div>
 
-
-
     <script type="module">
         import handle_image from '/js/support/handle_image.js';
+        import functionInteractions from '/js/interactions/functionInteractions.js';
 
         const groupId = document.getElementById('group_id').value;
         const userId = document.getElementById('user_id').value;
         const isAdmin = document.getElementById('is_admin').value === 'true';
         const isMember = document.getElementById('is_member').value === 'true';
         const isPending = document.getElementById('is_pending').value === 'true';
+
+        // ============ INTERACTIONS MODULE ============
+        let data_load;
+        const nameCheckInput = '.like-checkbox';
+        const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
+        let change_like = {};
+        let add_commends = [];
+        let deleted_commends = [];
+        let update_commends = [];
 
         // Handle image display
         handle_image('.news-content', '.image_src_img', '.image_src_input');
@@ -765,26 +810,168 @@
         });
 
         // Sort posts
-        document.getElementById('sort-posts')?.addEventListener('change', async (e) => {
+        document.getElementById('sort-posts')?.addEventListener('change', (e) => {
             const sort = e.target.value;
-            if (!sort) return;
-
-            try {
-                const response = await fetch(`/group/posts/sort?groupId=${groupId}&sort=${sort}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    window.location.reload();
-                }
-            } catch (error) {
-                console.error('Error sorting posts:', error);
-                alert('Lỗi khi sắp xếp bài viết');
-            }
+            let url = `/group/posts/sort?groupId=${groupId}&sort=${sort}`;
+            window.location.href = url;
         });
 
+        // Create post button
+        document.getElementById('create-post')?.addEventListener('click', () => {
+            window.location.href = '/Posts?groupId=' + groupId;
+        });
 
+        // Change like
+        document.querySelectorAll('.like-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                change_like = functionInteractions.change_like(e, change_like, userId);
+            });
+        });
 
+        // Send comments
+        const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
+        commendButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const postId = e.target.dataset.id;
+                const newsContainer = e.target.closest('.news');
+                const popupContainer = newsContainer.querySelector(nameContainIframe);
+                const iframe = popupContainer.querySelector('iframe');
 
+                // Toggle hiển thị
+                if (popupContainer.style.display === 'none' || popupContainer.style.display === '') {
+                    popupContainer.style.display = 'block';
+
+                    // Chờ iframe load xong
+                    if (!iframe.dataset.loaded) {
+                        await new Promise(resolve => {
+                            iframe.onload = () => {
+                                iframe.dataset.loaded = 'true';
+                                resolve();
+                            };
+                        });
+                    }
+
+                    // Xác định đã like chưa
+                    const likeCheckbox = newsContainer.querySelector('.like-checkbox');
+                    const isLiked = likeCheckbox ? likeCheckbox.checked : false;
+
+                    // Load Post_data từ server
+                    const formData = new FormData();
+                    formData.append('id_Post', postId);
+                    const res = await fetch('/Post/Post/load', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const Post_data = await res.json();
+                    Post_data.Post.like = isLiked;
+
+                    // Gửi Post_data vào iframe
+                    iframe.contentWindow.postMessage(
+                        { type: 'loadData', Post: Post_data.Post },
+                        '*'
+                    );
+
+                    // Gửi thông tin user vào iframe
+                    const userAvatarElement = newsContainer.querySelector('.news-author img');
+                    const my_avatar = userAvatarElement ? userAvatarElement.src : '';
+                    const short_user = { id_user: userId, my_avatar };
+                    iframe.contentWindow.postMessage(
+                        { type: 'userData', short_user },
+                        '*'
+                    );
+
+                    // Gửi comments data vào iframe
+                    let commend_data_array = [];
+                    if (data_load && data_load.commend) {
+                        commend_data_array = data_load.commend.filter(c => c.id_Posts == postId);
+                    }
+                    iframe.contentWindow.postMessage({
+                        type: 'commend_data_array',
+                        commend_data_array: commend_data_array
+                    }, '*');
+
+                } else {
+                    popupContainer.style.display = 'none';
+                }
+            });
+        });
+
+        // Handler data from iframe
+        window.addEventListener('message', (e) => {
+            if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
+
+            const data = e.data;
+            const postId = data.id_Posts;
+            const newsContainer = document.querySelector(`input[name="news"][value="${postId}"]`)?.closest('.news');
+
+            if (!newsContainer) return;
+
+            // Ẩn popup container
+            const popupContainer = newsContainer.querySelector(nameContainIframe);
+            if (popupContainer) {
+                popupContainer.style.display = 'none';
+            }
+
+            // Xử lý Like
+            if (data.check_like !== undefined) {
+                const method = data.check_like ? 'POST' : 'DELETE';
+                const postOwnerIdInput = newsContainer.querySelector('input[name="user_post_id"]');
+                const postOwnerId = postOwnerIdInput ? postOwnerIdInput.value : null;
+
+                change_like[postId] = {
+                    id_user: userId,
+                    id_Posts: postId,
+                    classify: 'like',
+                    method,
+                    notification_value: data.check_like ? {
+                        type: 'static',
+                        selectedIdChatRoom: null,
+                        selectedSenderId: userId,
+                        receiver_id: postOwnerId,
+                        content: `${userId} đã thích bài viết ${postId} của ${postOwnerId}`
+                    } : null
+                };
+
+                const likeCheckbox = document.getElementById(`like_${postId}`);
+                if (likeCheckbox) {
+                    likeCheckbox.checked = data.check_like;
+                }
+            }
+
+            // Xử lý Comments
+            if (data.add_commends && data.add_commends.length > 0) {
+                const postOwnerIdInput = newsContainer.querySelector('input[name="user_post_id"]');
+                const postOwnerId = postOwnerIdInput ? postOwnerIdInput.value : null;
+
+                add_commends = data.add_commends.map(comment => ({
+                    ...comment,
+                    notification_value: {
+                        type: 'comment',
+                        selectedIdChatRoom: null,
+                        selectedSenderId: userId,
+                        receiver_id: postOwnerId,
+                        content: `${userId} đã bình luận: "${comment.content.substring(0, 30)}${comment.content.length > 30 ? '...' : ''}" tại bài viết ${postId} của ${postOwnerId}`
+                    }
+                }));
+            } else {
+                add_commends = [];
+            }
+
+            deleted_commends = data.deletedCommends ?? [];
+            update_commends = data.updateCommends ?? [];
+        });
+
+        // Save to DB before leaving page
+        window.addEventListener("pagehide", () => {
+            functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
+        });
+
+        // Load interactions data
+        (async () => {
+            const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="news"]');
+            data_load = await functionInteractions.load_interactionPost(id_Post_load, userId);
+            await functionInteractions.set_like(data_load);
+        })();
 
         // Leave group
         document.getElementById('leave-group')?.addEventListener('click', async () => {
@@ -856,11 +1043,6 @@
                 console.error('Error:', error);
                 alert('❌ Lỗi khi hủy yêu cầu');
             }
-        });
-
-        // Create post button
-        document.getElementById('create-post')?.addEventListener('click', () => {
-            window.location.href = '/Posts?groupId=' + groupId;
         });
 
         // Load members
@@ -980,7 +1162,7 @@
                                 <button class="btn-success accept-request" data-user-id="${request.id_userA}">
                                     ✅ Chấp nhận
                                 </button>
-                                <button class="btn-danger reject-request" data-user-id="${request.id_userAs}">
+                                <button class="btn-danger reject-request" data-user-id="${request.id_userA}">
                                     ❌ Từ chối
                                 </button>
                             </div>
