@@ -664,14 +664,28 @@
                             </div>
                             {{#if ../isAdmin}}
                             <div class="news-controls">
-                                <button class="btn-secondary edit-post" data-post-id="{{id}}">✏️ Sửa</button>
-                                <button class="btn-danger delete-post" data-post-id="{{id}}">🗑️ Xóa</button>
+                                <form action="/Posts/delete" method="POST" style="display:inline">
+                                    <input type="hidden" name="PostId_curtain" value="{{id}}">
+                                    <button type="submit" class="btn-danger">🗑️ Xóa</button>
+                                </form>
+                                <form action="/Posts/update" method="POST" style="display:inline">
+                                    <input type="hidden" name="PostId_curtain" value="{{id}}">
+                                    <input type="hidden" name="PostId_original" value="{{PostId_original}}">
+                                    <button type="submit" class="btn-secondary">✏️ Sửa</button>
+                                </form>
                             </div>
                             {{else}}
                             {{#if (eq user_id ../user_id)}}
                             <div class="news-controls">
-                                <button class="btn-secondary edit-post" data-post-id="{{id}}">✏️ Sửa</button>
-                                <button class="btn-danger delete-post" data-post-id="{{id}}">🗑️ Xóa</button>
+                                <form action="/Posts/delete" method="POST" style="display:inline">
+                                    <input type="hidden" name="PostId_curtain" value="{{id}}">
+                                    <button type="submit" class="btn-danger">🗑️ Xóa</button>
+                                </form>
+                                <form action="/Posts/update" method="POST" style="display:inline">
+                                    <input type="hidden" name="PostId_curtain" value="{{id}}">
+                                    <input type="hidden" name="PostId_original" value="{{PostId_original}}">
+                                    <button type="submit" class="btn-secondary">✏️ Sửa</button>
+                                </form>
                             </div>
                             {{/if}}
                             {{/if}}
@@ -719,37 +733,7 @@
         </div>
     </div>
 
-    <!-- Edit Post Modal -->
-    <div class="modal" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ Chỉnh sửa bài viết</h2>
-            </div>
-            <form id="edit-form">
-                <input type="hidden" id="edit-post-id">
-                <div class="form-group">
-                    <label>Suy nghĩ của bạn:</label>
-                    <input type="text" id="edit-think" placeholder="Bạn đang nghĩ gì?">
-                </div>
-                <div class="form-group">
-                    <label>Nội dung:</label>
-                    <textarea id="edit-content" placeholder="Viết nội dung bài viết..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Phạm vi:</label>
-                    <select id="edit-scope">
-                        <option value="public">Công khai</option>
-                        <option value="group">Nhóm</option>
-                        <option value="only_me">Riêng tư</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="cancel-edit">Hủy</button>
-                    <button type="submit" class="btn-primary">💾 Lưu thay đổi</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <script type="module">
         import handle_image from '/js/support/handle_image.js';
@@ -798,89 +782,9 @@
             }
         });
 
-        // Delete single post
-        document.querySelectorAll('.delete-post').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return;
 
-                const postId = e.target.dataset.postId;
-                try {
-                    const response = await fetch('/group/posts/delete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ postId, groupId })
-                    });
 
-                    const data = await response.json();
-                    if (data.success) {
-                        document.querySelector(`[data-post-id="${postId}"]`).remove();
-                        alert('✅ Đã xóa bài viết thành công');
-                    } else {
-                        alert('❌ ' + data.message);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('❌ Lỗi khi xóa bài viết');
-                }
-            });
-        });
 
-        // Edit post
-        const editModal = document.getElementById('edit-modal');
-        document.querySelectorAll('.edit-post').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const postId = e.target.dataset.postId;
-                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
-
-                const think = postCard.querySelector('.news-content em')?.textContent || '';
-                const content = postCard.querySelector('.news-content p')?.textContent || '';
-
-                document.getElementById('edit-post-id').value = postId;
-                document.getElementById('edit-think').value = think;
-                document.getElementById('edit-content').value = content;
-
-                editModal.classList.add('active');
-            });
-        });
-
-        document.getElementById('cancel-edit').addEventListener('click', () => {
-            editModal.classList.remove('active');
-        });
-
-        document.getElementById('edit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const postId = document.getElementById('edit-post-id').value;
-            const think = document.getElementById('edit-think').value;
-            const content = document.getElementById('edit-content').value;
-            const scope = document.getElementById('edit-scope').value;
-
-            try {
-                const response = await fetch('/group/posts/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ postId, content, scope, think })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    alert('✅ Đã cập nhật bài viết thành công');
-                    editModal.classList.remove('active');
-                    window.location.reload();
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Lỗi khi cập nhật bài viết');
-            }
-        });
-
-        editModal.addEventListener('click', (e) => {
-            if (e.target === editModal) {
-                editModal.classList.remove('active');
-            }
-        });
 
         // Leave group
         document.getElementById('leave-group')?.addEventListener('click', async () => {
