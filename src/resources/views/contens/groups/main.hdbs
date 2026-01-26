@@ -1,69 +1,1146 @@
-<div>
-    <div style="display: flex;">
-        {{#each groups}}
-        <h3>{{groups.name}}</h3>
-        {{/each}}
-    </div>
-    <div>
-        {{#each Posts}}
-        <div id="news{{id}}">
-            <div class="bd_ct_news_nguoiDang">
-                <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
-                    <div style="top:0%">
-                        <img src="/{{users.avatar}}" alt="avatar">
-                    </div>
-                </div>
-                <div class="bd_ct_n_nguoiDang_name">
-                    <h3>{{groups.name}}</h3>
-                    <h4>{{users.name}} · {{time updatedAt}}</h4>
-                </div>
+<!DOCTYPE html>
+<html lang="vi">
 
-                <div class="bd_ct_news_title">
-                    <input type="hidden" class="image_src_input" value="{{contens.image}}">
-                    <h3>{{contens.text}}</h3>
-                    <img class="image_src_img" src="">
-                </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{group.name}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-                <div class="bd_ct_news_commend">
-                    <div id="bd_ct_news_commend_thongKe_news{{id}}">
-                        <p id="bd_ct_news_cmd_tk_text_news{{id}}" value="230">230 người khác</p>
-                    </div>
-                    <div id="bd_ct_news_commend_tuongTac">
-                        <button onclick="like('news{{id}}')">Thích</button>
-                        <button onclick="binhLuan('news{{id}}')">Bình luận</button>
-                        <button onclick="chiaSe()">Chia sẻ</button>
-                    </div>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar-header {
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .sidebar-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            font-weight: 500;
+            color: #4a5568;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .notification-badge {
+            background: #f56565;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header Card */
+        .section-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header h1 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Posts Controls */
+        .posts-controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .posts-controls label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-right: 12px;
+        }
+
+        select {
+            padding: 10px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #2d3748;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Post Card */
+        .news {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .news:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .news-author {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .news-author img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid #667eea;
+            object-fit: cover;
+        }
+
+        .news-author h3 {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .news-author small {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .news-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .news-content {
+            margin: 16px 0;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .news-content em {
+            display: block;
+            color: #667eea;
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .news-content p {
+            margin-bottom: 12px;
+        }
+
+        .news-content img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Members & Requests */
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .members-list,
+        .requests-list {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .member-item,
+        .request-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .member-item:hover,
+        .request-item:hover {
+            background: linear-gradient(135deg, #667eea08, #764ba208);
+        }
+
+        .member-item:last-child,
+        .request-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-info {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .member-info img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #667eea;
+            object-fit: cover;
+        }
+
+        .member-info h3 {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .member-info small {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 16px rgba(245, 101, 101, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* States */
+        .loading,
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .loading::before {
+            content: "⏳";
+            font-size: 32px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .empty-state::before {
+            content: "📭";
+            font-size: 48px;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        /* Group Action Buttons */
+        .group-actions {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 8px;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+            }
+        }
+
+        /* Edit Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="hidden" id="group_id" value="{{group.id}}">
+    <input type="hidden" id="user_id" value="{{user_id}}">
+    <input type="hidden" id="is_admin" value="{{isAdmin}}">
+    <input type="hidden" id="is_member" value="{{isMember}}">
+    <input type="hidden" id="is_pending" value="{{isPending}}">
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>{{group.name}}</h2>
+                <p>{{group.hastag}}</p>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-item active" data-page="posts">
+                    <span class="nav-icon">📝</span>
+                    <span>Bài viết</span>
                 </div>
+                <div class="nav-item" data-page="members">
+                    <span class="nav-icon">👥</span>
+                    <span>Thành viên</span>
+                </div>
+                {{#if isAdmin}}
+                <div class="nav-item" data-page="requests">
+                    <span class="nav-icon">🔔</span>
+                    <span>Yêu cầu tham gia</span>
+                    <span class="notification-badge" id="requests-badge" style="display: none;">0</span>
+                </div>
+                {{/if}}
+            </div>
+
+            <!-- Group Actions -->
+            <div class="group-actions">
+                {{#if isMember}}
+                {{#unless isAdmin}}
+                <button class="btn-danger" id="leave-group">
+                    🚪 Rời nhóm
+                </button>
+                {{/unless}}
+                {{else}}
+                {{#if isPending}}
+                <button class="btn-secondary" id="cancel-request">
+                    ⏳ Hủy yêu cầu tham gia
+                </button>
+                {{else}}
+                <button class="btn-primary" id="join-group">
+                    ➕ Gửi yêu cầu tham gia
+                </button>
+                {{/if}}
+                {{/if}}
             </div>
         </div>
-        {{/each}}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Posts Section -->
+            <div class="page-section active" id="posts-section">
+                <div class="section-header">
+                    <h1>📝 Bài viết trong nhóm</h1>
+                    {{#if isMember}}
+                    <div class="header-actions">
+                        <button class="btn-primary" id="create-post">
+                            ✏️ Tạo bài viết
+                        </button>
+                    </div>
+                    {{/if}}
+                </div>
+
+                <div class="posts-controls">
+                    <div>
+                        <label>Sắp xếp:</label>
+                        <select name="sort" id="sort-posts">
+                            <option value="">Mặc định</option>
+                            <option value="like">⭐ Nhiều lượt thích nhất</option>
+                            <option value="commend">💬 Nhiều bình luận nhất</option>
+                            <option value="share">🔄 Nhiều chia sẻ nhất</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="posts-container">
+                    {{#each Posts}}
+                    <div class="news" data-post-id="{{id}}">
+                        <div class="news-header">
+                            <div class="news-author">
+                                <img src="{{users.avatar}}" alt="avatar">
+                                <div>
+                                    <h3>{{users.name}}</h3>
+                                    <small>{{updatedAt}}</small>
+                                </div>
+                            </div>
+                            {{#if ../isAdmin}}
+                            <div class="news-controls">
+                                <button class="btn-secondary edit-post" data-post-id="{{id}}">✏️ Sửa</button>
+                                <button class="btn-danger delete-post" data-post-id="{{id}}">🗑️ Xóa</button>
+                            </div>
+                            {{else}}
+                            {{#if (eq user_id ../user_id)}}
+                            <div class="news-controls">
+                                <button class="btn-secondary edit-post" data-post-id="{{id}}">✏️ Sửa</button>
+                                <button class="btn-danger delete-post" data-post-id="{{id}}">🗑️ Xóa</button>
+                            </div>
+                            {{/if}}
+                            {{/if}}
+                        </div>
+                        <div class="news-content">
+                            {{#if think}}
+                            <em>{{think}}</em>
+                            {{/if}}
+                            <p>{{contens.text}}</p>
+                            {{#if contens.image}}
+                            <input type="hidden" class="image_src_input" value='{{{json contens.image}}}'>
+                            <img class="image_src_img" alt="post image">
+                            {{/if}}
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+
+            <!-- Members Section -->
+            <div class="page-section" id="members-section">
+                <div class="section-header">
+                    <h1>👥 Danh sách thành viên</h1>
+                    <div class="search-box">
+                        <input type="text" id="search-members" placeholder="🔍 Tìm kiếm thành viên theo tên...">
+                        <button class="btn-primary" id="search-btn">Tìm kiếm</button>
+                    </div>
+                </div>
+                <div class="members-list" id="members-container">
+                    <div class="loading">Đang tải danh sách thành viên...</div>
+                </div>
+            </div>
+
+            <!-- Requests Section (Admin only) -->
+            {{#if isAdmin}}
+            <div class="page-section" id="requests-section">
+                <div class="section-header">
+                    <h1>🔔 Yêu cầu tham gia nhóm</h1>
+                </div>
+                <div class="requests-list" id="requests-container">
+                    <div class="loading">Đang tải danh sách yêu cầu...</div>
+                </div>
+            </div>
+            {{/if}}
+        </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('input.image_src_input').forEach(hiddenInput => {
+    <!-- Edit Post Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Chỉnh sửa bài viết</h2>
+            </div>
+            <form id="edit-form">
+                <input type="hidden" id="edit-post-id">
+                <div class="form-group">
+                    <label>Suy nghĩ của bạn:</label>
+                    <input type="text" id="edit-think" placeholder="Bạn đang nghĩ gì?">
+                </div>
+                <div class="form-group">
+                    <label>Nội dung:</label>
+                    <textarea id="edit-content" placeholder="Viết nội dung bài viết..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Phạm vi:</label>
+                    <select id="edit-scope">
+                        <option value="public">Công khai</option>
+                        <option value="group">Nhóm</option>
+                        <option value="only_me">Riêng tư</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancel-edit">Hủy</button>
+                    <button type="submit" class="btn-primary">💾 Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import handle_image from '/js/support/handle_image.js';
+
+        const groupId = document.getElementById('group_id').value;
+        const userId = document.getElementById('user_id').value;
+        const isAdmin = document.getElementById('is_admin').value === 'true';
+        const isMember = document.getElementById('is_member').value === 'true';
+        const isPending = document.getElementById('is_pending').value === 'true';
+
+        // Handle image display
+        handle_image('.news-content', '.image_src_img', '.image_src_input');
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const page = item.dataset.page;
+                document.querySelectorAll('.page-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${page}-section`).classList.add('active');
+
+                if (page === 'members') loadMembers();
+                if (page === 'requests' && isAdmin) loadRequests();
+            });
+        });
+
+        // Sort posts
+        document.getElementById('sort-posts')?.addEventListener('change', async (e) => {
+            const sort = e.target.value;
+            if (!sort) return;
+
             try {
-                let data = hiddenInput.value;
-                if (typeof data === 'string') {
-                    try {
-                        data = JSON.parse(data); // parse lần 1
-                        if (typeof data === 'string') {
-                            data = JSON.parse(data); // parse lần 2 nếu vẫn là string
-                        }
-                    } catch (e) {
-                        console.error("Không parse được ảnh:", e);
-                        return;
-                    }
-                }
+                const response = await fetch(`/group/posts/sort?groupId=${groupId}&sort=${sort}`);
+                const data = await response.json();
 
-                let imgElement = hiddenInput.parentElement.querySelector('img.image_src_img');
-                if (imgElement && data.mimeType && data.base64) {
-                    imgElement.src = `data:${data.mimeType};base64,${data.base64}`;
+                if (data.success) {
+                    window.location.reload();
                 }
-            } catch (e) {
-                console.error("Lỗi xử lý ảnh:", e);
+            } catch (error) {
+                console.error('Error sorting posts:', error);
+                alert('Lỗi khi sắp xếp bài viết');
             }
         });
-    });
-</script>
+
+        // Delete single post
+        document.querySelectorAll('.delete-post').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return;
+
+                const postId = e.target.dataset.postId;
+                try {
+                    const response = await fetch('/group/posts/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ postId, groupId })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        document.querySelector(`[data-post-id="${postId}"]`).remove();
+                        alert('✅ Đã xóa bài viết thành công');
+                    } else {
+                        alert('❌ ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Lỗi khi xóa bài viết');
+                }
+            });
+        });
+
+        // Edit post
+        const editModal = document.getElementById('edit-modal');
+        document.querySelectorAll('.edit-post').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const postId = e.target.dataset.postId;
+                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+
+                const think = postCard.querySelector('.news-content em')?.textContent || '';
+                const content = postCard.querySelector('.news-content p')?.textContent || '';
+
+                document.getElementById('edit-post-id').value = postId;
+                document.getElementById('edit-think').value = think;
+                document.getElementById('edit-content').value = content;
+
+                editModal.classList.add('active');
+            });
+        });
+
+        document.getElementById('cancel-edit').addEventListener('click', () => {
+            editModal.classList.remove('active');
+        });
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const postId = document.getElementById('edit-post-id').value;
+            const think = document.getElementById('edit-think').value;
+            const content = document.getElementById('edit-content').value;
+            const scope = document.getElementById('edit-scope').value;
+
+            try {
+                const response = await fetch('/group/posts/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ postId, content, scope, think })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Đã cập nhật bài viết thành công');
+                    editModal.classList.remove('active');
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Lỗi khi cập nhật bài viết');
+            }
+        });
+
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.classList.remove('active');
+            }
+        });
+
+        // Leave group
+        document.getElementById('leave-group')?.addEventListener('click', async () => {
+            if (!confirm('Bạn có chắc muốn rời khỏi nhóm này?')) return;
+
+            try {
+                const response = await fetch('/group/leave', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ groupId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Đã rời nhóm thành công');
+                    window.location.href = '/main';
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Lỗi khi rời nhóm');
+            }
+        });
+
+        // Join group
+        document.getElementById('join-group')?.addEventListener('click', async () => {
+            if (!confirm('Bạn có muốn gửi yêu cầu tham gia nhóm này?')) return;
+
+            try {
+                const response = await fetch('/group/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ groupId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Đã gửi yêu cầu tham gia thành công. Vui lòng đợi admin duyệt.');
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Lỗi khi gửi yêu cầu tham gia');
+            }
+        });
+
+        // Cancel join request
+        document.getElementById('cancel-request')?.addEventListener('click', async () => {
+            if (!confirm('Bạn có muốn hủy yêu cầu tham gia nhóm này?')) return;
+
+            try {
+                const response = await fetch('/group/leave', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ groupId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Đã hủy yêu cầu tham gia');
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Lỗi khi hủy yêu cầu');
+            }
+        });
+
+        // Create post button
+        document.getElementById('create-post')?.addEventListener('click', () => {
+            window.location.href = '/Posts?groupId=' + groupId;
+        });
+
+        // Load members
+        async function loadMembers(searchName = '') {
+            const container = document.getElementById('members-container');
+            container.innerHTML = '<div class="loading">Đang tải danh sách thành viên...</div>';
+
+            try {
+                const url = `/group/members?groupId=${groupId}${searchName ? `&name=${searchName}` : ''}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.members.length === 0) {
+                        container.innerHTML = '<div class="empty-state">Không tìm thấy thành viên nào</div>';
+                        return;
+                    }
+
+                    container.innerHTML = data.members.map(member => `
+                        <div class="member-item">
+                            <div class="member-info">
+                                <img src="${member.avatar}" alt="${member.name}">
+                                <div>
+                                    <h3>${member.name}</h3>
+                                    <small>${member.alias || 'Không có mô tả'}</small>
+                                </div>
+                            </div>
+                            ${isAdmin && member.id !== userId ? `
+                                <div class="member-actions">
+                                    <button class="btn-danger remove-member" data-user-id="${member.id}">
+                                        ❌ Xóa khỏi nhóm
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+
+                    document.querySelectorAll('.remove-member').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            if (!confirm('Bạn có chắc muốn xóa thành viên này khỏi nhóm?')) return;
+
+                            const targetUserId = e.target.dataset.userId;
+                            try {
+                                const response = await fetch('/group/members/remove', {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ groupId, targetUserId })
+                                });
+
+                                const result = await response.json();
+                                if (result.success) {
+                                    alert('✅ Đã xóa thành viên thành công');
+                                    loadMembers(searchName);
+                                } else {
+                                    alert('❌ ' + result.message);
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert('❌ Lỗi khi xóa thành viên');
+                            }
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="empty-state">❌ Lỗi khi tải danh sách thành viên</div>';
+            }
+        }
+
+        document.getElementById('search-btn')?.addEventListener('click', () => {
+            const searchName = document.getElementById('search-members').value;
+            loadMembers(searchName);
+        });
+
+        document.getElementById('search-members')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const searchName = document.getElementById('search-members').value;
+                loadMembers(searchName);
+            }
+        });
+
+        // Load requests (admin)
+        async function loadRequests() {
+            if (!isAdmin) return;
+
+            const container = document.getElementById('requests-container');
+            container.innerHTML = '<div class="loading">Đang tải danh sách yêu cầu...</div>';
+
+            try {
+                const response = await fetch(`/group/members/pending?groupId=${groupId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const badge = document.getElementById('requests-badge');
+                    if (data.requests.length > 0) {
+                        badge.style.display = 'inline';
+                        badge.textContent = data.requests.length;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    if (data.requests.length === 0) {
+                        container.innerHTML = '<div class="empty-state">Không có yêu cầu tham gia mới</div>';
+                        return;
+                    }
+
+                    container.innerHTML = data.requests.map(request => `
+                        <div class="request-item">
+                            <div class="member-info">
+                                <img src="${request.avatar}" alt="${request.name}">
+                                <div>
+                                    <h3>${request.name}</h3>
+                                    <small>${request.alias || 'Không có mô tả'}</small>
+                                </div>
+                            </div>
+                            <div class="member-actions">
+                                <button class="btn-success accept-request" data-user-id="${request.id_userA}">
+                                    ✅ Chấp nhận
+                                </button>
+                                <button class="btn-danger reject-request" data-user-id="${request.id_userAs}">
+                                    ❌ Từ chối
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    document.querySelectorAll('.accept-request').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const targetUserId = e.target.dataset.userId;
+                            try {
+                                const response = await fetch('/group/members/accept', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ groupId, targetUserId })
+                                });
+
+                                const result = await response.json();
+                                if (result.success) {
+                                    alert('✅ Đã chấp nhận yêu cầu tham gia');
+                                    loadRequests();
+                                } else {
+                                    alert('❌ ' + result.message);
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert('❌ Lỗi khi chấp nhận yêu cầu');
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('.reject-request').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const targetUserId = e.target.dataset.userId;
+                            try {
+                                const response = await fetch('/group/members/reject', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ groupId, targetUserId })
+                                });
+
+                                const result = await response.json();
+                                if (result.success) {
+                                    alert('✅ Đã từ chối yêu cầu tham gia');
+                                    loadRequests();
+                                } else {
+                                    alert('❌ ' + result.message);
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert('❌ Lỗi khi từ chối yêu cầu');
+                            }
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="empty-state">❌ Lỗi khi tải danh sách yêu cầu</div>';
+            }
+        }
+
+        if (isAdmin) {
+            loadRequests();
+        }
+    </script>
+</body>
+
+</html>

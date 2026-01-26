@@ -115,7 +115,6 @@
                 content: `${selectedUserId} đã chia sẻ bài viết ${selectedPostId} của`,
                 type: "static"
             }));
-
             try {
                 const res1 = await fetch('http://localhost:3000/Posts/save', {
                     method: 'POST',

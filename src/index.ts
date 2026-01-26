@@ -40,7 +40,10 @@ const hbs = expressHandlebars.create({
             else if (diffMinutes > 0) return `${diffMinutes} minutes ago`
             else return `${diffSeconds} seconds ago`
         },
-        json: (context: unknown): string => JSON.stringify(context)
+        json: (context: unknown): string => JSON.stringify(context),
+        eq: function (a: any, b: any) {
+            return a === b;
+        }
 
     }
 });

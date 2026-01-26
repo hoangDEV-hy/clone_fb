@@ -116,36 +116,62 @@
                 tbody.innerHTML = `<tr><td colspan="3" style="text-align:center">No data</td></tr>`;
                 return;
             }
-
             list.forEach(item => {
                 const tr = document.createElement('tr');
-                const avatarHtml = item.avatar ? `<img src="/${item.avatar}" width="40" height="40" style="object-fit:cover">` : '';
-                const profileLinkHtml = `
-                    <form action="http://localhost:3000/page_manager/user" method="POST" style="display: inline;">
-                        <input type="hidden" name="selectedTargetId" value="${item.id}">
-                        <button type="submit" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer; padding:0;">
-                            Trang cá nhân
-                        </button>
-                    </form>
-                `;
+
+                const avatarHtml = item.avatar
+                    ? `<img src="/${item.avatar}" width="40" height="40" style="object-fit:cover">`
+                    : '';
+
+                let profileLinkHtml = '';
+
+                if (item.type === 'user') {
+                    profileLinkHtml = `
+            <form action="http://localhost:3000/page_manager/user" method="POST" style="display:inline;">
+                <input type="hidden" name="selectedTargetId" value="${item.id}">
+                <button type="submit"
+                    style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+                    Trang cá nhân
+                </button>
+            </form>
+        `;
+                } else if (item.type === 'group') {
+                    profileLinkHtml = `
+            <form action="http://localhost:3000/group" method="POST" style="display:inline;">
+                <input type="hidden" name="groupId" value="${item.id}">
+                <button type="submit"
+                    style="background:none;border:none;color:blue;text-decoration:underline;cursor:pointer;padding:0;">
+                    Trang nhóm
+                </button>
+            </form>
+        `;
+                }
 
                 if (type === 'mess') {
                     tr.innerHTML = `
-                        <td align="center">${avatarHtml}</td>
-                        <td>${profileLinkHtml}</td>
-                        <td align="center"><button onclick="addTo_room('${item.id}')">Add to room</button></td>
-                    `;
+            <td align="center">${avatarHtml}</td>
+            <td>${profileLinkHtml}</td>
+            <td align="center">
+                <button onclick="addTo_room('${item.id}')">Add to room</button>
+            </td>
+        `;
                 } else if (type === 'normal') {
                     tr.innerHTML = `
-                        <td align="center">${avatarHtml}</td>
-                        <td>${profileLinkHtml}</td>
-                        <td align="center"><small>N/A</small></td>
-                    `;
+            <td align="center">${avatarHtml}</td>
+            <td>${profileLinkHtml}</td>
+            <td align="center"><small>N/A</small></td>
+        `;
                 } else {
-                    tr.innerHTML = `<td colspan="3" style="text-align:center; color:red;">Định dạng không hợp lệ</td>`;
+                    tr.innerHTML = `
+            <td colspan="3" style="text-align:center;color:red;">
+                Định dạng không hợp lệ
+            </td>
+        `;
                 }
+
                 tbody.appendChild(tr);
             });
+
         }
     </script>
 </body>

@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../configs/sql'; // adjust the path
+import { Transaction, Op } from 'sequelize';
 
 class Group extends Model {
     public id!: number;
@@ -42,6 +43,7 @@ export { Group };
 
 import { Request, Response } from 'express';
 import throwError from '../helpers/ThrowErrorOfSqlQuery';
+import { User } from './user';
 
 async function check(req: Request, res: Response): Promise<any> {
     const { name } = req.body;
@@ -49,50 +51,52 @@ async function check(req: Request, res: Response): Promise<any> {
         return res.status(400).json({ message: 'Name already registered' });
     };
 }
-let methods = {
-
-    create: async (req: Request, res: Response): Promise<any> => {
-
+export let methods = {
+    // Tạo nhóm mới
+    createGroup: async (
+        data: { name: string; hastag?: string; admin: string },
+        transaction?: Transaction
+    ): Promise<Group> => {
         try {
-            await check(req, res);
-            const { name, hastag, admin } = req.body;
-            const newGroup = await Group.create({ name, hastag, admin });
-
-            return res.status(201).json({ message: 'group created' });
-        }
-        catch (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Failed to create group' });
+            return await Group.create(data, { transaction });
+        } catch (err) {
+            throwError(err);
         }
     },
-    edit: async (req: Request, res: Response): Promise<any> => {
 
+    // Cập nhật thông tin nhóm
+    updateGroup: async (
+        id: number,
+        data: Partial<Group>,
+        transaction?: Transaction
+    ): Promise<number> => {
         try {
-            await check(req, res);
-            const { name, hastag, admin } = req.body;
-            const newGroup = await Group.create({ name, hastag, admin });
-
-            return res.status(201).json({ message: 'group created' });
-        }
-        catch (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Failed to create group' });
+            const [affectedRows] = await Group.update(data, {
+                where: { id },
+                transaction
+            });
+            return affectedRows;
+        } catch (err) {
+            throwError(err);
         }
     },
-    destroy: async (req: Request, res: Response): Promise<any> => {
 
+    // Xóa nhóm
+    deleteGroup: async (
+        id: number,
+        transaction?: Transaction
+    ): Promise<number> => {
         try {
-            await check(req, res);
-            const { name, hastag, admin } = req.body;
-            const newGroup = await Group.create({ name, hastag, admin });
-
-            return res.status(201).json({ message: 'group created' });
-        }
-        catch (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Failed to create group' });
+            return await Group.destroy({
+                where: { id },
+                transaction
+            });
+        } catch (err) {
+            throwError(err);
         }
     },
+
+    // Tìm một nhóm
     selectGroup: async (data: Partial<Group>): Promise<Group | null> => {
         try {
             return await Group.findOne({ where: data });
@@ -100,13 +104,40 @@ let methods = {
             throwError(err);
         }
     },
+
+    // Tìm nhiều nhóm
     selectGroups: async (data: Partial<Group>): Promise<Group[]> => {
         try {
             return await Group.findAll({ where: data });
         } catch (err) {
             throwError(err);
         }
-    }
+    },
 
-}
-export { methods };
+    // Lấy nhóm kèm theo danh sách thành viên
+    selectGroupsGroupuserByOp_in: async (idGroups: number[]): Promise<Group[]> => {
+        try {
+            return await Group.findAll({
+                where: {
+                    id: { [Op.in]: idGroups }
+                },
+                include: [{
+                    model: group_user,
+                    as: 'groups',
+                    required: false
+                }]
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    getIdAdmin: async (groupId: number): Promise<string | undefined> => {
+        const user = await Group.findOne({
+            where: {
+                id: groupId
+            },
+            attributes: ['admin']
+        })
+        return user?.admin
+    }
+};

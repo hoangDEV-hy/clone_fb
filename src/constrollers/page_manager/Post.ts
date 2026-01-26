@@ -1,5 +1,5 @@
 import { methods as postController } from '../Posts'
-import { methods as groupController } from '../group/group'
+import { methods as groupController } from '../group'
 
 
 import { Group } from '../../models/group';

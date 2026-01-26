@@ -61,7 +61,19 @@ export let methods = {
     },
     selectPostsWithFilter_InteractionAndUser: async (selectedGroupId: number, scope: string, sort: string, selectedIdUser?: string): Promise<Posts[]> => {
         try {
-            return postModel.selectPostsWithFilter_InteractionAndUser({ user_id: selectedIdUser, group_id: selectedGroupId, scope: scope }, sort);
+            const whereCondition: Partial<Posts> = {
+                group_id: selectedGroupId,
+                scope
+            };
+
+            if (selectedIdUser) {
+                whereCondition.user_id = selectedIdUser;
+            }
+
+            return postModel.selectPostsWithFilter_InteractionAndUser(
+                whereCondition,
+                sort
+            );
         }
         catch (err) {
             throwError(err);

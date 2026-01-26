@@ -3,7 +3,7 @@
         <div style="display:flex">
             <input type="hidden" id="PostId" value="{{Post.id}}">
             {{!-- for update --}}
-            <input type="hidden" id="groupId" value="{{group_id}}{{Post.group_id}}">
+            <input type="hidden" id="groupId" value="{{group_id}}{{Post.group_id}}">-
             <input type="hidden" id="userId" value="{{user.id}}{{Post.user_id}}">
             {{#if user.id}}
             <img src="{{user.avatar}}" alt="" style="width:50px;height:50px;border-radius:50%;">

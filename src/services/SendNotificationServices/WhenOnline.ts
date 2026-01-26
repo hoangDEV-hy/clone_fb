@@ -23,6 +23,9 @@ export async function sendNotificationWhenOnline(
         async (received: boolean) => {
             try {
                 if (received) {
+                    if (!notification.id) {
+                        throw new Error("kieu du lieu thong bao khong hop le");
+                    }
                     await methodsNotifications.delete(notification.id);
                 } else {
                     socket.emit('badge_increment', 1);
@@ -31,6 +34,7 @@ export async function sendNotificationWhenOnline(
                 console.error('Notification handle error:', err);
             }
         }
+
     );
 
     return notification;

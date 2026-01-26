@@ -133,7 +133,7 @@ export class MutualFriendsService {
         if (groupIds.length === 0) return [];
 
         // Lấy tất cả thành viên trong các nhóm này
-        const groupMembers = await methodsGroupUser.selectGroupMembers(groupIds, userId);
+        const groupMembers = await methodsGroupUser.getMutualGroupMembers(groupIds, userId);
 
         const suggestedIds = groupMembers
             .map(m => m.id_userA)

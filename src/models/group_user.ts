@@ -1,4 +1,4 @@
-import { Model, DataTypes, Op } from "sequelize";
+import { Model, DataTypes, Op, Transaction } from "sequelize";
 import { sequelize } from '../configs/sql';
 
 
@@ -40,6 +40,7 @@ group_user.init({
 //setup association
 import { Group } from "../models/group";
 import { Posts } from "./Posts";
+import throwError from "../helpers/ThrowErrorOfSqlQuery";
 group_user.belongsTo(Group, { foreignKey: 'id_group', as: 'groups' });
 group_user.hasMany(Posts, {
     foreignKey: 'group_id',
@@ -48,34 +49,195 @@ group_user.hasMany(Posts, {
 export { group_user };
 
 export let methods = {
-    addGroup: (req: any, res: Response): void => {
-        const { id_group, id_userA } = req.body;
-        group_user.create({
-            id_group, id_userA, status: 'pendding'
-        })
-        //thông báo đến admin: lấy tất cả bản ghi đang ở trạng thái pendding gửi lên thông báo
+    // Thêm thành viên vào nhóm
+    addMember: async (
+        userId: string,
+        groupId: number,
+        status: 'pending' | 'active',
+        transaction?: Transaction
+    ): Promise<group_user> => {
+        try {
+            return await group_user.create({
+                id_userA: userId,
+                id_group: groupId,
+                status
+            }, { transaction });
+        } catch (err) {
+            throwError(err);
+        }
     },
-    delGroup: (id: { [key: string]: string }, res: Response): void => {
-        group_user.destroy({
-            where: id
-        })
-    },
-    upGroup: (req: any, res: Response): void => {
-        const { id } = req.body;
-        group_user.update({
-            status: 'active'
-        }, {
-            where: id
-        })
-        //thông báo đến user: c1: kiểm tra trạng thái ở id gửi đi để xét thông báo
-        //c2: khi chấp nhận tham gia thì sẽ gửi thông báo đến id_user đó
-    },
-    select: async (key: { [id: string]: string }): Promise<group_user[]> => {
-        return group_user.findAll(
-            {
-                where: key
+    // Xóa thành viên khỏi nhóm
+    deleteMember: async (
+        userId: string,
+        groupId: number,
+        status?: string,
+        transaction?: Transaction
+    ): Promise<number> => {
+        try {
+            const whereClause: any = {
+                id_userA: userId,
+                id_group: groupId
+            };
+
+            if (status) {
+                whereClause.status = status;
             }
-        );
+
+            return await group_user.destroy({
+                where: whereClause,
+                transaction
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    // Cập nhật trạng thái thành viên
+    updateMemberStatus: async (
+        userId: string,
+        groupId: number,
+        newStatus: string,
+        transaction?: Transaction
+    ): Promise<number> => {
+        try {
+            const [affectedRows] = await group_user.update(
+                { status: newStatus },
+                {
+                    where: {
+                        id_userA: userId,
+                        id_group: groupId,
+                        status: 'pending'
+                    },
+                    transaction
+                }
+            );
+            return affectedRows;
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    // Lấy danh sách nhóm đã tham gia (status: 'active')
+    selectGroupsJoined: async (userId: string): Promise<group_user[]> => {
+        try {
+            return await group_user.findAll({
+                where: {
+                    id_userA: userId,
+                    status: 'active'
+                },
+                attributes: ['id_group', 'status']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    // Lấy danh sách nhóm đang chờ duyệt (status: 'pending')
+    selectGroupsPending: async (userId: string): Promise<group_user[]> => {
+        try {
+            return await group_user.findAll({
+                where: {
+                    id_userA: userId,
+                    status: 'pending'
+                },
+                attributes: ['id_group', 'status']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    //lấy danh sách thành viên đang yêu cầu tham gia
+    selectUsersPending: async (group_id: number): Promise<group_user[]> => {
+        try {
+            return await group_user.findAll({
+                where: {
+                    id_group: group_id,
+                    status: 'pending'
+                }
+            })
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    // Kiểm tra trạng thái thành viên trong nhóm
+    checkMembership: async (
+        userId: string,
+        groupId: number
+    ): Promise<group_user | null> => {
+        try {
+            return await group_user.findOne({
+                where: {
+                    id_userA: userId,
+                    id_group: groupId
+                }
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+    // Lấy tất cả thành viên của một nhóm
+    getGroupMembersByGroupId: async (
+        groupId: number,
+        status?: 'active' | 'pending'
+    ): Promise<group_user[]> => {
+        try {
+            const whereClause: any = { id_group: groupId };
+
+            if (status) {
+                whereClause.status = status;
+            }
+
+            return await group_user.findAll({
+                where: whereClause,
+                attributes: ['id_userA', 'status']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+
+    // Lấy danh sách user trong các nhóm chung (để tìm mutual groups)
+    selectMutualGroupMembers: async (
+        mutualGroupIds: number[],
+        excludeUserId: string
+    ): Promise<group_user[]> => {
+        try {
+            return await group_user.findAll({
+                where: {
+                    id_group: { [Op.in]: mutualGroupIds },
+                    status: 'active',
+                    id_userA: { [Op.not]: excludeUserId }
+                },
+                attributes: ['id_userA']
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+
+    // Đếm số lượng thành viên active trong nhóm
+    countActiveMembers: async (groupId: number): Promise<number> => {
+        try {
+            return await group_user.count({
+                where: {
+                    id_group: groupId,
+                    status: 'active'
+                }
+            });
+        } catch (err) {
+            throwError(err);
+        }
+    },
+
+    // Đếm số lượng yêu cầu pending của nhóm
+    countPendingRequests: async (groupId: number): Promise<number> => {
+        try {
+            return await group_user.count({
+                where: {
+                    id_group: groupId,
+                    status: 'pending'
+                }
+            });
+        } catch (err) {
+            throwError(err);
+        }
     },
     selectGroups: async (userId: string) => {
         return await group_user.findAll({
@@ -86,7 +248,7 @@ export let methods = {
             attributes: ['id_group']
         });
     },
-    selectGroupMembers: async (mutualGroupIds: number[], userId: string) => {
+    getMutualGroupMembers: async (mutualGroupIds: number[], userId: string) => {
         return await group_user.findAll({
             where: {
                 id_group: { [Op.in]: mutualGroupIds },
@@ -95,6 +257,6 @@ export let methods = {
             },
             attributes: ['id_userA']
         });
-    }
+    },
+    
 }
-//thông báo: viết khi nào xong giao diện

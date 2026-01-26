@@ -3,7 +3,7 @@ import { chat_member } from "../models/chat/chat_members";
 import { user_user } from "../models/user_user";
 import { Op } from "sequelize";
 import { User } from "../models/user";
-import { methods as groupController } from "../constrollers/group/group";
+import { methods as groupController } from "../constrollers/group";
 import { methods as userController } from "../constrollers/User"
 
 const router: Router = express.Router();
@@ -149,8 +149,17 @@ router.get('/get', async (req: Request, res: Response): Promise<void> => {
     const selectedGroups = await groupController.selectGroupsWithName(selectedName) || [];
     const selectedUsers = await userController.selectUsersWithName(selectedName) || [];
 
+    const groupsWithType = selectedGroups.map(g => ({
+        ...(g.toJSON ? g.toJSON() : g),
+        type: 'group'
+    }));
+
+    const usersWithType = selectedUsers.map(u => ({
+        ...(u.toJSON ? u.toJSON() : u),
+        type: 'user'
+    }))
     // Gộp 2 mảng
-    const merged = [...selectedGroups, ...selectedUsers];
+    const merged = [...groupsWithType, ...usersWithType];
 
     // Lọc trùng theo name
     const uniqueList = Array.from(

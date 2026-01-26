@@ -2,7 +2,10 @@ import express from "express";
 import { authenticate } from "../middware/auth";
 import { Response, Request } from "express";
 import { methods as postController } from "../constrollers/Posts";
+import { methods as groupController } from "../constrollers/group"
 import throwError from "../helpers/ThrowErrorOfRouter";
+import { addNotification, sendNotification } from '../services/FollowerService';
+
 
 import ExtendRequest from "../types/Type_ExtendRequest";
 let route = express.Router();
@@ -13,7 +16,7 @@ route.get(
     async (req: ExtendRequest, res: Response): Promise<void> => {
         try {
             const selectedIdUser = req.admin?.id;
-            const selectedGroupId = req.session?.currentGroupId;
+            const selectedGroupId = req.query.groupId as string | undefined;
             if (!selectedIdUser) {
                 res.status(401).send('Unauthorized');
                 return;
@@ -95,6 +98,7 @@ route.post('/delete', authenticate.user_auth, async (req: Request, res: Response
 
 
 import multer from 'multer';
+import NotificationServerTake from "../types/Type_Notification";
 let uploadfile = multer({ storage: multer.memoryStorage() });
 
 route.post('/upload', uploadfile.single('file'), (req: any, res) => {
@@ -133,6 +137,23 @@ route.post('/save', authenticate.user_auth, uploadForm.none(), async (req: Exten
         if (!PostId_curtain) await postController.create(PostId_original, selectedUserId, groupId, content, scope, think);
         else {
             await postController.update(PostId_original, PostId_curtain, content, scope, think);
+        }
+        if (scope = "group") {
+            const idAdminGroup = await groupController.getIdAdmin(groupId);
+            if (!idAdminGroup) {
+                throw new Error("dữ liệu group không hợp lệ");
+            }
+            const notification_value: NotificationServerTake = {
+                selectedIdChatRoom: groupId,
+                receiver_id: idAdminGroup,
+                content: `có bài viết mới trong nhóm ${groupId}`,
+                type: "static"
+            }
+            const resultNotification = await addNotification(notification_value);
+            if (!resultNotification.id) {
+                throw new Error("dữ liệu tin nhắn không hơp lệ");
+            }
+            sendNotification(resultNotification.id, notification_value);
         }
         res.status(200).json({
             status: 'ok',
