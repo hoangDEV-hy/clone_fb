@@ -477,9 +477,7 @@
                 </ul>
             </li>
 
-            <li><a href="#">Trợ giúp và hỗ trợ</a></li>
-            <li><a href="#">Màn hình và trợ năng</a></li>
-            <li><a href="#">Đóng góp ý kiến</a></li>
+            <li><a href="/page_manager/joined">Nhóm</a></li>
             <li><a href="/logout">Đăng xuất</a></li>
         </ul>
 
@@ -551,8 +549,7 @@
                 </div>
             </div>
             <div id="think">
-                <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
-                <a href="/Posts">tạo tin</a>
+                <form action="/Posts" method="get"> <button>Tạo tin</button> </form>
             </div>
             <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
                 <iframe id="myIframe" src="/Post/iframe/commend" style="width:100%; height:400px; "></iframe>

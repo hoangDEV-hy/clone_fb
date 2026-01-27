@@ -24,9 +24,8 @@ const functionInteractions = {
 
         for (let [key, value] of Object.entries(data_load)) {
             if (key === "sl_like_check") {
-                // value is now the array [ {id_Posts: 3, totalLikes: 2, likedByUser: 1} ]
                 for (let item of value) {
-                    let id_Post = item.id_Posts;   // <-- notice: field name is id_Posts, not id_Post
+                    let id_Post = item.id_Posts;
 
                     if (item.likedByUser === 1) {
                         document.getElementById(id_Post).checked = true;
@@ -44,9 +43,7 @@ const functionInteractions = {
         const id_Post = click.dataset.id;
         document.querySelector(nameContainIframe).style.display = "block";
 
-        // xác định đã like chưa
         let like = document.getElementById(id_Post).checked;
-
 
         // load Post_data từ server
         const formData = new FormData();
@@ -57,21 +54,22 @@ const functionInteractions = {
         });
         const Post_data = await res.json();
         Post_data.Post.like = like;
-        // gửi Post_data  vào iframe
+
         console.log(Post_data.Post)
-        //Post_data.Post.forEach(e => { console.log('e', e) })
         iframe.contentWindow.postMessage(
             { type: 'loadData', Post: Post_data.Post },
             '*'
         );
 
-        // gửi thông tin user vào iframe
-        const my_avatar = document.querySelector(namePicture).src;
+        // gửi thông tin user vào iframe (Fixed: kiểm tra element tồn tại)
+        const avatarElement = document.querySelector(namePicture);
+        const my_avatar = avatarElement ? avatarElement.src : '';
         const short_user = { id_user, my_avatar };
         iframe.contentWindow.postMessage(
             { type: 'userData', short_user },
             '*'
         );
+
         // gui commends to iframe
         let commend_data_array;
         for (let [key, value] of Object.entries(data_load)) {
@@ -80,17 +78,12 @@ const functionInteractions = {
             }
         }
 
-
         iframe.contentWindow.postMessage({
             type: 'commend_data_array',
             commend_data_array: commend_data_array
         });
 
-
-
         console.log('send_commends done')
-
-
     },
     change_like: (clicked_post, change_like, id_user) => {
 
@@ -112,13 +105,14 @@ const functionInteractions = {
                 selectedSenderId: id_user,
                 receiver_id: postOwnerId,
                 content: `${id_user} đã thích bài viết ${id_Post} của ${postOwnerId}`
-            } : null // Không gửi notification khi unlike
+            } : null
         };
 
         console.log('change_like done')
         return change_like;
 
     },
+    // Fixed: Đổi tên từ hander_dataiframe thành handle_dataiframe
     handle_dataiframe: (take_data, add_commends, deleted_commends, update_commends, containIframeName, change_like, id_user, onUpdate) => {
 
         if (take_data.data.type === 'interactions_an_Post_Data') {
@@ -129,28 +123,27 @@ const functionInteractions = {
             // Xử lý Like
             if (data.check_like !== undefined) {
                 let method = data.check_like ? 'Post' : 'DELETE';
-                // Lấy post owner từ DOM
                 const postElement = document.querySelector(`input[name="news"][value="${data.id_Posts}"]`)?.closest('.news');
                 const postOwnerIdInput = postElement?.querySelector('input[name="post_owner_id"]');
                 const postOwnerId = postOwnerIdInput ? postOwnerIdInput.value : null;
+
                 change_like[data.id_Posts] = {
                     id_user,
                     id_Posts: data.id_Posts,
                     classify: 'like',
                     method,
-                    notification_value: isCheck ? {
+                    notification_value: data.check_like ? {
                         type: 'static',
                         selectedIdChatRoom: null,
                         selectedSenderId: id_user,
                         receiver_id: postOwnerId,
                         content: `${id_user} đã thích bài viết ${data.id_Posts} của ${postOwnerId}`
-                    } : null // Không gửi notification khi unlike
+                    } : null
                 };
                 document.getElementById(data.id_Posts).checked = data.check_like;
             }
 
-
-            // Xử lý Comments - thêm notification data
+            // Xử lý Comments
             if (data.add_commends && data.add_commends.length > 0) {
                 const postElement = document.querySelector(`input[name="news"][value="${data.id_Posts}"]`)?.closest('.news');
                 const postOwnerIdInput = postElement?.querySelector('input[name="post_owner_id"]');
@@ -181,12 +174,9 @@ const functionInteractions = {
         });
 
         console.log('handle_dataiframe done');
-
-
     },
     save_toDb: async (deleted_commends, add_commends, update_commends, change_like) => {
 
-        // Gửi like với notification
         if (change_like && Object.keys(change_like).length > 0) {
             try {
                 const response = await fetch('/Post/like', {
@@ -202,13 +192,11 @@ const functionInteractions = {
                 }
             } catch (error) {
                 console.error('Error saving likes:', error);
-                // Fallback to sendBeacon if fetch fails
                 const likeBlob = new Blob([JSON.stringify(change_like)], { type: 'application/json' });
                 navigator.sendBeacon('/Post/like', likeBlob);
             }
         }
 
-        // Gửi comment với notification
         if (add_commends && add_commends.length > 0) {
             try {
                 const response = await fetch('/Post/commend', {
@@ -224,13 +212,11 @@ const functionInteractions = {
                 }
             } catch (error) {
                 console.error('Error saving comments:', error);
-                // Fallback to sendBeacon
                 const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
                 navigator.sendBeacon('/Post/commend', commendBlob);
             }
         }
 
-        // Gửi deleted comments
         if (deleted_commends && deleted_commends.length > 0) {
             try {
                 const response = await fetch('/Post/commend/del', {
@@ -251,7 +237,6 @@ const functionInteractions = {
             }
         }
 
-        // Gửi updated comments
         if (update_commends && update_commends.length > 0) {
             try {
                 const response = await fetch('/Post/commend/up', {
@@ -272,9 +257,7 @@ const functionInteractions = {
             }
         }
 
-
         console.log('save_toDb done')
-
     }
 }
 

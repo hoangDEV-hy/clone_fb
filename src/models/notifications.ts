@@ -3,6 +3,7 @@ import { DataTypes, Model } from "sequelize";
 import { Transaction } from 'sequelize';
 
 import NotificationServerTake from "../types/Type_Notification";
+import throwError from "../helpers/ThrowErrorOfSqlQuery";
 export class notifications extends Model {
     declare id: number;
     declare sender_id: string;
@@ -101,6 +102,20 @@ export let methods = {
         } catch (error) {
             console.error('Error in notifications.selectNotificationsAndQuantity():', error);
             throw error;
+        }
+    },
+    getNotificationsChat: async (chatId: number, receiverId: string): Promise<notifications[] | null> => {
+        try {
+            return await notifications.findAll({
+                where: {
+                    receiver_id: receiverId,
+                    chat_id: chatId
+                },
+                order: [['createdAt', 'DESC']],
+                limit: 5
+            });
+        } catch (err) {
+            throwError(err);
         }
     }
 }

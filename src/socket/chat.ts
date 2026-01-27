@@ -1,94 +1,352 @@
-import { Socket } from 'socket.io'
-import { select_chats, create_mes } from '../constrollers/chat/chat'
-import { select_chatsType, create_chat } from "../constrollers/chat/chat"
-import { select_members, add_members } from '../constrollers/chat/chat_members'
-
-//types
-import { notifications } from '../models/notifications'
+import { Socket, Server } from 'socket.io';
+import { methods as chatController } from '../constrollers/chat/chat';
+import { methods as chatMemberController } from '../constrollers/chat/chat_members';
+import { methods as config_chatController } from '../constrollers/Configs/Ctrl_ConfigChat';
+import { addNotification, sendNotification } from '../services/FollowerService';
 
 
-export let config_dataChat = {
-    get_chatData: (socket: Socket) => {
-        socket.on('get_chatData', async (sender_id, receiver_id, callback) => {
-            try {
-                let select_chatsData = await select_chats(sender_id, receiver_id);
+import NotificationServerTake from '../types/Type_Notification';
+let active_users: { [userId: string]: string } = {};
 
-                let result: any = {};
+export const ChatSocket = {
 
-                if (Array.isArray(select_chatsData)) {
-                    result.chat = {
-                        message: 'Chat found',
-                        data: select_chatsData
-                    };
-                } else if (select_chatsData.created) {
-                    result.chat = {
-                        message: 'Chat created successfully',
-                        data: select_chatsData
-                    };
+    /**
+     * Gửi và nhận tin nhắn
+     */
+    sendMessage: (socket: Socket, io: Server, active_users: any) => {
+        socket.on(
+            'send_message',
+            async (
+                chatId: number,
+                author: string,
+                content: string,
+                type: 'text' | 'image' | 'file' = 'text'
+            ) => {
+                try {
+                    // Lưu tin nhắn
+                    const message = await chatController.sendMessage(
+                        chatId,
+                        author,
+                        content,
+                        type
+                    );
+
+                    if (!message) {
+                        throw new Error('Failed to send message');
+                    }
+
+                    // Lấy danh sách members của chat
+                    const members = await chatMemberController.selectMembers(
+                        false,
+                        chatId,
+                        author,
+                        status
+                    );
+
+                    // Gửi tin nhắn đến tất cả members online
+                    members.forEach((member) => {
+                        const socketId = active_users[member.idUser];
+                        if (socketId) {
+                            io.to(socketId).emit('receive_message', {
+                                chatId,
+                                message,
+                                author
+                            });
+                        }
+                    });
+
+                    // Gửi thông báo cho những người offline
+                    const offlineMembers = members.filter(
+                        (m) => !active_users[m.idUser] && m.idUser !== author
+                    );
+
+                    for (const member of offlineMembers) {
+                        // Kiểm tra config notifications
+                        const config = await config_chatController.getConfig(
+                            chatId,
+                            member.idUser
+                        );
+
+                        if (config && config.notifications) {
+                            const notification_value: NotificationServerTake = {
+                                receiver_id: member.idUser,
+                                selectedIdChatRoom: chatId,
+                                type: 'static',
+                                content: content.substring(0, 50)
+                            }
+                            const notificationResult = await addNotification(notification_value);
+                            sendNotification(notificationResult.id, notification_value);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error in send_message:', err);
+                    socket.emit('error', { message: 'Failed to send message' });
                 }
-                let chat_id: number;
+            }
+        );
+    },
 
-                if (Array.isArray(select_chatsData)) {
-                    // Chat existed before, so use the first chat's id
-                    chat_id = select_chatsData[0].id;
-                } else {
-                    // Chat was newly created
-                    chat_id = select_chatsData.chatId;
+    /**
+     * Xóa tin nhắn
+     */
+    deleteMessage: (socket: Socket, io: Server) => {
+        socket.on(
+            'delete_message',
+            async (
+                messageId: number,
+                userId: string,
+                chatId: number
+            ) => {
+                try {
+                    await chatController.deleteMessage(messageId, userId, chatId);
+
+                    // Broadcast đến tất cả members trong chat
+                    io.to(`chat_${chatId}`).emit('message_deleted', {
+                        messageId,
+                        chatId
+                    });
+                } catch (err) {
+                    console.error('Error in delete_message:', err);
+                    socket.emit('error', { message: 'Failed to delete message' });
                 }
-                let select_chatMembers = await select_members(sender_id, receiver_id, chat_id);
-                console.log('select_chatMembers', select_chatMembers)
+            }
+        );
+    },
 
-                // 3. Check members
-                if (Array.isArray(select_chatMembers) && select_chatMembers.length > 0) {
-                    result.members = {
-                        message: 'Member of this chat found'
-                    };
-                } else {
-
-                    let status = 'joining';
-                    let chat_valueMembers = [{ chat_id: chat_id, idUser: sender_id, status: status }, { chat_id: chat_id, idUser: receiver_id, status: status }];
-                    const created = await add_members(chat_valueMembers);
-
-                    result.members = {
-                        message: created
-                            ? 'Add members of chat successfully' : 'Cannot add members'
-                    };
+    /**
+     * Thêm thành viên
+     */
+    inviteMembers: (socket: Socket, io: Server) => {
+        socket.on(
+            'inviteMembers',
+            async (
+                memberIds: string[],
+                notification: NotificationServerTake
+            ) => {
+                try {
+                    // Gửi thông báo cho members mới
+                    memberIds.forEach(async (memberId) => {
+                        notification.receiver_id = memberId;
+                        const notification_value = await addNotification(notification);
+                        sendNotification(notification_value.id, notification);
+                    });
+                } catch (err) {
+                    console.error('Error in add_members:', err);
+                    socket.emit('error', { message: 'Failed to add members' });
                 }
+            }
+        );
+    },
+    /**
+     * xử lý lời mời vào nhóm
+     */
+    //khi client click vao tin nhan( lay dau ra nhieu thong tin nhu nay?)
+    handleInventMember: (socket: Socket, io: Server) => {
+        socket.on('handleInventMembers', async (accept: boolean, chatId: number,
+            adminId: string,
+            memberIds: string[],
+            notification: NotificationServerTake) => {
+            if (accept) {
+                try {
+                    await chatController.addMembers(
+                        chatId,
+                        adminId,
+                        memberIds,
+                    );
 
-                // 4. Chỉ callback 1 lần
-                return callback(result);
+                    // Lấy lại thông tin chat sau khi thêm members
+                    const updatedChat = await chatController.selectChatById(chatId);
+                    const members = await chatMemberController.selectMembers(
+                        true, chatId
+                    );
 
-            } catch (err) {
-                return callback({
-                    message: 'Error: ' + err
+                    // Broadcast đến tất cả members
+                    io.to(`chat_${chatId}`).emit('member_added', {
+                        chatId,
+                        newMembers: memberIds,
+                        chat: updatedChat,
+                        allMembers: members
+                    });
+
+                    // Gửi thông báo cho admin
+                    const notification_value = await addNotification(notification);
+                    sendNotification(notification_value.id, notification);
+                } catch (err) {
+                    console.error('Error in add_members:', err);
+                    socket.emit('error', { message: 'Failed to add members' });
+                }
+            } else {
+                const notification_value = await addNotification(notification);
+                sendNotification(notification_value.id, notification);
+            }
+        })
+    },
+
+    /**
+     * Xóa thành viên
+     */
+    removeMember: (socket: Socket, io: Server) => {
+        socket.on(
+            'remove_member',
+            async (
+                chatId: number,
+                adminId: string,
+                removedUserId: string,
+                notification: NotificationServerTake
+            ) => {
+                try {
+                    await chatController.removeMember(
+                        chatId,
+                        adminId,
+                        removedUserId
+                    );
+
+                    // Lấy lại thông tin chat
+                    const updatedChat = await chatController.selectChatById(chatId);
+                    const members = await chatMemberController.selectMembers(
+                        true, chatId
+                    );
+
+                    // Broadcast đến tất cả members
+                    io.to(`chat_${chatId}`).emit('member_removed', {
+                        chatId,
+                        removedUserId,
+                        chat: updatedChat,
+                        allMembers: members
+                    });
+
+                    // Thông báo cho người bị xóa
+                    const notification_value = await addNotification(notification);
+                    sendNotification(notification_value.id, notification);
+                } catch (err) {
+                    console.error('Error in remove_member:', err);
+                    socket.emit('error', { message: 'Failed to remove member' });
+                }
+            }
+        );
+    },
+
+    /**
+     * Cập nhật config chat
+     */
+    updateConfig: (socket: Socket, io: Server) => {
+        socket.on(
+            'update_config',
+            async (
+                chatId: number,
+                userId: string,
+                configData: any
+            ) => {
+                try {
+                    await chatController.updateChatConfig(
+                        chatId,
+                        userId,
+                        configData
+                    );
+
+                    // Broadcast đến user (có thể có nhiều devices)
+                    const socketId = active_users[userId];
+                    if (socketId) {
+                        io.to(socketId).emit('config_updated', {
+                            chatId,
+                            configData
+                        });
+                    }
+                } catch (err) {
+                    console.error('Error in update_config:', err);
+                    socket.emit('error', { message: 'Failed to update config' });
+                }
+            }
+        );
+    },
+
+    /**
+     * Chuyển đổi type chat <-> group
+     */
+    // convertChatType: (socket: Socket, io: Server) => {
+    //     socket.on(
+    //         'convert_chat_type',
+    //         async (chatId: number, adminId: string) => {
+    //             try {
+    //                 const newType = await ChatController.convertChatType(
+    //                     chatId,
+    //                     adminId
+    //                 );
+
+    //                 // Broadcast đến tất cả members
+    //                 io.to(`chat_${chatId}`).emit('chat_type_converted', {
+    //                     chatId,
+    //                     newType
+    //                 });
+    //             } catch (err) {
+    //                 console.error('Error in convert_chat_type:', err);
+    //                 socket.emit('error', { message: 'Failed to convert chat type' });
+    //             }
+    //         }
+    //     );
+    // },
+
+    /**
+     * Chuyển quyền admin
+     */
+    transferAdmin: (socket: Socket, io: Server) => {
+        socket.on(
+            'transfer_admin',
+            async (
+                chatId: number,
+                currentAdminId: string,
+                newAdminId: string,
+                notification: NotificationServerTake
+            ) => {
+                try {
+                    await chatController.transferAdmin(
+                        chatId,
+                        currentAdminId,
+                        newAdminId,
+                        notification
+                    );
+
+                    // Broadcast đến tất cả members
+                    io.to(`chat_${chatId}`).emit('admin_transferred', {
+                        chatId,
+                        oldAdminId: currentAdminId,
+                        newAdminId
+                    });
+
+                    // Thông báo cho admin mới
+                    const notification_value = await addNotification(notification);
+                    sendNotification(notification_value.id, notification);
+                } catch (err) {
+                    console.error('Error in transfer_admin:', err);
+                    socket.emit('error', { message: 'Failed to transfer admin' });
+                }
+            }
+        );
+    },
+
+    /**
+     * Typing indicator
+     */
+    typingIndicator: (socket: Socket, io: Server) => {
+        socket.on(
+            'typing_start',
+            (chatId: number, userId: string) => {
+                socket.to(`chat_${chatId}`).emit('user_typing', {
+                    chatId,
+                    userId
                 });
             }
-        });
-    },
-    getAndSend_mesData: (socket: Socket, io: any, active_users: any[]) => {
-        socket.on('send_mes', async (send_mesData, chatId, author, receiver_id) => {
-            try {
+        );
 
-                const saverMes = await create_mes(chatId, author, send_mesData);
-                // Phát lại cho người gửi (xác nhận)
-                if (active_users[author]) {
-                    io.to(active_users[author]).emit('receive_mes', saverMes, author);
-                }
-
-                // Phát lại cho người nhận (nếu đang online)
-                if (active_users[receiver_id]) {
-                    io.to(active_users[receiver_id]).emit('receive_mes', saverMes);
-                }
+        socket.on(
+            'typing_stop',
+            (chatId: number, userId: string) => {
+                socket.to(`chat_${chatId}`).emit('user_stopped_typing', {
+                    chatId,
+                    userId
+                });
             }
-            catch (e) {
-                console.log('errol', e);
-            }
-        })
-    },
-    joinChatRoomAndSendNotificationsChat: (socket: Socket) => {
-        socket.on('joinChatRoom', (idChat, selectedValueNotificationChat: notifications) => {
-            socket.join(idChat);
-            socket.in(idChat).emit('sendedNotificationChat', selectedValueNotificationChat)
-        })
+        );
     }
-}
+};
+

@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-import { config_dataChat } from "./chat"
 import { sendNotificationWhenOnline } from '../services/SendNotificationServices/WhenOnline'
+import { ChatSocket } from "./chat";
 
 import NotificationServerTake from "../types/Type_Notification";
 let active_users: any = [];
@@ -13,28 +13,15 @@ export function setup_chat(io: Server) {
             active_users[user_id] = socket.id;
             console.log(`⚡ User${user_id} connected: ${socket.id}`);
         })
-        //sending chatData to client
-        config_dataChat.get_chatData(socket);
-        //listening mesData to server and emit mesData to client
-        config_dataChat.getAndSend_mesData(socket, io, active_users);
 
-        //emit mesData to client
-        socket.emit('get_chatData',)
-
-        //defaultJoinLeaveChatRoom
-        socket.on('defaultJoinChatRoom', (idChat) => {
-            socket.join(idChat);
-        })
-        socket.on('defaultLeaveChatRoom', (idChat) => {
-            for (const room of socket.rooms) {
-                if (room !== idChat) {
-                    socket.leave(room);
-                    console.log(`Đã rời khỏi phòng: ${room}`);
-                }
-            }
-        })
-        //join chat room send notification to chat
-        //config_dataChat.joinChatRoomAndSendNotificationsChat(socket);
+        ChatSocket.sendMessage(socket, io, active_users);
+        ChatSocket.deleteMessage(socket, io);
+        ChatSocket.inviteMembers(socket, io);
+        ChatSocket.handleInventMember(socket, io);
+        ChatSocket.removeMember(socket, io);
+        ChatSocket.updateConfig(socket, io);
+        ChatSocket.transferAdmin(socket, io);
+        ChatSocket.typingIndicator(socket, io);
 
         socket.on('disconnect', () => {
             for (const userId in active_users) {

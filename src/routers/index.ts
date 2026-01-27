@@ -6,7 +6,7 @@ import cors from 'cors';
 import { route as main } from './main'
 import { router as interactions } from './interactions'
 import { route as upload } from './upload'
-import { route as chat } from './chat'
+import { router as chat } from './chat'
 import { route as notification } from './notification'
 import { router as follow } from './Router_Follower'
 import { router as mutualFriend } from './Router_MutualFriend'
@@ -23,7 +23,7 @@ function router(app: Express): void {
     app.use('/main', main);
     app.use('/Post', interactions);
     app.use('/upload', upload);
-    app.use('/mess', chat);
+    app.use('/chat', chat);
     app.use('/notification', notification);
     app.use('/follow', follow);
     app.use('/mutualfriend', mutualFriend);

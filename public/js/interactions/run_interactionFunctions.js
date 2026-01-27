@@ -7,14 +7,33 @@ export default function interactions(change_like, id_user, nameContainIframe, da
             change_like = functionInteractions.change_like(e, change_like, id_user);
         })
     });
+
     //send_commends
     const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
     commendButtons.forEach(button => {
         button.addEventListener('click', async e => {
-            functionInteractions.send_commends(e, nameContainIframe, "myIframe", '.my_profile img', id_user, data_load);
+            // Fix: Tìm selector phù hợp với avatar của user
+            // Ưu tiên các selector có thể có trên trang
+            const avatarSelectors = [
+                '.my_profile img',
+                'form[action="/page_manager/user/upload/avatar"] img',
+                '.head img[alt="avt"]',
+                '.bd_ct_news_nguoiDang img'
+            ];
+
+            let avatarSelector = '.my_profile img'; // default
+            for (const selector of avatarSelectors) {
+                if (document.querySelector(selector)) {
+                    avatarSelector = selector;
+                    break;
+                }
+            }
+
+            functionInteractions.send_commends(e, nameContainIframe, "myIframe", avatarSelector, id_user, data_load);
         })
     })
-    //handle_dataiframe
+
+    //handle_dataiframe (Fixed typo: hander -> handle)
     window.addEventListener('message', e => {
         if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
 

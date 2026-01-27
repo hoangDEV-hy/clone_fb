@@ -74,7 +74,7 @@
         document.querySelector('#new input').value = Post.id ?? '';
 
         const avatarImg = document.querySelector('.bd_ct_n_nguoiDang_anh [name=avatar]');
-        avatarImg.src = Post.users?.avatar ? "/" + Post.users.avatar : '';
+        avatarImg.src = Post.users?.avatar ? Post.users.avatar : '';
 
         const userName = document.querySelector('.bd_ct_n_nguoiDang_name [name=name]');
         userName.innerHTML = Post.users?.name ?? '';

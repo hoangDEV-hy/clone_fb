@@ -449,7 +449,7 @@
             window.addEventListener('message', e => {
                 if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
 
-                functionInteractions.hander_dataIframe(
+                functionInteractions.handle_dataiframe(
                     e,
                     add_commends,
                     deleted_commends,
