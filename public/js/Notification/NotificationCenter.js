@@ -38,18 +38,18 @@ const NotificationCenter = {
         if (!container) return;
 
         if (!list || list.length === 0) {
-            container.innerHTML = '<li class="empty">Không có thông báo mới</li>';
+            container.innerHTML = '<div class="notification-empty">Không có thông báo mới</div>';
             return;
         }
 
         container.innerHTML = list.map(notif => `
-            <li class="avt notification-item" data-id="${notif.id}">
+            <div class="notification-card" data-id="${notif.id}">
                 <div class="notification-content">
-                    ${notif.content}
-                    <span class="time">${this.formatTime(notif.createdAt)}</span>
+                    <div class="notification-text">${notif.content}</div>
+                    <div class="notification-time">${this.formatTime(notif.createdAt)}</div>
                 </div>
-                <button class="delete-btn" onclick="NotificationCenter.deleteNotification(${notif.id})">×</button>
-            </li>
+                <button class="notification-delete-btn" onclick="NotificationCenter.deleteNotification(${notif.id})" aria-label="Xóa thông báo">×</button>
+            </div>
         `).join('');
     },
 

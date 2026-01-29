@@ -22,7 +22,9 @@
                 <ul class="thongBao menu">
                     <li><strong>Thông Báo</strong></li>
                     <li class="divider"></li>
-                    <li id="notificationList">Đang tải...</li>
+                    <li class="notification-container-wrapper">
+                        <div id="notificationList" class="notification-list">Đang tải...</div>
+                    </li>
                 </ul>
             </div>
 

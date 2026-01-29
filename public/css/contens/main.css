@@ -123,6 +123,7 @@ button {
   top: 120%;
   right: 0;
   min-width: 220px;
+  max-width: 350px;
   background: #ffffff;
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(15, 52, 96, 0.15);
@@ -155,6 +156,108 @@ button {
 
 .menu-btn {
   position: relative;
+}
+
+/* Notification container wrapper */
+.notification-container-wrapper {
+  padding: 0 !important;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-container-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-container-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-container-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 999px;
+}
+
+/* Notification list container */
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Notification card */
+.notification-card {
+  background: #f4f9ff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.notification-card:hover {
+  background: #e3f2ff;
+  border-color: #1877f2;
+  box-shadow: 0 2px 8px rgba(24, 119, 242, 0.15);
+  transform: translateY(-1px);
+}
+
+.notification-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.notification-text {
+  font-size: 0.9rem;
+  color: #1a202c;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.notification-delete-btn {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: #718096;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.notification-delete-btn:hover {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.notification-empty {
+  padding: 20px;
+  text-align: center;
+  color: #718096;
+  font-size: 0.9rem;
 }
 
 /* ====== PAGE BODY LAYOUT ====== */
