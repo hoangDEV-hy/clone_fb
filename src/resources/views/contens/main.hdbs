@@ -4,443 +4,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook - Trang chủ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <title>Giả Lập Facebook</title>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #18191a;
+            color: #e4e6eb;
+        }
 
+        /* ========== HEADER ========== */
+        .header {
+            background: #242526;
+            padding: 8px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
 
+        .navbar {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar li {
+            position: relative;
+        }
+
+        .navbar a,
+        .navbar button {
+            color: #e4e6eb;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .navbar a:hover,
+        .navbar button:hover {
+            background: #3a3b3c;
+        }
+
+        .logo img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .my_profile img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-left: 4px;
+        }
+
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #f02849;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 5px;
+            font-size: 11px;
+            font-weight: 600;
+            display: none;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .menu {
+            display: none;
+            position: absolute;
+            background: #242526;
+            border: 1px solid #3a3b3c;
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 280px;
+            max-width: 360px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            top: calc(100% + 8px);
+            right: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .menu.active {
+            display: block;
+        }
+
+        .menu li {
+            list-style: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .menu li:hover {
+            background: #3a3b3c;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-item img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-item-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item-preview {
+            font-size: 12px;
+            color: #b0b3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .divider {
+            height: 1px;
+            background: #3a3b3c;
+            margin: 8px 0;
+        }
+
+        /* ========== LAYOUT ========== */
+        .main-container {
+            display: flex;
+            gap: 16px;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .body_center {
+            flex: 1;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .body_right {
+            position: sticky;
+            top: 72px;
+            width: 280px;
+            height: fit-content;
+            background: #242526;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: calc(100vh - 88px);
+            overflow-y: auto;
+        }
+
+        .body_right h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #b0b3b8;
+            font-weight: 600;
+        }
+
+        .body_right ul {
+            list-style: none;
+        }
+
+        .body_right li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .body_right li:hover {
+            background: #3a3b3c;
+        }
+
+        .body_right li img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .body_right li span {
+            font-size: 14px;
+        }
+
+        /* ========== POSTS ========== */
+        .news {
+            background: #242526;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        /* ========== CHAT BOX ========== */
+        .chat-box {
+            position: fixed;
+            bottom: 0;
+            right: 320px;
+            width: 360px;
+            height: 480px;
+            background: #242526;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+        }
+
+        .chat-box.active {
+            display: flex;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .chat-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-bottom: 1px solid #3a3b3c;
+            background: #2f3031;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .chat-head-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-head img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-head h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-head-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .chat-head button,
+        .chat-head select {
+            background: transparent;
+            border: none;
+            color: #b0b3b8;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .chat-head button:hover,
+        .chat-head select:hover {
+            background: #3a3b3c;
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            background: #18191a;
+            scrollbar-width: thin;
+            scrollbar-color: #4a4b4c #242526;
+        }
+
+        .chat-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-body::-webkit-scrollbar-thumb {
+            background: #4a4b4c;
+            border-radius: 3px;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .message {
+            padding: 7px 12px;
+            border-radius: 16px;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: messageIn 0.2s ease-out;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .my-message {
+            align-self: flex-end;
+            background: #0084ff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .other-message {
+            align-self: flex-start;
+            background: #3a3b3c;
+            color: #e4e6eb;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message img {
+            max-width: 200px;
+            border-radius: 8px;
+            margin-top: 4px;
+        }
+
+        .message audio {
+            max-width: 200px;
+            margin-top: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .chat-footer {
+            border-top: 1px solid #3a3b3c;
+            padding: 10px 12px;
+            background: #242526;
+        }
+
+        .chat-input-actions {
+            display: flex;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .chat-input-actions select {
+            padding: 6px 8px;
+            background: #3a3b3c;
+            border: none;
+            border-radius: 6px;
+            color: #e4e6eb;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .chat-input-actions textarea {
+            flex: 1;
+            padding: 8px 12px;
+            background: #3a3b3c;
+            border: none;
+            border-radius: 18px;
+            color: #e4e6eb;
+            resize: none;
+            min-height: 36px;
+            max-height: 100px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .chat-input-actions textarea:focus {
+            outline: none;
+            background: #4a4b4c;
+        }
+
+        .chat-input-actions button {
+            padding: 8px 14px;
+            background: #0084ff;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .chat-input-actions button:hover {
+            background: #0073e6;
+        }
+
+        .chat-input-actions button:disabled {
+            background: #3a3b3c;
+            color: #65676b;
+            cursor: not-allowed;
+        }
+
+        .emoji-picker,
+        .voice-actions {
+            display: none;
+            padding: 8px;
+            background: #2f3031;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .voice-actions button {
+            margin-right: 8px;
+            padding: 6px 12px;
+            background: #3a3b3c;
+            border: none;
+            border-radius: 6px;
+            color: #e4e6eb;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .voice-actions button:hover {
+            background: #4a4b4c;
+        }
+
+        .voice-actions audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 8px 12px;
+            background: #3a3b3c;
+            border-radius: 16px;
+            width: fit-content;
+            margin-bottom: 6px;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #b0b3b8;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1200px) {
+            .body_right {
+                display: none;
+            }
+
+            .chat-box {
+                right: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                gap: 4px;
+            }
+
+            .navbar a,
+            .navbar button {
+                padding: 4px 6px;
+                font-size: 13px;
+            }
+
+            .chat-box {
+                right: 0;
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .main-container {
+                padding: 12px;
+            }
+        }
+    </style>
 </head>
-<style>
-    [data-role="message"].selected {
-        border: 2px solid red;
-        background: #ffeaea;
-    }
-
-    .overlayConfirm {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    .dialogConfirm {
-        width: 350px;
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .actionsConfirm {
-        margin-top: 20px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-    }
-
-    .actionsConfirm button {
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-    }
-
-    .actionsConfirm button:last-child {
-        background: #1877f2;
-        color: white;
-        border: none;
-    }
-
-    .menu {
-        display: none;
-        position: absolute;
-        background: white;
-        border: 1px solid #ccc;
-        z-index: 1000;
-    }
-
-    .menu.active {
-        display: block;
-    }
-
-    .follow-toggle-btn[data-status="following"] {
-        color: #1877f2;
-        font-weight: 600;
-    }
-
-    .follow-toggle-btn[data-status="not-following"] {
-        color: #050505;
-    }
-
-    .follow-toggle-btn[data-status="loading"] {
-        color: #65676b;
-        font-style: italic;
-    }
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #18191a;
-        color: #e4e6eb;
-        padding: 20px;
-    }
-
-    .suggestions-container {
-        max-width: 680px;
-        margin: 0 auto 20px;
-        background: #242526;
-        border-radius: 8px;
-        padding: 16px;
-    }
-
-    .suggestions-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-    }
-
-    .suggestions-header h2 {
-        font-size: 20px;
-        font-weight: 600;
-    }
-
-    .view-all {
-        color: #2d88ff;
-        text-decoration: none;
-        font-size: 15px;
-        font-weight: 500;
-    }
-
-    .view-all:hover {
-        text-decoration: underline;
-    }
-
-    .suggestions-wrapper {
-        position: relative;
-    }
-
-    .suggestions-scroll {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        scroll-behavior: smooth;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .suggestions-scroll::-webkit-scrollbar {
-        display: none;
-    }
-
-    .suggestion-card {
-        flex: 0 0 auto;
-        width: 160px;
-        background: #3a3b3c;
-        border-radius: 8px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: transform 0.2s;
-        position: relative;
-    }
-
-    .suggestion-card:hover {
-        transform: translateY(-4px);
-    }
-
-    .card-avatar {
-        width: 100%;
-        height: 160px;
-        position: relative;
-        overflow: hidden;
-        background: #4a4b4c;
-    }
-
-    .card-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .card-avatar-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 48px;
-        font-weight: 600;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .card-info {
-        padding: 12px;
-    }
-
-    .card-name {
-        font-size: 15px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .mutual-friends {
-        font-size: 13px;
-        color: #b0b3b8;
-        margin-bottom: 12px;
-    }
-
-    .card-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .btn {
-        padding: 8px;
-        border: none;
-        border-radius: 6px;
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-primary {
-        background: #2d88ff;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #1877f2;
-    }
-
-    .btn-secondary {
-        background: #3a3b3c;
-        color: #e4e6eb;
-    }
-
-    .btn-secondary:hover {
-        background: #4a4b4c;
-    }
-
-    .nav-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s;
-    }
-
-    .nav-button:hover {
-        background: white;
-        transform: translateY(-50%) scale(1.1);
-    }
-
-    .nav-button.prev {
-        left: -12px;
-    }
-
-    .nav-button.next {
-        right: -12px;
-    }
-
-    .nav-button svg {
-        width: 20px;
-        height: 20px;
-        fill: #050505;
-    }
-
-    .nav-button:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-
-    .loading {
-        text-align: center;
-        padding: 40px;
-        color: #b0b3b8;
-    }
-
-    .error {
-        text-align: center;
-        padding: 40px;
-        color: #f02849;
-    }
-
-    /* Loading skeleton */
-    .skeleton {
-        animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.5;
-        }
-    }
-
-    .skeleton-card {
-        flex: 0 0 auto;
-        width: 160px;
-        background: #3a3b3c;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .skeleton-avatar {
-        width: 100%;
-        height: 160px;
-        background: #4a4b4c;
-    }
-
-    .skeleton-info {
-        padding: 12px;
-    }
-
-    .skeleton-line {
-        height: 16px;
-        background: #4a4b4c;
-        border-radius: 4px;
-        margin-bottom: 8px;
-    }
-
-    .skeleton-line.short {
-        width: 60%;
-    }
-
-    .mutual-friends-modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .mutual-friends-modal.active {
-        display: flex;
-    }
-
-    .modal-content {
-        background: #242526;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 500px;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-
-    .modal-header {
-        padding: 16px;
-        border-bottom: 1px solid #3a3b3c;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .modal-header h3 {
-        font-size: 20px;
-    }
-
-    .close-modal {
-        background: #3a3b3c;
-        border: none;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-body {
-        padding: 16px;
-    }
-
-    .mutual-friend-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px;
-        border-radius: 8px;
-        margin-bottom: 4px;
-    }
-
-    .mutual-friend-item:hover {
-        background: #3a3b3c;
-    }
-
-    .mutual-friend-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #4a4b4c;
-    }
-
-    .mutual-friend-info h4 {
-        font-size: 15px;
-        font-weight: 600;
-    }
-</style>
 
 <body>
-    <div id="bd_ct_news_cmd_tuongTac_nenMo"></div>
+    <!-- Header -->
     <div class="header">
         <ul class="navbar">
             <li class="logo">
                 <img src="/pictures/image-1754515454077-261962452.png" alt="logo">
             </li>
-
-            <li class="search">
-                <a href="/searches">Tìm kiếm</a>
-            </li>
-
+            <li><a href="/searches">Tìm kiếm</a></li>
             <li><a href="/page_manager/friends/joined">Bạn bè</a></li>
 
             <!-- Tin nhắn -->
             <li class="menu-btn" data-menu="mes">
-                Tin nhắn
-                <ul class="mes menu">
+                <button>Tin nhắn</button>
+                <ul class="mes menu" id="messageMenu">
                     <li><strong>Tin Nhắn</strong></li>
                     <li class="divider"></li>
-                    <li><a href="#">Nguyễn Hoàng</a></li>
-                    <li><a href="#">Bùi Huy</a></li>
-                    <li><a href="#">Văn Hiệu</a></li>
-                    <li><a href="#">Quảng Nam</a></li>
+                    <li style="text-align: center; color: #b0b3b8; padding: 20px;">Đang tải...</li>
                 </ul>
             </li>
 
             <!-- Thông báo -->
             <li class="menu-btn" data-menu="thongBao">
-                Thông Báo
+                <button>Thông Báo</button>
                 <span id="unreadBadge" class="badge"></span>
                 <ul class="thongBao menu">
                     <li><strong>Thông Báo</strong></li>
@@ -451,595 +595,679 @@
 
             <!-- Profile -->
             <li class="my_profile menu-btn" data-menu="submenu">
-                <form action="http://localhost:3000/page_manager/user" method="POST" style="display: inline;">
-                    <input type="hidden" name="selectedTargetId" value="{{user.id}}">
-                    <button type="submit"
-                        style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; padding: 0; font: inherit;">
-                        Trang cá nhân
-                    </button>
-                </form>
-                <img src="{{user.avatar}}" alt="ảnh đại diện">
-                Tài khoản
-                </a>
+                <button style="display: flex; align-items: center; gap: 4px;">
+                    <span>{{user.name}}</span>
+                    <img src="{{user.avatar}}" alt="avatar">
+                </button>
                 <ul class="submenu menu">
-                    <li>{{user.name}}</li>
                     <li>
-                        <input type="hidden" value="{{user.id}}">
+                        <form action="http://localhost:3000/page_manager/user" method="POST">
+                            <input type="hidden" name="selectedTargetId" value="{{user.id}}">
+                            <button type="submit"
+                                style="width: 100%; text-align: left; background: none; border: none; color: #e4e6eb; cursor: pointer; padding: 0;">
+                                Trang cá nhân
+                            </button>
+                        </form>
                     </li>
-                </ul>
-            </li>
-
-            <!-- Settings -->
-            <li class="menu-btn" data-menu="subsubmenu">
-                Cài đặt
-                <ul class="subsubmenu menu">
-                    <li>Ngôn Ngữ</li>
+                    <li class="divider"></li>
+                    <li><input type="hidden" id="currentUserId" value="{{user.id}}"></li>
                 </ul>
             </li>
 
             <li><a href="/page_manager/joined">Nhóm</a></li>
             <li><a href="/logout">Đăng xuất</a></li>
         </ul>
-
     </div>
-    <div class="body" style="display: flex">
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Center Content -->
         <div class="body_center">
-            <div class="suggestions-container">
-                <div class="suggestions-header">
-                    <h2>Những người bạn có thể biết</h2>
-                    <a href="#" class="view-all">Xem tất cả</a>
+            <!-- Friend Suggestions -->
+            <div style="background: #242526; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h2 style="font-size: 17px; font-weight: 600; margin: 0;">Những người bạn có thể biết</h2>
+                    <a href="#" style="color: #2d88ff; text-decoration: none; font-size: 14px;">Xem tất cả</a>
                 </div>
+                <div id="suggestionsScroll"></div>
+            </div>
 
-                <div class="suggestions-wrapper">
-                    <button class="nav-button prev" id="prevBtn" disabled>
-                        <svg viewBox="0 0 24 24">
-                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                        </svg>
+            <!-- Create Post -->
+            <div style="background: #242526; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <form action="/Posts" method="get">
+                    <button
+                        style="width: 100%; padding: 10px; background: #3a3b3c; border: none; border-radius: 20px; color: #b0b3b8; cursor: pointer; font-size: 14px;">
+                        Bạn đang nghĩ gì?
                     </button>
-
-                    <div class="suggestions-scroll" id="suggestionsScroll">
-                        <!-- Loading skeleton -->
-                        <div class="skeleton-card skeleton">
-                            <div class="skeleton-avatar"></div>
-                            <div class="skeleton-info">
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line short"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                            </div>
-                        </div>
-                        <div class="skeleton-card skeleton">
-                            <div class="skeleton-avatar"></div>
-                            <div class="skeleton-info">
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line short"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                            </div>
-                        </div>
-                        <div class="skeleton-card skeleton">
-                            <div class="skeleton-avatar"></div>
-                            <div class="skeleton-info">
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line short"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="nav-button next" id="nextBtn">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
-                        </svg>
-                    </button>
-                </div>
+                </form>
             </div>
 
-            <!-- Modal hiển thị bạn chung -->
-            <div class="mutual-friends-modal" id="mutualFriendsModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="modalTitle">Bạn chung</h3>
-                        <button class="close-modal" id="closeModal">✕</button>
-                    </div>
-                    <div class="modal-body" id="modalBody">
-                        <!-- Nội dung bạn chung sẽ được load ở đây -->
-                    </div>
-                </div>
-            </div>
-            <div id="think">
-                <form action="/Posts" method="get"> <button>Tạo tin</button> </form>
-            </div>
-            <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
-                <iframe id="myIframe" src="/Post/iframe/commend" style="width:100%; height:400px; "></iframe>
-            </div>
-            <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
-
-
+            <!-- Posts -->
             {{#each allPosts}}
             <div class="news">
                 <input type="hidden" name="news" value="{{id}}">
                 <input type="hidden" name="post_owner_id" value="{{users.id}}">
-                <div class="bd_ct_news_nguoiDang">
-                    <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
-                        <div style="top:0%">
-                            <img src="{{users.avatar}}" alt="avatar">
-                        </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <img src="{{users.avatar}}" alt="avatar"
+                        style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 600;">{{users.name}}</h4>
+                        <p style="margin: 0; font-size: 12px; color: #b0b3b8;">{{time updatedAt}}</p>
                     </div>
-                    <div class="bd_ct_n_nguoiDang_name">
-                        {{#if group_id}}
-                        <h3>{{groups.name}}</h3>
-                        {{/if}}
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <!-- Click vào tên để vào trang cá nhân -->
-                            <h4>
-                                <form action="http://localhost:3000/page_manager/user" method="POST"
-                                    style="display: inline;">
-                                    <input type="hidden" name="selectedTargetId" value="{{users.id}}">
-                                    <button type="submit"
-                                        style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; padding: 0; font: inherit;">
-                                        Trang cá nhân
-                                    </button>
-                                </form>
-                                <h5>{{users.name}} · {{time updatedAt}}</h5>
-                            </h4>
+                </div>
 
-                            <!-- Menu 3 chấm -->
-                            <div class="post-menu-container" style="position: relative;">
-                                <button class="post-menu-btn" data-user-id="{{users.id}}"
-                                    data-post-id="{{id}}">⋮</button>
-                                <ul class="post-menu" style="display: none;">
-                                    <!-- Button follow/unfollow sẽ được JS thay đổi động -->
-                                    <li class="follow-toggle-btn" data-user-id="{{users.id}}" data-status="loading">
-                                        Đang kiểm tra...
-                                    </li>
-                                    <li class="hide-post-btn" data-post-id="{{id}}">Ẩn bài viết</li>
-                                    <li class="report-post-btn" data-post-id="{{id}}">Báo cáo</li>
-                                </ul>
-                            </div>
-                        </div>
+                <div>
+                    {{#if think}}
+                    <h2 style="font-size: 14px; margin-bottom: 8px; font-weight: normal;">{{think}}</h2>
+                    {{/if}}
+                    <div class="bd_ct_news_title">
+                        <input type="hidden" class="image_src_input" value='{{json contens.image}}'>
+                        <p style="font-size: 14px; line-height: 1.4;">{{contens.text}}</p>
+                        <img class="image_src_img" src="" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">
                     </div>
+                </div>
 
-                    <div>
-                        <h2>{{think}}</h2>
-                        <div class="bd_ct_news_title">
-                            <input type="hidden" class="image_src_input" value='{{json contens.image}}'>
-                            <h3>{{contens.text}}</h3>
-                            <img class="image_src_img" src="">
-                        </div>
-                    </div>
-
-                    <div class="bd_ct_news_commend">
-                        <div id="bd_ct_news_commend_thongKe_news{{id}}">
-                            <p id="bd_ct_news_cmd_tk_text_news{{id}}"></p>
-                        </div>
-                        <div class="bd_ct_news_commend_tuongTac">
-                            <input type="checkbox" class="like-checkbox" id="{{id}}" data-id="{{id}}">like
-                            <button name="commend" data-id="{{id}}">Bình luận</button>
-
-                            <form action="/Post/share" method="Post">
-                                <input type="hidden" name="id_Post" value={{id}}>
-                                <button type="submit">Chia sẻ</button>
-                            </form>
-                        </div>
+                <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #3a3b3c;">
+                    <div style="display: flex; gap: 16px;">
+                        <label style="cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 4px;">
+                            <input type="checkbox" class="like-checkbox" data-id="{{id}}">
+                            <span>Thích</span>
+                        </label>
+                        <button name="commend" data-id="{{id}}"
+                            style="background: none; border: none; color: #b0b3b8; cursor: pointer; font-size: 14px;">
+                            Bình luận
+                        </button>
                     </div>
                 </div>
             </div>
             {{/each}}
 
-            <button id="loadMoreBtn">Load more</button>
-
+            <button id="loadMoreBtn"
+                style="width: 100%; padding: 10px; background: #3a3b3c; border: none; border-radius: 8px; color: #e4e6eb; cursor: pointer; font-size: 14px; margin-top: 16px;">
+                Xem thêm
+            </button>
         </div>
-        <div class="body_right">
 
+        <!-- Right Sidebar - Friends List -->
+        <div class="body_right">
             <h2>Người liên hệ</h2>
-            <ul data-role="friendList">
+            <ul id="friendList">
                 {{#each friend_array}}
-                <li data-id="{{id}}">
-                    <img src="{{avatar}}" width="30" height="30" alt="{{name}}">
+                <li data-id="{{id}}" data-name="{{name}}" data-avatar="{{avatar}}">
+                    <img src="{{avatar}}" alt="{{name}}">
                     <span>{{name}}</span>
                 </li>
                 {{/each}}
             </ul>
-            <ul data-role="myRoom">
-                <li>Room 1</li>
-                <li>Room 2</li>
-            </ul>
+        </div>
+    </div>
 
-
-            <div data-role="chatBox" style="display: none;">
-                <div data-role="chatHead" style="display: flex;">
-                    <h3 data-role="head_name">ten</h3>
-                    <input type="hidden" data-role="head_chatId">
-                    <img src="" alt="tagetPicture">
-                    <button data-role="add_member">thêm thành viên</button>
-                    <select data-role="head_option">
-                        <option>----------</option>
-                        <option value="delete">delete</option>
-                        <option value="submit">submit</option>
-                        <option value="cancel">cancel</option>
-                        <option value="edit_nickName">changing nickname</option>
-                        <option value="select_members">show members</option>
-
-                    </select>
-                    <button data-role="head_close">close</button>
-                </div>
-                <div data-role="contain_chat" style="display: flex;">
-                    <div data-role="contain_otherChat">
-
-                    </div>
-                    <div data-role="contain_myChat">
-
-                    </div>
-                </div>
-                <div data-role="notification"></div>
-                <div data-role="chatFooter">
-                    <select data-role="typeMes">
-
-                        <option>----------</option>
-                        <option value="voice">voice</option>
-                        <option value="emoji">emoji</option>
-                        <option value="picture">picture</option>
-                    </select>
-                    <emoji-picker style="display: none;"></emoji-picker>
-                    <div data-role="voiceAction" style="display: none;">
-                        <button data-role="start_voice">start</button>
-                        <button data-role="end_voice">end</button>
-                        <audio data-role="replay_voice" controls></audio>
-                    </div>
-                    <input type="file" data-role="upload_img" style="display: none;" accept="image/*, image/jpeg">
-
-                    <textarea data-role="contentChat"></textarea>
-                    <button data-role="send_mes">send</button>
-                </div>
+    <!-- Chat Box -->
+    <div class="chat-box" data-role="chatBox">
+        <div class="chat-head">
+            <div class="chat-head-info">
+                <img src="/pictures/default-avatar.png" alt="avatar" data-role="head_avatar">
+                <h3 data-role="head_name">Tên người dùng</h3>
+                <input type="hidden" data-role="head_chatId">
+                <input type="hidden" data-role="head_receiverId">
+            </div>
+            <div class="chat-head-actions">
+                <select data-role="head_option">
+                    <option value="">⋮</option>
+                    <option value="delete">Xóa tin nhắn</option>
+                    <option value="submit">Xác nhận</option>
+                    <option value="cancel">Hủy</option>
+                    <option value="edit_nickName">Đổi biệt danh</option>
+                </select>
+                <button data-role="head_close">✕</button>
             </div>
         </div>
-        <!-- ========== MODAL ĐỒNG Ý / HUỶ ========== -->
-        <div id="overlayConfirm" class="overlayConfirm">
-            <div class="dialogConfirm">
-                <h3>Bạn muốn tiếp tục?</h3>
-                <p>Hành động này có thể thay đổi dữ liệu!</p>
 
-                <div class="actionsConfirm">
-                    <button id="btnCancelConfirm">Huỷ</button>
-                    <button id="btnOkConfirm">Đồng ý</button>
+        <div class="chat-body">
+            <div class="chat-messages">
+                <div data-role="contain_otherChat" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                <div class="typing-indicator" data-role="typing_indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
-                </divS /div>
-                <!-- ========== /MODAL ========== -->
-                <!-- Friend Suggestions Scripts -->
-                <script src="/js/Suggestion/ApiService.js"></script>
-                <script src="/js/Suggestion/UiService.js"></script>
-                <script src="/js/Suggestion/ToastService.js"></script>
-                <script src="/js/Suggestion/ModalService.js"></script>
-                <script src="/js/Suggestion/ScrollService.js"></script>
-                <script src="/js/Suggestion/SuggestionsController.js"></script>
-                <script src="/js/Suggestion/SuggestionActions.js"></script>
-</body>
-<script src="/socket.io/socket.io.js"></script>
-<!-- CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- JS (bundle + Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-<script type="module">
-    import handle_image from '/js/support/handle_image.js';
-    import interactions from '/js/interactions/run_interactionFunctions.js'
-    import loadHandleConfig_chat from '/js/chat/loadHandleConfig_chat.js'
-    import featureOfChat from '/js/chat/featureOfChat.js'
-    import notification from '/js/Notification/notification.js'
-    import NotificationCenter from '/js/Notification/NotificationCenter.js';
-    // expose ra global để HTML onclick dùng được
-    window.NotificationCenter = NotificationCenter;
+                <div data-role="contain_myChat" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+        </div>
 
-    import follow from '/js/Follow.js';
-    import reloadMain from '/js/ReloadMain.js'
+        <div class="chat-footer">
+            <div class="chat-input-actions">
+                <select data-role="typeMes">
+                    <option value="">📎</option>
+                    <option value="picture">🖼️</option>
+                    <option value="voice">🎤</option>
+                    <option value="emoji">😊</option>
+                </select>
+                <textarea data-role="contentChat" placeholder="Aa" rows="1"></textarea>
+                <button data-role="send_mes" disabled>➤</button>
+            </div>
 
+            <div class="emoji-picker" style="display: none;">
+                <emoji-picker></emoji-picker>
+            </div>
 
+            <div class="voice-actions" data-role="voiceAction" style="display: none;">
+                <button data-role="start_voice">🎙️ Bắt đầu ghi</button>
+                <button data-role="end_voice" disabled>⏹️ Dừng</button>
+                <audio data-role="replay_voice" controls></audio>
+            </div>
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        // xử lý ảnh base64 từ hidden input
-        handle_image('.bd_ct_news_title', '.image_src_img', '.image_src_input');
+            <input type="file" data-role="upload_img" accept="image/*" style="display: none;">
+        </div>
+    </div>
 
-        //for load_Posts, change_like
-        const id_user = document.querySelector('.my_profile input').value;
-        //for load_Posts, set_like
-        let data_load;
-        //for set_like, change_like
-        const nameCheckInput = '.like-checkbox';
-        //for send_commends, handle_dataIframe
-        const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
-        //for send_commends, handle_dataIframe, change_like, save_toDB
-        let change_like = {};
-        // lưu dữ liệu comment từ iframe
-        let add_commends = [];
-        //save the delete commend data
-        let deleted_commends = [];
-        //save the update commend data
-        let update_commends = [];
-        interactions(change_like, id_user, nameContainIframe, data_load, add_commends, deleted_commends, update_commends);
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 
+    <script type="module">
+        import handle_image from '/js/support/handle_image.js';
+        import interactions from '/js/interactions/run_interactionFunctions.js';
+        import featureOfChat from '/js/chat/featureOfChat.js';
+        import NotificationCenter from '/js/Notification/NotificationCenter.js';
 
-        //chatBox
-        let socket = io();
-        socket.onAny((event, ...args) => {
-            console.log('📡 received event:', event, args);
-        });
-        let chatState = {
-            receiver_id: null,
-            head_name: null,
-            chat_id: null
-        };
-        async function handle_functions(socket, chatState, id_user) {
-            // Load chatState asynchronously
-            chatState = await loadHandleConfig_chat.load_chat(socket, id_user, chatState);
-            // Send message asynchronously
-            featureOfChat.send_mes(id_user, chatState.receiver_id, socket);
-            // Return the updated chatState
-            return chatState;
-        }
-        //for realtime notifications
-        socket.on('badge_increment', (badge_increment) => {
-            console.log('badge_increment run')
-            const badge = document.getElementById('unreadBadge');
-            if (!badge) return;
+        window.NotificationCenter = NotificationCenter;
 
-            const current = parseInt(badge.textContent || '0', 10);
-            const newCount = current + badge_increment;
+        document.addEventListener('DOMContentLoaded', async () => {
+            const id_user = document.getElementById('currentUserId').value;
+            const socket = io({
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                timeout: 10000
+            });
+            socket.emit('register', id_user);
 
-            NotificationCenter.updateUnreadBadge(newCount);
-        })
+            console.log('✅ Socket connected:', socket.id);
+            let reconnectAttempts = 0;
+            const MAX_RECONNECT_ATTEMPTS = 5;
+            let notificationShown = false;
 
-        // Usage
-        handle_functions(socket, chatState, id_user)
-            .then(updatedChatState => {
-            })
-            .catch(err => console.error("Error:", err));
+            // Hàm hiển thị thông báo
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background: ${type === 'error' ? '#f44336' : '#2196F3'};
+    color: white;
+    border-radius: 5px;
+    z-index: 9999;
+  `;
+                document.body.appendChild(notification);
 
-        //for reloading mes from server
-        const containChat = document.querySelector('[data-role="contain_chat"]');
-        const myChat = containChat.querySelector('[data-role="contain_myChat"]');
-        const otherChat = containChat.querySelector('[data-role="contain_otherChat"]');
-        socket.on('receive_mes', (data) => {
-            if (String(data[0].chatID) !== chatState.chat_id.value) {
-                console.log('notification'); return
-            }
-            loadHandleConfig_chat.handleChatData(data, myChat, otherChat, chatState.receiver_id);
-        });
-
-
-        //featureOfChat
-        //delete event
-        const chatHead = document.querySelector('[data-role="chatHead"]');
-        const head_option = chatHead.querySelector('[data-role="head_option"]');
-
-        let selecter_messages;
-        head_option.addEventListener('change', async (e) => {
-            let contain_myChat = document.querySelector('[data-role="contain_myChat"]')
-            const value = e.target.value;
-            if (['delete', 'submit', 'cancel'].includes(value)) {
-                selecter_messages = await featureOfChat.del_mes(e, contain_myChat, selecter_messages);
-            }
-            //edit_name
-            if (e.target.value === 'edit_nickName') {
-                featureOfChat.edit_nickName(id_user, chatState);
-            }
-            //select_members
-            if (e.target.value === 'select_members') {
-                featureOfChat.select_members(myIframe, nameContainIframe);
+                setTimeout(() => notification.remove(), 3000);
             }
 
-        });
-        //notifications
-        notification.define();
-        //generate a notificationn & handle_notification
-        socket.on('create_notification', (data, callback) => {
-            if (data) {
-                if (data.type === "invited_joinChat") {
-                    notification.generate_notification(data, "Thông báo", "invited_joinChat", socket);
+            socket.on('connect', () => {
+                console.log('Kết nối thành công! Socket ID:', socket.id);
+                reconnectAttempts = 0;
+                notificationShown = false;
+                showNotification('Đã kết nối đến server', 'success');
+            });
+
+            socket.on('disconnect', (reason) => {
+                console.log('Mất kết nối:', reason);
+                showNotification('Mất kết nối với server', 'error');
+
+                if (reason === 'io server disconnect') {
+                    setTimeout(() => {
+                        window.location.href = './404.html';
+                    }, 2000);
                 }
-                else if (data.type === "static") {
-                    notification.generate_notification(data, "Thông báo", "static", socket);
-                } else {
-                    //notification.generate_notification(data, "Thông báo", "unknownType");
-                }
-            }
-            else {
-                console.log('khong ton tai data.content');
-                // Vẫn gửi acknowledgment nếu có callback nhưng data không hợp lệ
-                if (callback && typeof callback === 'function') {
-                    callback({ received: false });
-                }
-            }
-        });
+            });
 
-        //event click_listRoom
-        document.querySelectorAll('[data-role="myRoom"]').forEach(el => {
-            el.addEventListener('click', (e) => {
-                console.log(e.target.textContent.trim());
-            }
-            )
-        })
+            socket.on('connect_error', (error) => {
+                reconnectAttempts++;
 
-        //event add member to chat
-        document.querySelector('[data-role="add_member"]').addEventListener('click', () => {
-            const iframe = document.getElementById('myIframe');
-            iframe.src = '/mess/chat_room/people';
-            document.querySelector(nameContainIframe).style.display = "block";
-            //for searching chat_room, friend
-            let chat_roomUserId = {
-                chat_roomId: chatState.chat_id.value,
-                idUser: id_user
+                if (!notificationShown) {
+                    showNotification(`Đang thử kết nối lại... (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`, 'error');
+                    notificationShown = true;
+                }
+
+                if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                    showNotification('Không thể kết nối đến server. Chuyển hướng...', 'error');
+                    setTimeout(() => {
+                        window.location.href = './404.html';
+                    }, 2000);
+                }
+            });
+
+            socket.on('reconnect_attempt', (attemptNumber) => {
+                console.log(`Thử kết nối lại lần ${attemptNumber}`);
+            });
+
+            socket.on('reconnect_failed', () => {
+                showNotification('Kết nối thất bại. Chuyển hướng...', 'error');
+                setTimeout(() => {
+                    window.location.href = '/404.html';
+                }, 2000);
+            });
+
+            // Handle images
+            handle_image('.bd_ct_news_title', '.image_src_img', '.image_src_input');
+
+            // Initialize interactions
+            let change_like = {}, add_commends = [], deleted_commends = [], update_commends = [], data_load;
+            interactions(change_like, id_user, '.bd_ct_news_cmd_tuongTac_pop', data_load, add_commends, deleted_commends, update_commends);
+
+            // ========== CHAT STATE ==========
+            const chatBox = document.querySelector('[data-role="chatBox"]');
+            const sendBtn = chatBox.querySelector('[data-role="send_mes"]');
+            const chatInput = chatBox.querySelector('[data-role="contentChat"]');
+
+            let chatState = {
+                receiver_id: null,
+                chat_id: null
             };
-            iframe.onload = () => {
-                iframe.contentWindow.postMessage(chat_roomUserId, window.location.origin);
-            };
-            let close_buttonIframe = document.createElement('button');
-            close_buttonIframe.addEventListener('click', () => {
-                document.querySelector(nameContainIframe).style.display = "none";
-            })
-            document.querySelector(nameContainIframe).appendChild(close_buttonIframe);
-        })
 
-        // ================= MENU / NOTIFICATION =================
-        const menus = document.querySelectorAll('.menu');
-        const menuButtons = document.querySelectorAll('.menu-btn');
+            // Enable/disable send button based on input
+            chatInput.addEventListener('input', () => {
+                sendBtn.disabled = !chatInput.value.trim();
+            });
 
-        function closeAllMenus() {
-            menus.forEach(menu => menu.classList.remove('active'));
-        }
+            // Close chat
+            chatBox.querySelector('[data-role="head_close"]').addEventListener('click', () => {
+                chatBox.classList.remove('active');
+            });
 
-        menuButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation(); // ⛔ rất quan trọng
+            // ========== LOAD CHAT LIST ==========
+            // getUserChats() với User relations (sender, receiver)
+            async function loadChatList() {
+                try {
+                    const res = await fetch('/chat/list');
+                    const data = await res.json();
 
-                const className = btn.dataset.menu;
-                if (!className) return;
+                    console.log('📋 Chat list:', data);
 
-                const menu = document.querySelector(`.${className}`);
-                if (!menu) return;
+                    if (data.success && data.chats && data.chats.length > 0) {
+                        const menu = document.getElementById('messageMenu');
 
-                const isOpen = menu.classList.contains('active');
+                        const chatItems = data.chats.map(chat => {
+                            // Xác định ai là người còn lại
+                            let otherUser = null;
+                            let chatName = 'Unknown';
+                            let chatAvatar = '/pictures/default-avatar.png';
+                            let lastMessage = '';
 
-                // đóng tất cả trước
-                closeAllMenus();
+                            if (chat.type === 'chat') {
+                                // 1-on-1 chat
+                                otherUser = chat.sender_id === id_user ? chat.receiver : chat.sender;
+                                if (otherUser) {
+                                    chatName = otherUser.name || 'Unknown';
+                                    chatAvatar = otherUser.avatar || '/pictures/default-avatar.png';
+                                }
+                            } else {
+                                // Group chat
+                                chatName = chat.name || 'Group Chat';
+                                chatAvatar = chat.avatar || '/pictures/default-group.png';
+                            }
 
-                // toggle
-                if (!isOpen) {
-                    menu.classList.add('active');
+                            // Last message preview
+                            if (chat.contensChat && chat.contensChat.length > 0) {
+                                const lastMsg = chat.contensChat[0];
+                                if (lastMsg.type === 'text') {
+                                    lastMessage = lastMsg.content.substring(0, 30) + (lastMsg.content.length > 30 ? '...' : '');
+                                } else if (lastMsg.type === 'image') {
+                                    lastMessage = '🖼️ Hình ảnh';
+                                } else if (lastMsg.type === 'file') {
+                                    lastMessage = '🎤 Tin nhắn thoại';
+                                }
+                            }
 
-                    // load notification khi mở thông báo
-                    if (className === 'thongBao') {
-                        NotificationCenter.loadNotifications(id_user, 1);
+                            return `
+                                <li class="chat-item" data-chat-id="${chat.id}" data-receiver-id="${otherUser?.id || ''}">
+                                    <img src="${chatAvatar}" alt="${chatName}">
+                                    <div class="chat-item-info">
+                                        <div class="chat-item-name">${chatName}</div>
+                                        ${lastMessage ? `<div class="chat-item-preview">${lastMessage}</div>` : ''}
+                                    </div>
+                                </li>
+                            `;
+                        }).join('');
 
+                        menu.innerHTML = `
+                            <li><strong>Tin Nhắn</strong></li>
+                            <li class="divider"></li>
+                            ${chatItems}
+                        `;
+
+                        // Click vào chat item
+                        menu.querySelectorAll('.chat-item').forEach(item => {
+                            item.addEventListener('click', () => {
+                                const chatId = item.dataset.chatId;
+                                const receiverId = item.dataset.receiverId;
+                                openChatDetail(chatId, receiverId);
+                            });
+                        });
+                    } else {
+                        const menu = document.getElementById('messageMenu');
+                        menu.innerHTML = `
+                            <li><strong>Tin Nhắn</strong></li>
+                            <li class="divider"></li>
+                            <li style="text-align: center; color: #b0b3b8; padding: 20px;">Chưa có tin nhắn nào</li>
+                        `;
                     }
+                } catch (err) {
+                    console.error('❌ Error loading chat list:', err);
+                }
+            }
+
+            // ========== OPEN CHAT DETAIL ==========
+            // getChatFullData() với config và messages
+            async function openChatDetail(chatId, receiverId = null) {
+                try {
+                    const res = await fetch(`/chat/detail?chatId=${chatId}&userId=${id_user}`);
+                    const result = await res.json();
+
+                    console.log('💬 Chat detail:', result);
+
+                    if (result.success && result.data) {
+                        const { chat, config, messages } = result.data;
+
+                        // Xác định tên hiển thị
+                        let displayName = 'Unknown';
+                        let displayAvatar = '/pictures/default-avatar.png';
+                        let actualReceiverId = receiverId;
+
+                        if (chat.type === 'chat') {
+                            const otherUser = chat.sender_id === id_user ? chat.receiver : chat.sender;
+                            if (otherUser) {
+                                // Ưu tiên nickname từ config
+                                displayName = config?.nickName || otherUser.name || 'Unknown';
+                                displayAvatar = otherUser.avatar || '/pictures/default-avatar.png';
+                                actualReceiverId = otherUser.id;
+                            }
+                        } else {
+                            displayName = chat.name || 'Group Chat';
+                            displayAvatar = chat.avatar || '/pictures/default-group.png';
+                        }
+
+                        // Update chat head
+                        chatBox.querySelector('[data-role="head_name"]').textContent = displayName;
+                        chatBox.querySelector('[data-role="head_avatar"]').src = displayAvatar;
+                        chatBox.querySelector('[data-role="head_chatId"]').value = chatId;
+                        chatBox.querySelector('[data-role="head_receiverId"]').value = actualReceiverId;
+
+                        chatState.chat_id = chatId;
+                        chatState.receiver_id = actualReceiverId;
+
+                        // Clear messages
+                        const myChat = chatBox.querySelector('[data-role="contain_myChat"]');
+                        const otherChat = chatBox.querySelector('[data-role="contain_otherChat"]');
+                        myChat.innerHTML = '';
+                        otherChat.innerHTML = '';
+
+                        // Display messages (đã reversed từ controller)
+                        if (messages && messages.length > 0) {
+                            messages.forEach(msg => {
+                                const div = document.createElement('div');
+                                div.className = msg.author === id_user ? 'message my-message' : 'message other-message';
+                                div.dataset.messageId = msg.id;
+
+                                if (msg.type === 'image') {
+                                    const img = document.createElement('img');
+                                    img.src = msg.content;
+                                    div.appendChild(img);
+                                } else if (msg.type === 'file') {
+                                    const audio = document.createElement('audio');
+                                    audio.src = msg.content;
+                                    audio.controls = true;
+                                    div.appendChild(audio);
+                                } else {
+                                    div.textContent = msg.content;
+                                }
+
+                                const parent = msg.author === id_user ? myChat : otherChat;
+                                parent.appendChild(div);
+                            });
+
+                            // Scroll to bottom
+                            setTimeout(() => {
+                                chatBox.querySelector('.chat-body').scrollTop = 999999;
+                            }, 100);
+                        }
+
+                        // Join socket room
+                        socket.emit('defaultLeaveChatRoom', chatId);
+                        socket.emit('defaultJoinChatRoom', chatId);
+
+                        // Show chat box
+                        chatBox.classList.add('active');
+                        chatInput.focus();
+                    }
+                } catch (err) {
+                    console.error('❌ Error opening chat:', err);
+                }
+            }
+
+            // ========== CREATE CHAT ==========
+            // getOrCreateChat() khi click bạn bè
+            document.getElementById('friendList').addEventListener('click', async (e) => {
+                const li = e.target.closest('li');
+                if (!li) return;
+
+                const receiverId = li.dataset.id;
+
+                try {
+                    const res = await fetch('/chat/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            senderId: id_user,
+                            receiverId: receiverId
+                        })
+                    });
+
+                    const result = await res.json();
+                    console.log('🆕 Create chat:', result);
+
+                    if (result.chat?.id) {
+                        await openChatDetail(result.chat.id, receiverId);
+
+                        // Reload chat list nếu tạo mới
+                        if (result.created) {
+                            await loadChatList();
+                        }
+                    }
+                } catch (err) {
+                    console.error('❌ Error creating chat:', err);
                 }
             });
-        });
 
-        // Click bên trong menu (nút xoá, item…) → KHÔNG đóng
-        menus.forEach(menu => {
-            menu.addEventListener('click', (e) => {
-                e.stopPropagation();
+            // ========== SEND MESSAGE ==========
+            function sendMessage() {
+                const content = chatInput.value.trim();
+                if (!content || !chatState.chat_id) return;
+
+                socket.emit('send_message', parseInt(chatState.chat_id), id_user, content, 'text');
+                chatInput.value = '';
+                sendBtn.disabled = true;
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // ========== RECEIVE MESSAGE ==========
+            socket.on('receive_message', (data) => {
+                console.log('📨 Message received:', data);
+
+                const currentChatId = chatBox.querySelector('[data-role="head_chatId"]').value;
+                if (String(data.chatId) !== String(currentChatId)) {
+                    // Show notification or badge
+                    console.log('💬 Message for different chat');
+                    return;
+                }
+
+                const div = document.createElement('div');
+                div.className = data.message.author === id_user ? 'message my-message' : 'message other-message';
+                div.dataset.messageId = data.message.id;
+
+                if (data.message.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = data.message.content;
+                    div.appendChild(img);
+                } else if (data.message.type === 'file') {
+                    const audio = document.createElement('audio');
+                    audio.src = data.message.content;
+                    audio.controls = true;
+                    div.appendChild(audio);
+                } else {
+                    div.textContent = data.message.content;
+                }
+
+                const parent = data.message.author === id_user ?
+                    chatBox.querySelector('[data-role="contain_myChat"]') :
+                    chatBox.querySelector('[data-role="contain_otherChat"]');
+                parent.appendChild(div);
+
+                // Scroll to bottom
+                chatBox.querySelector('.chat-body').scrollTop = 999999;
+
+                // Reload chat list để update last message
+                loadChatList();
+            });
+
+            // ========== TYPING INDICATOR ==========
+            let typingTimeout;
+            chatInput.addEventListener('input', () => {
+                if (chatState.chat_id) {
+                    socket.emit('typing_start', parseInt(chatState.chat_id), id_user);
+
+                    clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(() => {
+                        socket.emit('typing_stop', parseInt(chatState.chat_id), id_user);
+                    }, 1000);
+                }
+            });
+
+            socket.on('user_typing', (data) => {
+                const currentChatId = chatBox.querySelector('[data-role="head_chatId"]').value;
+                if (String(data.chatId) === String(currentChatId) && data.userId !== id_user) {
+                    chatBox.querySelector('[data-role="typing_indicator"]').style.display = 'block';
+                }
+            });
+
+            socket.on('user_stopped_typing', (data) => {
+                chatBox.querySelector('[data-role="typing_indicator"]').style.display = 'none';
+            });
+
+            // ========== CHAT OPTIONS ==========
+            const head_option = chatBox.querySelector('[data-role="head_option"]');
+            let selecter_messages;
+
+            head_option.addEventListener('change', async (e) => {
+                const contain_myChat = chatBox.querySelector('[data-role="contain_myChat"]');
+                const value = e.target.value;
+
+                if (['delete', 'submit', 'cancel'].includes(value)) {
+                    selecter_messages = await featureOfChat.del_mes(e, contain_myChat, selecter_messages);
+                }
+
+                if (value === 'edit_nickName') {
+                    featureOfChat.edit_nickName(id_user, chatState);
+                }
+
+                e.target.value = '';
+            });
+
+            // ========== MESSAGE TYPE SELECT ==========
+            const typeMes = chatBox.querySelector('[data-role="typeMes"]');
+            const emojiPicker = chatBox.querySelector('.emoji-picker');
+            const voiceAction = chatBox.querySelector('[data-role="voiceAction"]');
+            const uploadImg = chatBox.querySelector('[data-role="upload_img"]');
+
+            typeMes.addEventListener('change', () => {
+                emojiPicker.style.display = 'none';
+                voiceAction.style.display = 'none';
+
+                if (typeMes.value === 'emoji') {
+                    emojiPicker.style.display = 'block';
+                } else if (typeMes.value === 'voice') {
+                    voiceAction.style.display = 'block';
+                } else if (typeMes.value === 'picture') {
+                    uploadImg.click();
+                }
+
+                typeMes.value = '';
+            });
+
+            // ========== NOTIFICATIONS ==========
+            socket.on('create_notification', (data, callback) => {
+                if (data && window.notification) {
+                    window.notification.generate_notification(data, "Thông báo", data.type || "static", socket);
+                }
+                if (callback) callback({ received: !!data });
+            });
+
+            socket.on('badge_increment', (count) => {
+                const badge = document.getElementById('unreadBadge');
+                if (badge) {
+                    const current = parseInt(badge.textContent || '0');
+                    NotificationCenter.updateUnreadBadge(current + count);
+                }
+            });
+
+            // ========== MENU HANDLING ==========
+            const menus = document.querySelectorAll('.menu');
+            const menuButtons = document.querySelectorAll('.menu-btn');
+
+            menuButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const className = btn.dataset.menu;
+                    const menu = document.querySelector(`.${className}`);
+
+                    menus.forEach(m => m.classList.remove('active'));
+
+                    if (menu) {
+                        menu.classList.add('active');
+                        if (className === 'mes') loadChatList();
+                        if (className === 'thongBao') NotificationCenter.loadNotifications(id_user, 1);
+                    }
+                });
+            });
+
+            menus.forEach(menu => {
+                menu.addEventListener('click', (e) => e.stopPropagation());
+            });
+
+            document.addEventListener('click', () => {
+                menus.forEach(m => m.classList.remove('active'));
+            });
+
+            // ========== INITIALIZATION ==========
+            window.addEventListener('load', async () => {
+                await loadChatList();
+                NotificationCenter.init(id_user, 1);
+            });
+
+            // Load more posts
+            document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
+                const params = new URLSearchParams();
+                params.append('limit', 10);
+                const cursor = "{{cursor}}";
+                if (cursor) params.append('cursor', cursor);
+                window.location.href = `/main?${params}`;
             });
         });
-
-        // Click ra ngoài → đóng tất cả menu
-        document.addEventListener('click', () => {
-            closeAllMenus();
-        });
-
-
-        // ========== XỬ LÝ MENU 3 CHẤM VỚI FOLLOW ĐỘNG ==========
-        document.addEventListener('click', async (e) => {
-            // Mở menu khi click nút 3 chấm
-            if (e.target.classList.contains('post-menu-btn')) {
-                e.stopPropagation();
-
-                const targetUserId = e.target.dataset.userId;
-                const menu = e.target.nextElementSibling;
-                const followBtn = menu.querySelector('.follow-toggle-btn');
-
-                // Đóng tất cả menu khác
-                document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
-
-                // Mở menu hiện tại
-                menu.style.display = 'block';
-
-                // Kiểm tra trạng thái follow ngay khi mở menu
-                await follow.checkAndUpdateFollowStatus(followBtn, id_user, targetUserId);
-                return;
-            }
-
-            // Toggle Follow/Unfollow
-            if (e.target.classList.contains('follow-toggle-btn')) {
-                e.stopPropagation();
-                const targetUserId = e.target.dataset.userId;
-                const currentStatus = e.target.dataset.status;
-
-                if (currentStatus === 'following') {
-                    await follow.handleUnfollow(e.target, id_user, targetUserId);
-                } else if (currentStatus === 'not-following') {
-                    await follow.handleFollow(e.target, id_user, targetUserId);
-                }
-                return;
-            }
-
-            // Ẩn bài viết
-            if (e.target.classList.contains('hide-post-btn')) {
-                const postId = e.target.dataset.postId;
-                follow.handleHidePost(postId);
-                return;
-            }
-
-            // Báo cáo
-            if (e.target.classList.contains('report-post-btn')) {
-                const postId = e.target.dataset.postId;
-                follow.handleReport(postId);
-                return;
-            }
-
-            // Click ra ngoài → đóng menu
-            document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
-        });
-
-        // Khởi tạo khi trang load
-        window.addEventListener('load', async () => {
-            NotificationCenter.init(id_user, 1);
-
-            // for reset cache feed
-            await reloadMain(id_user);
-        });
-        document.querySelector('.logo').addEventListener('click', async () => {
-            await reloadMain(id_user);
-        });
-
-        //phan trang bai viet
-        document.getElementById('loadMoreBtn').addEventListener('click', () => {
-            let nextCursor = "{{cursor}}";
-            console.log('nextCursor', nextCursor)
-            const params = new URLSearchParams();
-            params.append('limit', 10);
-
-            if (nextCursor) {
-                params.append('cursor', nextCursor);
-            }
-
-            window.location.href = `/main?${params.toString()}`;
-        });
-    })
-
-    async function initFriendSuggestions() {
-        // Lấy userId từ DOM
-        const userInput = document.querySelector('.my_profile input');
-        if (!userInput) {
-            console.error('User input not found');
-            return;
-        }
-
-        const userId = userInput.value;
-        if (!userId) {
-            console.error('User ID not found');
-            return;
-        }
-
-        // Khởi tạo animations
-        toastService.addAnimations();
-
-        // Khởi tạo các services
-        modalService.init();
-        scrollService.init('suggestionsScroll', 'prevBtn', 'nextBtn');
-
-        // Khởi tạo controller và load suggestions
-        await suggestionsController.init(userId);
-    }
-
-    // Auto initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initFriendSuggestions);
-    } else {
-        initFriendSuggestions();
-    }
-</script>
+    </script>
+</body>
 
 </html>

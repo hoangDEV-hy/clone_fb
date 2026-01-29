@@ -104,12 +104,12 @@ export let methods = {
             throw error;
         }
     },
-    getNotificationsChat: async (chatId: number, receiverId: string): Promise<notifications[] | null> => {
+    getNotificationsChat: async (chat_id: number, receiverId: string): Promise<notifications[] | null> => {
         try {
             return await notifications.findAll({
                 where: {
                     receiver_id: receiverId,
-                    chat_id: chatId
+                    sender_id: "" + chat_id
                 },
                 order: [['createdAt', 'DESC']],
                 limit: 5

@@ -53,7 +53,7 @@ app.set('view engine', 'hdbs');
 app.set('views', path.join(__dirname, 'resources', 'views'));
 
 // Cấu hình static files
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use('/upload', express.static(path.join(__dirname, '..', 'upload')));
 
 //cấu hình cookie
@@ -88,6 +88,9 @@ app.use(methodOverride('_method'));
 
 
 router(app);
+app.use((req, res, next) => {
+    res.status(404).sendFile(path.join(process.cwd(), 'public', '404.html'));
+})
 //for listening to  client login
 setup_chat(io);
 

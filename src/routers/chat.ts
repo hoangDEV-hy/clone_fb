@@ -7,6 +7,7 @@ import NotificationServerTake from '../types/Type_Notification';
 import ExtendRequest from '../types/Type_ExtendRequest';
 import throwError from '../helpers/ThrowErrorOfRouter';
 import { chat } from '../models/chat/chat';
+import { authenticate } from '../middware/auth';
 
 const router: Router = express.Router();
 
@@ -14,7 +15,7 @@ const router: Router = express.Router();
  * GET /chat/list
  * Lấy danh sách chat của user
  */
-router.get('/list', async (req: ExtendRequest, res: Response) => {
+router.get('/list', authenticate.user_auth, async (req: ExtendRequest, res: Response) => {
     try {
         const userId = req.admin?.id;
 
@@ -37,7 +38,7 @@ router.get('/list', async (req: ExtendRequest, res: Response) => {
  * GET /chat/detail
  * Lấy thông tin đầy đủ của chat
  */
-router.get('/detail', async (req: ExtendRequest, res: Response, next: NextFunction) => {
+router.get('/detail', authenticate.user_auth, async (req: ExtendRequest, res: Response, next: NextFunction) => {
     try {
         const chatId = Number(req.query.chatId);
         const userId = req.admin?.id;

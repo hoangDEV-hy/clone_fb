@@ -26,7 +26,7 @@ const functionInteractions = {
             if (key === "sl_like_check") {
                 for (let item of value) {
                     let id_Post = item.id_Posts;
-
+                    console.log('id_post', id_Post)
                     if (item.likedByUser === 1) {
                         document.getElementById(id_Post).checked = true;
                     }

@@ -109,7 +109,8 @@ export const methods = {
                 where: {
                     chat_id: chatId,
                     author: userId
-                }
+                },
+                order: []
             });
         } catch (error) {
             throwError(error);

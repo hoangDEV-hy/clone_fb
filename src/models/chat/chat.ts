@@ -1,6 +1,9 @@
 import { sequelize } from '../../configs/sql'
 import { Model, DataTypes, Op, Transaction } from "sequelize";
 
+
+import throwError from '../../helpers/ThrowErrorOfSqlQuery';
+
 class chat extends Model {
     declare id: number;
     declare sender_id: string;
@@ -41,8 +44,17 @@ chat.init(
     }
 )
 import { contentsChat } from './contensChat';
-import throwError from '../../helpers/ThrowErrorOfSqlQuery';
+import { User } from '../user';
 chat.hasMany(contentsChat, { foreignKey: 'chatID', as: 'contensChat' })
+chat.belongsTo(User, {
+    foreignKey: 'sender_id',
+    as: 'sender'
+});
+
+chat.belongsTo(User, {
+    foreignKey: 'receiver_id',
+    as: 'receiver'
+});
 export { chat }
 
 export const methods = {
@@ -179,6 +191,16 @@ export const methods = {
             return await chat.findAll({
                 where: { id: { [Op.in]: chatIds } },
                 include: [
+                    {
+                        model: User,
+                        as: 'sender',
+                        attributes: ['id', 'name', 'avatar']
+                    },
+                    {
+                        model: User,
+                        as: 'receiver',
+                        attributes: ['id', 'name', 'avatar']
+                    },
                     {
                         model: contentsChat,
                         as: 'contensChat',

@@ -28,6 +28,7 @@ function router(app: Express): void {
     app.use('/follow', follow);
     app.use('/mutualfriend', mutualFriend);
     app.use('/searches', searches);
+
 }
 
 
