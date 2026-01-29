@@ -197,9 +197,10 @@ export const methods = {
         chatId: number,
         author: string,
         content: string,
-        type: 'text' | 'image' | 'file' = 'text'
+        type: 'text' | 'image' | 'file' = 'text',
     ): Promise<any> => {
         try {
+            let status = "";
             // Kiểm tra user có trong chat không
             const members = await chat_memberController.selectMembers(false, chatId, author, status);
 

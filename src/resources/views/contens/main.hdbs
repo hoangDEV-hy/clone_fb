@@ -782,6 +782,11 @@
                 reconnectionDelay: 1000,
                 timeout: 10000
             });
+            socket.onAny((eventName, ...args) => {
+                console.log('📤 Event nhận từ server');
+                console.log('Event:', eventName);
+                console.log('Data:', args);
+            });
             socket.emit('register', id_user);
 
             console.log('✅ Socket connected:', socket.id);

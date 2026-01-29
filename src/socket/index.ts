@@ -13,6 +13,12 @@ export function setup_chat(io: Server) {
             active_users[user_id] = socket.id;
             console.log(`⚡ User${user_id} connected: ${socket.id}`);
         })
+        socket.onAny((eventName, ...args) => {
+            console.log('📩 Event nhận từ client');
+            console.log('Socket ID:', socket.id);
+            console.log('Event:', eventName);
+            console.log('Data:', args);
+        });
 
         ChatSocket.sendMessage(socket, io, active_users);
         ChatSocket.deleteMessage(socket, io);

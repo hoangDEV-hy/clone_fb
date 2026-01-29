@@ -67,11 +67,10 @@ export const methods = {
             throwError(err);
         }
     },
-    selectMembers: async (includeUser: boolean, chat_id?: number, author?: string, status?: string, ): Promise<chat_member[]> => {
+    selectMembers: async (includeUser: boolean, chat_id?: number, author?: string, status?: string,): Promise<chat_member[]> => {
         try {
             return await chat_memberModel.selectMembers({
                 chat_id: chat_id,
-                idUser: author,
                 status: 'joining'
             }, includeUser);
         } catch (err) {

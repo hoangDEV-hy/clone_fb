@@ -14,6 +14,7 @@ export const ChatSocket = {
      * Gửi và nhận tin nhắn
      */
     sendMessage: (socket: Socket, io: Server, active_users: any) => {
+        console.log("sendMessage")
         socket.on(
             'send_message',
             async (
@@ -34,18 +35,19 @@ export const ChatSocket = {
                     if (!message) {
                         throw new Error('Failed to send message');
                     }
-
+                    let status = "";
                     // Lấy danh sách members của chat
                     const members = await chatMemberController.selectMembers(
                         false,
                         chatId,
-                        author,
                         status
                     );
+                    console.log('members', members);
 
                     // Gửi tin nhắn đến tất cả members online
                     members.forEach((member) => {
                         const socketId = active_users[member.idUser];
+                        console.log("socketId", socketId);
                         if (socketId) {
                             io.to(socketId).emit('receive_message', {
                                 chatId,
