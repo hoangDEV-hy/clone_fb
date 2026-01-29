@@ -21,18 +21,6 @@ export function setup_chat(io: Server) {
         //emit mesData to client
         socket.emit('get_chatData',)
 
-        //defaultJoinLeaveChatRoom
-        socket.on('defaultJoinChatRoom', (idChat) => {
-            socket.join(idChat);
-        })
-        socket.on('defaultLeaveChatRoom', (idChat) => {
-            for (const room of socket.rooms) {
-                if (room !== idChat) {
-                    socket.leave(room);
-                    console.log(`Đã rời khỏi phòng: ${room}`);
-                }
-            }
-        })
         //join chat room send notification to chat
         //config_dataChat.joinChatRoomAndSendNotificationsChat(socket);
 
