@@ -39,13 +39,9 @@ group_user.init({
 
 //setup association
 import { Group } from "./Group";
-import { Posts } from "./Post";
 import throwError from "../Helpers/ThrowErrorOfSqlQuery";
 group_user.belongsTo(Group, { foreignKey: 'id_group', as: 'groups' });
-group_user.hasMany(Posts, {
-    foreignKey: 'group_id',
-    as: 'Posts'
-});
+
 export { group_user };
 
 export let methods = {

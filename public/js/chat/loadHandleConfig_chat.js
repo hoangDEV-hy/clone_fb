@@ -15,7 +15,6 @@ const loadHandleConfig_chat = {
 
                 socket.emit('register', id_user);
                 socket.emit("get_chatData", id_user, chatState.receiver_id, (data) => {
-                    console.log('selectedChatData', data);
                     const containChat = document.querySelector('[data-role="contain_chat"]');
                     const chatHead = chatBox.querySelector('[data-role="chatHead"]');
 

@@ -59,7 +59,6 @@ router.delete(
             const result = await friendController.delFriend(id, id_userB);
 
             if (!result) {
-                console.log('result', result);
                 res.status(500).json({ error: 'error server' }); // Đổi thành json
                 return;
             }

@@ -133,12 +133,12 @@ router.post('/save', authenticate.user_auth, uploadForm.none(), async (req: Exte
         }
         let { PostId_original, PostId_curtain, groupId, content, scope, think } = req.body;
         if (PostId_original === '') PostId_original = null;
-
+        if (groupId === "") groupId = null;
         if (!PostId_curtain) await postController.create(PostId_original, selectedUserId, groupId, content, scope, think);
         else {
             await postController.update(PostId_original, PostId_curtain, content, scope, think);
         }
-        if (scope = "group") {
+        if (scope === "group") {
             const idAdminGroup = await groupController.getIdAdmin(groupId);
             if (!idAdminGroup) {
                 throw new Error("dữ liệu group không hợp lệ");

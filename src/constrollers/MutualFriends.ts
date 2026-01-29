@@ -88,7 +88,6 @@ export class MutualFriendsController {
      * @throws Error if targetUserId is invalid
      */
     validateTargetUserId(targetUserId: any): string {
-        console.log('targetUserId', targetUserId)
         if (!targetUserId || typeof targetUserId !== 'string' || targetUserId.trim() === '') {
             throw new Error('Target user ID is required and must be a valid string');
         }

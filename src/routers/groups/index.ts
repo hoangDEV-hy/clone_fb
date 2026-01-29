@@ -2,6 +2,7 @@ import express from 'express'
 import { authenticate } from '../../Middlewares/Auth'
 import { methods } from '../../Models/Group';
 import { methods as group } from '../../Constrollers/Groups'
+import throwError from '../../Helpers/ThrowErrorOfRouter';
 const router = express.Router();
 
 router.get('/create', authenticate.user_auth, (req: any, res: any) => {
@@ -33,13 +34,12 @@ router.get('/main', authenticate.user_auth, authenticate.currentGroup, async (re
             };
             return obj;
         });
-        console.log(joinGroup)
 
 
         res.render('Contents/Groups/Main', { groups: joinGroup, Posts: tranAllPosts })
 
     } catch (error) {
-        console.log(error);
+        throwError(error, res);
     }
 })
 

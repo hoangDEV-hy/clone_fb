@@ -58,8 +58,12 @@ export let config_dataChat = {
                 return callback(result);
 
             } catch (err) {
+                // Log chi tiết ở server
+                console.error('get_chatData error:', err);
+            
+                // Trả về message chung, không lộ DB
                 return callback({
-                    message: 'Error: ' + err
+                    message: 'Internal server error'
                 });
             }
         });
@@ -82,12 +86,6 @@ export let config_dataChat = {
             catch (e) {
                 console.log('errol', e);
             }
-        })
-    },
-    joinChatRoomAndSendNotificationsChat: (socket: Socket) => {
-        socket.on('joinChatRoom', (idChat, selectedValueNotificationChat: notifications) => {
-            socket.join(idChat);
-            socket.in(idChat).emit('sendedNotificationChat', selectedValueNotificationChat)
         })
     }
 }

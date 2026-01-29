@@ -76,8 +76,6 @@ const notification = {
         //     receiver_id: chat_memberValue.chat_id,
         //     content: `New ${chat_memberValue.receiver_id} joined this room`
         // };
-        console.log('chat_memberValue', chat_memberValue)
-        console.log('selectedValueNotificationAdmin', selectedValueNotificationAdmin)
 
         document.getElementById("btnCancelConfirm").onclick = async function () {
             document.getElementById("overlayConfirm").style.display = "none";

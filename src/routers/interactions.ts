@@ -145,7 +145,6 @@ router.post(
         }
 
         const postTransformer = transformPostServices.transformPostReturnContent(post);
-        console.log('post', post.toJSON());
         res.render('Contents/Post/ExtendPost', {
             Post: post.toJSON(),
             conten: postTransformer,

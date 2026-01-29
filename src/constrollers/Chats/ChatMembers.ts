@@ -12,7 +12,6 @@ export async function select_members(sender_id: string, receiver_id: string, sel
             }
         }
     );
-    console.log('members', members)
     if (members.length === 2) {
         return members;
     }

@@ -21,7 +21,7 @@ router.get('/logout', authenticate.user_auth, (req: Request, res: Response) => {
             return res.status(500).json({ message: 'Logout failed' });
         }
 
-        res.clearCookie('token'); // tên cookie mặc định
+        res.clearCookie('token');
         res.redirect('/login');
     });
 

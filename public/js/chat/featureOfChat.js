@@ -215,7 +215,6 @@ const featureOfChat = {
         if (e.target.value === 'submit') {
             let send_data = new FormData();
             const delArray = [...selecter_messages];
-            console.log(delArray);
 
             send_data.append("del_mesData", JSON.stringify(delArray));
 
@@ -226,7 +225,6 @@ const featureOfChat = {
                 });
 
                 const result = await response.json();
-                console.log(result)
                 if (result.result == 'success') {
                     selecter_messages.forEach((msgId) => {
                         const remove_divMess = contain_myChat.querySelector(
@@ -258,7 +256,6 @@ const featureOfChat = {
     },
     edit_nickName: (id_user, chatState) => {
         let chatHead = document.querySelector('[data-role="chatHead"]');
-        console.log(chatState.head_name)
         chatState.head_name.contentEditable = "true";
 
         let submit = document.createElement('button');

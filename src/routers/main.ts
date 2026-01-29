@@ -32,7 +32,7 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         } catch (error: any) {
             res.status(400).json({
                 success: false,
-                error: error.message
+                error: "Failed to validate limit"
             });
             return;
         }
@@ -69,7 +69,7 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         console.error('Feed router error:', error);
         res.status(500).json({
             success: false,
-            error: error.message || 'Failed to fetch feed'
+            error:'Failed to fetch feed'
         });
     }
 });

@@ -27,7 +27,9 @@ class CacheManager {
 
     //delete all cache of pattern
     clearPattern(pattern: string): void {
+        console.log("keys: ", Array.from(this.cache.keys()))
         for (const key of this.cache.keys()) {
+            console.log("key: ", key)
             if (key.includes(pattern)) {
                 this.cache.delete(key);
             }

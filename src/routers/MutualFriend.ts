@@ -54,7 +54,7 @@ router.get(
                 ) {
                     res.status(400).json({
                         success: false,
-                        message: error.message,
+                        message: "Unauthorized. User not authenticated.",
                     });
                     return;
                 }
@@ -62,7 +62,7 @@ router.get(
                 if (error.message.includes('not found')) {
                     res.status(404).json({
                         success: false,
-                        message: error.message,
+                        message: "Target user ID is required and must be a valid string",
                     });
                     return;
                 }
@@ -74,7 +74,7 @@ router.get(
                 error:
                     process.env.NODE_ENV === 'development'
                         ? error instanceof Error
-                            ? error.message
+                            ? "An error occurred while retrieving suggested friends."
                             : 'Unknown error'
                         : undefined,
             });
@@ -123,7 +123,7 @@ router.get(
                 if (error.message === 'Unauthorized. User not authenticated.') {
                     res.status(401).json({
                         success: false,
-                        message: error.message,
+                        message: "Unauthorized. User not authenticated.",
                     });
                     return;
                 }
@@ -136,7 +136,7 @@ router.get(
                 ) {
                     res.status(400).json({
                         success: false,
-                        message: error.message,
+                        message: "Unauthorized. User not authenticated.",
                     });
                     return;
                 }
@@ -144,7 +144,7 @@ router.get(
                 if (error.message.includes('not found')) {
                     res.status(404).json({
                         success: false,
-                        message: error.message,
+                        message: "Target user ID is required and must be a valid string",
                     });
                     return;
                 }
@@ -156,7 +156,7 @@ router.get(
                 error:
                     process.env.NODE_ENV === 'development'
                         ? error instanceof Error
-                            ? error.message
+                            ? "An error occurred while retrieving mutual friends."
                             : 'Unknown error'
                         : undefined,
             });
@@ -204,7 +204,7 @@ router.delete(
                 if (error.message.includes('Target user ID is required')) {
                     res.status(400).json({
                         success: false,
-                        message: error.message,
+                        message: "Target user ID is required and must be a valid string",
                     });
                     return;
                 }
@@ -216,7 +216,7 @@ router.delete(
                 error:
                     process.env.NODE_ENV === 'development'
                         ? error instanceof Error
-                            ? error.message
+                            ? "An error occurred while invalidating cache."
                             : 'Unknown error'
                         : undefined,
             });
@@ -261,7 +261,7 @@ router.delete(
                 error:
                     process.env.NODE_ENV === 'development'
                         ? error instanceof Error
-                            ? error.message
+                            ? "An error occurred while invalidating cache."
                             : 'Unknown error'
                         : undefined,
             });

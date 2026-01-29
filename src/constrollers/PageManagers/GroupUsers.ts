@@ -133,8 +133,6 @@ export let methods = {
             if (!group || group.admin !== adminId) {
                 throw new Error('NOT_GROUP_ADMIN');
             }
-            console.log("userId", userId)
-            console.log("groupId", groupId)
             // Cập nhật status từ pending -> active
             const affectedRows = await groupUserModel.updateMemberStatus(
                 userId,

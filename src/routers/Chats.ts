@@ -45,8 +45,11 @@ router.post('/del', upload.none(), async (req: Request, res: Response) => {
 router.post('/config', async (req: Request, res: Response) => {
     const { chat_id, author, name: nickName } = req.body;
     const save_data: any = await createOrUpdateOrLoad_chat({ chat_id, author }, { nickName }, { chat_id, author, nickName });
-    res.send({ "save_data": save_data.toJSON() });
+    if (save_data) {
+        res.send({ "save_data": save_data.toJSON() });
+    }
 })
+    
 //post chat_room people
 // router.post('/chat_room/people', async (req: Request, res: Response) => {
 //     const idUser = req.body.id_user;

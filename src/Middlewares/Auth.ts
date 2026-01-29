@@ -32,7 +32,7 @@ export let authenticate = {
             next();
         } catch (error) {
             console.log(error);
-            res.status(500).json(error);
+            res.status(500).json({ error: "có lỗi xảy ra khi xác thực admin group" });
         }
 
     },
@@ -43,7 +43,7 @@ export let authenticate = {
             next();
         } catch (err) {
             console.log(err);
-            res.status(500).json(err);
+            res.status(500).json({ error: "có lỗi xảy ra khi xác thực  group hiện tại" });
         }
     },
     rendToken: async (req: Request, res: Response, next: NextFunction): Promise<void> => {

@@ -176,7 +176,7 @@ router.get('/members', authenticate.user_auth, async (req: ExtendRequest, res: R
         res.json({ success: true, members });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while retrieving group members." });
     }
 });
 
@@ -190,11 +190,10 @@ router.get('/members/pending', authenticate.user_auth, async (req: ExtendRequest
             return;
         }
         const pendingRequests = await groupuserController.getPendingRequests(userId, groupId);
-        console.log("pendingRequests", pendingRequests)
         res.json({ success: true, requests: pendingRequests });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while retrieving pending requests." });
     }
 });
 
@@ -222,7 +221,7 @@ router.post('/members/accept', authenticate.user_auth, async (req: ExtendRequest
         res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while accepting join request." });
     }
 });
 
@@ -249,7 +248,7 @@ router.post('/members/reject', authenticate.user_auth, async (req: ExtendRequest
         res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while rejecting join request." });
     }
 });
 
@@ -277,7 +276,7 @@ router.delete('/members/remove', authenticate.user_auth, async (req: ExtendReque
         res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while removing member." });
     }
 });
 
@@ -323,7 +322,7 @@ router.post('/join', authenticate.user_auth, async (req: ExtendRequest, res: Res
         res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while sending join request." });
     }
 });
 
@@ -343,7 +342,7 @@ router.post('/leave', authenticate.user_auth, async (req: ExtendRequest, res: Re
         res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: (error as Error).message });
+        res.json({ success: false, message: "An error occurred while leaving group." });
     }
 });
 

@@ -19,7 +19,6 @@ route.get('/sort', authenticate.user_auth, async (req: ExtendRequest, res: Respo
         let sort: string = req.query.sort as string;
         const tranAllPosts = await page_managerUserController.selectPostWithSort(selectedTargetId, sort);
         const user = await userController.selectUser(selectedTargetId);
-        console.log(tranAllPosts?.map(e => { return e }));
         const config_interface = String(id) === String(selectedTargetId);
         return res.render('Contents/PageManagers/User', {
             Posts: tranAllPosts,
