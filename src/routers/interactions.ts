@@ -24,11 +24,15 @@ let router = express.Router();
 router.post('/interactions/load', upload.none(), async (req: Request, res: Response): Promise<void> => {
     try {
         const { id_Posts, id_user } = req.body;
-        if (!id_Posts) {
-            res.status(202).json({ ok: "khong co bai viet" });
+        if (id_Posts == null || id_Posts === '') {
+            res.status(202).json({ ok: "không có bài viết" });
             return;
         }
         const Posts_data = JSON.parse(id_Posts);
+        if (!Array.isArray(Posts_data) || Posts_data.length === 0) {
+            res.status(202).json({ ok: "không có bài viết" });
+            return;
+        }
         //check id_Posts
         if (!id_user) {
             res.status(401).json({ error: "không có quyền" });

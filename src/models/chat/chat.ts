@@ -7,7 +7,7 @@ class chat extends Model {
     declare receiver_id: string;
     declare admin: number;
     declare name: string;
-    declare type:string;
+    declare type: string;
 }
 chat.init(
     {
@@ -30,8 +30,8 @@ chat.init(
         name: {
             type: DataTypes.STRING
         },
-        type:{
-            type:DataTypes.STRING
+        type: {
+            type: DataTypes.STRING
         }
     },
 
