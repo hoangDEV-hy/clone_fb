@@ -1,374 +1,68 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách người theo dõi</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f0f2f5;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            color: #1c1e21;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-
-        .list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: box-shadow 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .card img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 12px;
-        }
-
-        .card h3 {
-            font-size: 18px;
-            color: #050505;
-            margin-bottom: 4px;
-            text-align: center;
-        }
-
-        .mutual {
-            color: #65676b;
-            font-size: 13px;
-            margin-bottom: 12px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .btn:last-child {
-            margin-bottom: 0;
-        }
-
-        .btn.unfriend {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn.unfriend:hover {
-            background-color: #c82333;
-        }
-
-        .btn.unfriend:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 30px;
-        }
-
-        .pagination button {
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .pagination button:hover:not(:disabled) {
-            background-color: #f0f2f5;
-        }
-
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pagination span {
-            color: #65676b;
-            font-size: 14px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #65676b;
-            grid-column: 1 / -1;
-        }
-
-        .error {
-            background-color: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>Danh sách người theo dõi</h1>
-
-        <div id="error-message" style="display: none;" class="error"></div>
-        <div id="success-message" style="display: none;" class="success"></div>
-
-        <div id="followers-list" class="list">
-            <div class="loading">Đang tải...</div>
-        </div>
-
-        <div class="pagination" id="pagination-container" style="display: none;">
-            <button id="prev-btn" onclick="loadPage(currentPage - 1)">
-                ← Trước
-            </button>
-            <span id="page-info">Trang 1</span>
-            <button id="next-btn" onclick="loadPage(currentPage + 1)">
-                Sau →
-            </button>
-        </div>
+<div class="page-manager-container">
+    <div class="page-manager-header">
+        <h1>👥 Danh sách người theo dõi</h1>
+        <p>Quản lý danh sách những người đang theo dõi bạn</p>
     </div>
 
-    <script>
-        const selectedFollowerID = "{{ selectedUserId }}";
-        let currentPage = 1;
-        let totalPages = 1;
+    <div id="error-message" style="display: none;" class="error-message"></div>
+    <div id="success-message" style="display: none;" class="success-message"></div>
 
-        // Load danh sách followers
-        async function loadFollowers(page = 1) {
-            try {
-                const response = await fetch(`/follow/followers?selectedFollowerID=${selectedFollowerID}&page=${page}`);
-                const data = await response.json();
+    <div id="followers-list" class="followers-grid">
+        <div class="loading-state">Đang tải...</div>
+    </div>
 
-                if (!response.ok || data.error || !data.success) {
-                    showError(data.message || 'Không thể tải danh sách người theo dõi');
-                    return;
-                }
+    <div class="pagination" id="pagination-container" style="display: none;">
+        <button id="prev-btn" class="btn-secondary" onclick="loadPage(currentPage - 1)">
+            ← Trước
+        </button>
+        <span id="page-info">Trang 1</span>
+        <button id="next-btn" class="btn-secondary" onclick="loadPage(currentPage + 1)">
+            Sau →
+        </button>
+    </div>
+</div>
 
+<input type="hidden" data-user-id="{{ selectedUserId }}">
 
-                renderFollowers(data.data, data.pagination);
-                currentPage = page;
-            } catch (error) {
-                showError('Không thể tải danh sách người theo dõi');
-                console.error('Error loading followers:', error);
-            }
-        }
+<link rel="stylesheet" href="/css/contens/page-manager.css">
+<script src="/js/view-following-page.js"></script>
 
-        // Render danh sách followers
-        function renderFollowers(followers, paginationInfo) {
-            const listContainer = document.getElementById('followers-list');
+<style>
+.followers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
 
-            if (!followers || !Array.isArray(followers) || followers.length === 0) {
-                listContainer.innerHTML = '<div class="loading">Không có người theo dõi nào</div>';
-                document.getElementById('pagination-container').style.display = 'none';
-                return;
-            }
+.error-message {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
 
-            let html = '';
-            followers.forEach(follower => {
-                const followingId = follower.following_id;
-                const avatar = follower.avatar || '/img/default-avatar.jpg';
-                const name = follower.name || followingId;
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
 
-                html += `
-                    <div class="card" data-follower-id="${followingId}">
-                        <img src="${avatar}" alt="Ảnh ${name}" >
-                        <h3>${name}</h3>
-                        <button class="btn unfriend" onclick="unfollowUser('${followingId}', '${name}')">
-                            Huỷ theo dõi
-                        </button>
-                    </div>
-                `;
-            });
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+}
 
-            listContainer.innerHTML = html;
-
-            // Xử lý pagination
-            if (paginationInfo) {
-                updatePagination(paginationInfo);
-                document.getElementById('pagination-container').style.display = 'flex';
-            } else {
-                document.getElementById('pagination-container').style.display = 'none';
-            }
-        }
-
-        // Cập nhật phân trang
-        function updatePagination(paginationInfo) {
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const pageInfo = document.getElementById('page-info');
-
-            // Nếu pagination là string (như "1"), convert sang number
-            if (typeof paginationInfo === 'string') {
-                totalPages = parseInt(paginationInfo) || 1;
-
-                // Disable prev nếu đang ở trang đầu
-                if (prevBtn) prevBtn.disabled = currentPage <= 1;
-
-                // Disable next nếu đang ở trang cuối
-                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
-
-                if (pageInfo) {
-                    if (totalPages > 1) {
-                        pageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
-                    } else {
-                        pageInfo.textContent = `Trang ${currentPage}`;
-                    }
-                }
-            }
-            // Nếu pagination là object với các thuộc tính chi tiết
-            else if (typeof paginationInfo === 'object') {
-                totalPages = paginationInfo.totalPages || 1;
-
-                if (prevBtn) prevBtn.disabled = !paginationInfo.hasPrevPage;
-                if (nextBtn) nextBtn.disabled = !paginationInfo.hasNextPage;
-
-                if (pageInfo) {
-                    pageInfo.textContent = `Trang ${paginationInfo.currentPage || currentPage} / ${totalPages}`;
-                }
-            }
-        }
-
-        // Xóa follower (unfollow)
-        async function unfollowUser(followerId, followerName) {
-            if (!confirm(`Bạn có chắc muốn hủy theo dõi ${followerName}?`)) {
-                return;
-            }
-
-            // Disable button để tránh click nhiều lần
-            const card = document.querySelector(`[data-follower-id="${followerId}"]`);
-            const btn = card?.querySelector('button');
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = 'Đang xử lý...';
-            }
-
-            try {
-                const response = await fetch('/follow/followers', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        selectedFollowerID: selectedFollowerID,
-                        deletedFollowingsID: followerId,
-                        notification_value: {
-                            id: null,
-                            selectedIdChatRoom: null,
-                            selectedSenderId: selectedFollowerID,
-                            receiver_id: followerId,
-                            content: `${selectedFollowerID} đã huỷ theo dõi ${followerId}`,
-                            type: "static"
-                        }
-                    })
-                });
-                const data = await response.json();
-
-                if (!response.ok || data.error) {
-                    showError(data.message || 'Không thể hủy theo dõi');
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.textContent = 'Huỷ theo dõi';
-                    }
-                    return;
-                }
-
-                // Reload danh sách
-                showSuccess('Đã hủy theo dõi thành công');
-                loadFollowers(currentPage);
-            } catch (error) {
-                showError('Không thể hủy theo dõi');
-                console.error('Error unfollowing user:', error);
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = 'Huỷ theo dõi';
-                }
-            }
-        }
-
-        // Load trang mới
-        function loadPage(page) {
-            if (page < 1 || page > totalPages) return;
-            loadFollowers(page);
-        }
-
-        // Hiển thị lỗi
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        // Hiển thị thành công
-        function showSuccess(message) {
-            const successDiv = document.getElementById('success-message');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        // Load dữ liệu khi trang load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadFollowers(1);
-        });
-    </script>
-</body>
-
-</html>
+.pagination span {
+    color: #65676b;
+    font-size: 14px;
+    font-weight: 500;
+}
+</style>

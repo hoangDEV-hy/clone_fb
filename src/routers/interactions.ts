@@ -57,6 +57,7 @@ router.post('/interactions/load', upload.none(), async (req: Request, res: Respo
 
         // Send response
         let interactions_data = { sl_like_check, sl_share, commend };
+        console.log("interactions_data", interactions_data)
         res.json(interactions_data);
 
     } catch (err) {

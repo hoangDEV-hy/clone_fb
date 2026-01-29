@@ -21,6 +21,14 @@ const functionInteractions = {
         return await res.json();
     },
     set_like: (data_load) => {
+        // Hàm format số lượng
+        function formatCount(count) {
+            if (!count || count === 0) return '';
+            if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            }
+            return count.toString();
+        }
 
         for (let [key, value] of Object.entries(data_load)) {
             if (key === "sl_like_check") {
@@ -28,8 +36,17 @@ const functionInteractions = {
                 for (let item of value) {
                     let id_Post = item.id_Posts;   // <-- notice: field name is id_Posts, not id_Post
 
+                    // Set checkbox checked/unchecked
                     if (item.likedByUser === 1) {
                         document.getElementById(id_Post).checked = true;
+                    }
+
+                    // Hiển thị số lượng like
+                    const likeCountEl = document.getElementById(`bd_ct_news_cmd_tk_text_news${id_Post}`);
+                    if (likeCountEl && item.totalLikes > 0) {
+                        likeCountEl.textContent = formatCount(item.totalLikes);
+                    } else if (likeCountEl) {
+                        likeCountEl.textContent = '';
                     }
                 }
             }
@@ -65,7 +82,15 @@ const functionInteractions = {
         );
 
         // gửi thông tin user vào iframe
-        const my_avatar = document.querySelector(namePicture).src;
+        const avatarElement = document.querySelector(namePicture);
+        let my_avatar = '';
+        if (avatarElement) {
+            my_avatar = avatarElement.src || avatarElement.getAttribute('src') || '';
+            // Đảm bảo đường dẫn có dấu / ở đầu nếu là đường dẫn tương đối
+            if (my_avatar && !my_avatar.startsWith('http') && !my_avatar.startsWith('/') && !my_avatar.startsWith('data:')) {
+                my_avatar = '/' + my_avatar;
+            }
+        }
         const short_user = { id_user, my_avatar };
         iframe.contentWindow.postMessage(
             { type: 'userData', short_user },
@@ -85,7 +110,11 @@ const functionInteractions = {
             commend_data_array: commend_data_array
         });
 
-
+        // Gửi interactions_data vào iframe để hiển thị stats
+        iframe.contentWindow.postMessage({
+            type: 'interactions_data',
+            interactions_data: data_load
+        }, '*');
 
         console.log('send_commends done')
 
@@ -137,7 +166,7 @@ const functionInteractions = {
                     id_Posts: data.id_Posts,
                     classify: 'like',
                     method,
-                    notification_value: isCheck ? {
+                    notification_value: data.check_like ? {
                         type: 'static',
                         selectedIdChatRoom: null,
                         selectedSenderId: id_user,

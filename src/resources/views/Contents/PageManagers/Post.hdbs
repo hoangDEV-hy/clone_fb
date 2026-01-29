@@ -1,159 +1,79 @@
-<div>
-    <h1>Quản lý bài đăng nhóm</h1>
-    <div style="display: flex;">
-        <div>
-            <h3>{{groups.name}}</h3>
-
-
-            <img src="" alt="">
-            {{#if isAdmin}}
-            {{!-- for spliting admin sort and user sort --}}
-            <div><a href="Post/admin/Post">Trang quản lý</a></div>
-            {{/if}}
+<div class="page-manager-container">
+    <div class="page-manager-header">
+        <h1>📝 Quản lý bài đăng nhóm</h1>
+        <p>{{groups.name}}</p>
+        {{#if isAdmin}}
+        <div style="margin-top: 12px;">
+            <a href="Post/admin/Post" class="btn-secondary">⚙️ Trang quản lý</a>
         </div>
-        <select data-role="sort">
-            <option>--sort by--</option>
-            <option value="like">Most Likes</option>
-            <option value="commend">Most Commends</option>
-            <option value="share">Most Shares</option>
+        {{/if}}
+    </div>
+
+    <div style="margin-bottom: 24px;">
+        <label for="sort-posts" style="font-weight: 600; color: #4a5568; margin-right: 12px;">Sắp xếp:</label>
+        <select id="sort-posts" data-role="sort" class="btn-secondary" style="padding: 10px 16px; border-radius: 10px; border: 2px solid #e3f2ff;">
+            <option value="">-- Sắp xếp theo --</option>
+            <option value="like">⭐ Nhiều lượt thích nhất</option>
+            <option value="commend">💬 Nhiều bình luận nhất</option>
+            <option value="share">🔄 Nhiều chia sẻ nhất</option>
         </select>
+    </div>
+
+    <div class="posts-list">
         {{#each Posts}}
-        <div class="news">
+        <div class="news manager-card">
+            <input type="hidden" value="{{users.id}}">
             <div class="bd_ct_news_nguoiDang">
-                <div id="bd_ct_n_nguoiDang_anh" style="position: relative;">
-                    <div style="top:0%">
-                        <input type="hidden" value="{{users.id}}">
-                        <img src="/{{users.avatar}}" alt="ảnh con">
+                <div class="card-header">
+                    <img src="/{{users.avatar}}" alt="{{users.name}}" class="card-avatar" style="width: 48px; height: 48px;">
+                    <div style="flex: 1;">
+                        <h4 style="font-size: 16px; font-weight: 600; color: #102a43; margin-bottom: 4px;">{{users.name}}</h4>
+                        <small style="color: #65676b; font-size: 13px;">{{time updatedAt}}</small>
                     </div>
-                </div>
-                <div id="bd_ct_n_nguoiDang_name">
-                    <h4>{{users.name}} . {{time updatedAt}}</h4>
-                    <div>
-
-                        <form action="/page_manager/Post/del?_method=DELETE" method="Post" style="display:inline">
+                    <div class="card-actions">
+                        <form action="/page_manager/Post/del?_method=DELETE" method="POST" style="display:inline">
                             <input type="hidden" name="id" value="{{id}}">
-                            <button type="submit">delete</button>
+                            <button type="submit" class="btn-danger" style="font-size: 12px; padding: 6px 12px;">🗑️ Xóa</button>
                         </form>
-                        <form action="/page_manager/Post/update" method="Post" style="display:inline">
+                        <form action="/page_manager/Post/update" method="POST" style="display:inline">
                             <input type="hidden" name="id" value="{{id}}">
-                            <button type="submit">update</button>
+                            <button type="submit" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">✏️ Sửa</button>
                         </form>
                     </div>
                 </div>
 
-                <div class="bd_ct_news_title">
+                <div class="bd_ct_news_title" style="margin-top: 16px;">
                     <input type="hidden" value="{{id}}">
-                    <h3>{{contens.text}}</h3>
+                    <h3 style="font-size: 15px; line-height: 1.6; color: #102a43; margin-bottom: 12px;">{{contens.text}}</h3>
                     <input class="image_src" type="hidden" value="{{contens.image}}">
-                    <img class="image_src" src="" alt="ảnh news">
+                    <img class="image_src" src="" alt="ảnh news" style="max-width: 100%; border-radius: 12px; margin-top: 8px;">
                 </div>
-                <div class="bd_ct_news_commend">
+
+                <div class="bd_ct_news_commend" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e3f2ff;">
                     <div id="bd_ct_news_commend_thongKe_news{{id}}">
                         <p id="bd_ct_news_cmd_tk_text_news{{id}}"></p>
                     </div>
-                    <div class="bd_ct_news_commend_tuongTac">
-                        <input type="checkbox" class="like-checkbox" id="{{id}}" data-id="{{id}}">like
-                        <button name="commend" data-id="{{id}}">Bình luận</button>
-
-                        <form action="/Post/share" method="Post">
+                    <div class="bd_ct_news_commend_tuongTac" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" class="like-checkbox" id="{{id}}" data-id="{{id}}">
+                            <span style="color: #65676b; font-weight: 500;">👍 Thích</span>
+                        </label>
+                        <button name="commend" data-id="{{id}}" class="btn-secondary" style="font-size: 13px; padding: 6px 12px;">💬 Bình luận</button>
+                        <form action="/Post/share" method="POST" style="display:inline">
                             <input type="hidden" name="id_Post" value={{id}}>
-                            <button type="submit">Chia sẻ</button>
+                            <button type="submit" class="btn-secondary" style="font-size: 13px; padding: 6px 12px;">🔄 Chia sẻ</button>
                         </form>
                         <div class="bd_ct_news_cmd_tuongTac_pop" style="display:none;">
-                            <iframe id="myIframe" src="/Post/iframe/commend"
-                                style="width:100%; height:400px; "></iframe>
+                            <iframe id="myIframe" src="/Post/iframe/commend" style="width:100%; height:400px; border-radius: 12px;"></iframe>
                         </div>
                     </div>
                 </div>
             </div>
-            {{/each}}
         </div>
+        {{/each}}
     </div>
 </div>
-<script type="module">
-    import hander_image from '/js/hander_image.js';
-    import functionInteractions from '/js/functionInteractions.js'
-    document.addEventListener('DOMContentLoaded', () => {
-        hander_image('.bd_ct_news_title', 'img.image_src', 'input.image_src');
 
-        //for sorting
-        document.querySelector('[data-role="sort"]').addEventListener('change', () => {
-            let url = `Post/sort?sort=${document.querySelector('[data-role="sort"]').value}`;
-            window.location.href = url;
-        })
-        //for load_Posts, change_like
-        const id_user = document.querySelector('.news input[type="hidden"]').value;
-
-        //for load_Posts, set_like
-        let data_load;
-        //for set_like, change_like
-        const nameCheckInput = '.like-checkbox';
-        //for send_commends, hander_dataIframe
-        const nameContainIframe = '.bd_ct_news_cmd_tuongTac_pop';
-        //for send_commends, hander_dataIframe, change_like, save_toDB
-        let change_like = {};
-        // lưu dữ liệu comment từ iframe
-        let add_commends = [];
-        //save the delete commend data
-        let deleted_commends = [];
-        //save the update commend data
-        let update_commends = [];
-
-        //change like
-        document.querySelectorAll('.like-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                change_like = functionInteractions.change_like(e, change_like, id_user);
-            })
-        });
-        //send_commends
-        const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
-        commendButtons.forEach(button => {
-            button.addEventListener('click', async e => {
-                functionInteractions.send_commends(e, nameContainIframe, "myIframe", 'img[alt="ảnh con"]', id_user, data_load);
-            })
-        })
-        //hander_dataIframe
-        window.addEventListener('message', e => {
-            if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
-
-            functionInteractions.hander_dataIframe(
-                e,
-                add_commends,
-                deleted_commends,
-                update_commends,
-                nameContainIframe,
-                change_like,
-                id_user,
-                (newData) => {
-                    deleted_commends = newData.deleted_commends;
-                    update_commends = newData.update_commends;
-                    change_like = newData.change_like;
-                    add_commends = newData.add_commends;
-                }
-            );
-
-        });
-
-        //save_toDB
-        window.addEventListener("pagehide", () => {
-            functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
-        });
-
-
-
-
-
-
-
-
-        //for logic the program
-        (async () => {
-            //take ids for load interactions
-            const id_Post_load = await functionInteractions.take_idInteractionPost('.news', 'input[name="id"]');
-            //load interactions
-            data_load = await functionInteractions.load_interactionPost(id_Post_load, id_user);
-            //set like
-            await functionInteractions.set_like(data_load);
-        })();
-    });
-</script>
+<link rel="stylesheet" href="/css/contens/page-manager.css">
+<link rel="stylesheet" href="/css/app.css">
+<script type="module" src="/js/post-manager-page.js"></script>

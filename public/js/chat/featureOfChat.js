@@ -184,35 +184,50 @@ const featureOfChat = {
             }
         });
     },
-    del_mes: async (e, contain_myChat, selecter_messages) => {
+    /**
+     * Xử lý xoá tin nhắn
+     * @param {'delete'|'submit'|'cancel'} mode 
+     * - delete: bật chế độ chọn tin nhắn (gắn listener click)
+     * - submit: gửi request xoá các tin đã chọn
+     * - cancel: huỷ chọn
+     */
+    del_mes: async (mode, contain_myChat, selecter_messages) => {
+        if (!contain_myChat) return selecter_messages;
+
+        // Luôn dùng cùng 1 Set để giữ trạng thái các tin nhắn đã chọn
         if (!selecter_messages) selecter_messages = new Set();
 
+        // Gắn listener click để chọn / bỏ chọn tin nhắn
+        // Query lại mỗi lần để đảm bảo lấy được messages mới nhất
+        const messages = contain_myChat.querySelectorAll('[data-role="message"]');
 
-        let messages = contain_myChat.querySelectorAll('[data-role="message"]');
-
-
-        messages.forEach(e => {
-            let chat_id = e.dataset.messageId;
+        messages.forEach((msgEl) => {
+            const chat_id = msgEl.dataset.messageId;
+            
             // Chỉ gắn nếu chưa có attribute đánh dấu
-            if (!e.dataset.listenerAttached) {
-                e.addEventListener('click', () => {
+            if (!msgEl.dataset.listenerAttached) {
+                msgEl.addEventListener('click', () => {
                     if (!selecter_messages) return; // bảo vệ khi cancel
                     if (selecter_messages.has(chat_id)) {
                         selecter_messages.delete(chat_id);
-                        e.classList.remove('selected');
+                        msgEl.classList.remove('selected');
                     } else {
                         selecter_messages.add(chat_id);
-                        e.classList.add('selected');
+                        msgEl.classList.add('selected');
                     }
                 });
 
                 // Đánh dấu là đã gắn listener
-                e.dataset.listenerAttached = "true";
-            };
-        })
+                msgEl.dataset.listenerAttached = "true";
+            }
+        });
 
+        // Nếu chỉ là bật chế độ chọn (delete) thì return luôn
+        if (mode === 'delete') {
+            return selecter_messages;
+        }
 
-        if (e.target.value === 'submit') {
+        if (mode === 'submit') {
             let send_data = new FormData();
             const delArray = [...selecter_messages];
 
@@ -241,13 +256,11 @@ const featureOfChat = {
                 alert("Fail to delete (network or server error)");
             }
         }
-        if (e.target.value === 'cancel') {
+        if (mode === 'cancel') {
+            const messagesToClear = contain_myChat.querySelectorAll('[data-role="message"]');
 
-            let messages = contain_myChat.querySelectorAll('[data-role="message"]');
-
-
-            messages.forEach(e => {
-                e.classList.remove('selected')
+            messagesToClear.forEach(msgEl => {
+                msgEl.classList.remove('selected');
             });
 
             selecter_messages = undefined;

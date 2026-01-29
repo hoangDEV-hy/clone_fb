@@ -1,254 +1,81 @@
-<div style="display: flex; gap: 20px;">
-    <div>
-        <div>
-            <a href="/page_manager/group_user/joined">Nhóm đã tham gia</a>
-        </div>
-        <div>
-            <a href="/page_manager/group_user/pending">Nhóm chờ duyệt</a>
-        </div>
-        <div style="margin-top: 20px;">
-            <button type="button" id="create-group-btn"
-                style="padding: 8px 16px; background: #1877f2; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Tạo nhóm mới
-            </button>
-        </div>
+<div class="page-manager-container">
+    <div class="page-manager-header">
+        <h1>📋 Quản lý nhóm</h1>
+        <p>Xem và quản lý các nhóm bạn đã tham gia hoặc đang chờ duyệt</p>
     </div>
 
-    <div>
+    <div class="page-manager-sidebar">
+        <a href="/page_manager/group_user/joined" class="sidebar-nav-link {{#if (eq currentPage 'joined')}}active{{/if}}">
+            ✅ Nhóm đã tham gia
+        </a>
+        <a href="/page_manager/group_user/pending" class="sidebar-nav-link {{#if (eq currentPage 'pending')}}active{{/if}}">
+            ⏳ Nhóm chờ duyệt
+        </a>
+        <button type="button" id="create-group-btn" class="btn-primary">
+            ➕ Tạo nhóm mới
+        </button>
+    </div>
+
+    <div class="groups-list">
         {{#if group.length}}
         {{#each group}}
-        <div class="group-card" data-group-id="{{this.id}}"
-            style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-            <img src="" alt="" style="width: 50px; height: 50px; object-fit: cover;">
-            <input type="text" value="{{this.name}}" readonly
-                style="border: none; font-weight: bold; margin-left: 10px;">
-
-            <div style="margin-top:8px;">
-                <button type="button" class="toggle-more-btn">More</button>
-
-                <div class="more-actions" style="visibility:hidden; margin-top:6px;">
-                    <a href="/group" style="color:blue; text-decoration:none; margin-right: 10px;">
-                        Truy cập nhóm
-                    </a>
-
-                    {{#if this.isPending}}
-                    <button type="button" class="cancel-request-btn"
-                        style="background:none; border:none; color:orange; cursor:pointer; margin-left:10px;">
-                        Hủy yêu cầu
-                    </button>
-                    {{else}}
-                    <button type="button" class="leave-group-btn"
-                        style="background:none; border:none; color:red; cursor:pointer; margin-left:10px;">
-                        Rời nhóm
-                    </button>
-                    {{/if}}
+        <div class="manager-card group-card" data-group-id="{{this.id}}">
+            <div class="card-header">
+                <img src="{{this.avatar}}" alt="{{this.name}}" class="card-avatar" onerror="this.src='/pictures/avatar.jpg'">
+                <div class="card-title">{{this.name}}</div>
+                <div class="card-actions">
+                    <button type="button" class="toggle-more-btn btn-more">Thêm</button>
                 </div>
+            </div>
+
+            {{#if this.hastag}}
+            <p style="color: #65676b; font-size: 14px; margin-bottom: 12px;">#{{this.hastag}}</p>
+            {{/if}}
+
+            <div class="more-actions hidden">
+                <form action="/group" method="POST" style="display:inline;">
+                    <input type="hidden" name="groupId" value="{{this.id}}">
+                    <button type="submit" class="btn-primary">🔗 Truy cập nhóm</button>
+                </form>
+
+                {{#if this.isPending}}
+                <button type="button" class="cancel-request-btn btn-secondary">❌ Hủy yêu cầu</button>
+                {{else}}
+                <button type="button" class="leave-group-btn btn-danger">🚪 Rời nhóm</button>
+                {{/if}}
             </div>
         </div>
         {{/each}}
         {{else}}
-        <h1>Không có nhóm nào</h1>
+        <div class="empty-state">
+            <p>Không có nhóm nào</p>
+        </div>
         {{/if}}
     </div>
 </div>
 
 <!-- Modal tạo nhóm -->
-<div id="create-group-modal"
-    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-    <div
-        style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border-radius:8px; min-width:400px;">
-        <h2>Tạo nhóm mới</h2>
+<div id="create-group-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>➕ Tạo nhóm mới</h2>
+        </div>
         <form id="create-group-form">
-            <div style="margin-bottom:15px;">
-                <label style="display:block; margin-bottom:5px;">Tên nhóm *</label>
-                <input type="text" id="group-name" required
-                    style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <div class="modal-form-group">
+                <label for="group-name">Tên nhóm *</label>
+                <input type="text" id="group-name" required placeholder="Nhập tên nhóm">
             </div>
-            <div style="margin-bottom:15px;">
-                <label style="display:block; margin-bottom:5px;">Hashtag (tùy chọn)</label>
-                <input type="text" id="group-hashtag"
-                    style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <div class="modal-form-group">
+                <label for="group-hashtag">Hashtag (tùy chọn)</label>
+                <input type="text" id="group-hashtag" placeholder="Nhập hashtag">
             </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button type="button" id="cancel-create-btn"
-                    style="padding:8px 16px; background:#ccc; border:none; border-radius:4px; cursor:pointer;">
-                    Hủy
-                </button>
-                <button type="submit"
-                    style="padding:8px 16px; background:#1877f2; color:white; border:none; border-radius:4px; cursor:pointer;">
-                    Tạo nhóm
-                </button>
+            <div class="modal-actions">
+                <button type="button" id="cancel-create-btn" class="btn-secondary">Hủy</button>
+                <button type="submit" class="btn-primary">Tạo nhóm</button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const modal = document.getElementById('create-group-modal');
-        const createGroupBtn = document.getElementById('create-group-btn');
-        const cancelCreateBtn = document.getElementById('cancel-create-btn');
-        const createGroupForm = document.getElementById('create-group-form');
-
-        // Mở modal tạo nhóm
-        createGroupBtn.addEventListener('click', () => {
-            modal.style.display = 'block';
-        });
-
-        // Đóng modal
-        cancelCreateBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            createGroupForm.reset();
-        });
-
-        // Đóng modal khi click bên ngoài
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                createGroupForm.reset();
-            }
-        });
-
-        // Xử lý tạo nhóm
-        createGroupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const name = document.getElementById('group-name').value.trim();
-            const hastag = document.getElementById('group-hashtag').value.trim();
-
-            if (!name) {
-                alert('Vui lòng nhập tên nhóm');
-                return;
-            }
-
-            try {
-                const response = await fetch('/page_manager/group_user/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, hastag })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert('Tạo nhóm thành công!');
-                    modal.style.display = 'none';
-                    createGroupForm.reset();
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Tạo nhóm thất bại');
-                }
-            } catch (err) {
-                console.error('Error creating group:', err);
-                alert('Lỗi kết nối server');
-            }
-        });
-
-        // Xử lý các sự kiện click
-        document.addEventListener('click', async (e) => {
-
-            /* Toggle more */
-            if (e.target.classList.contains('toggle-more-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const card = e.target.closest('.group-card');
-                const more = card.querySelector('.more-actions');
-
-                more.style.visibility =
-                    more.style.visibility === 'visible' ? 'hidden' : 'visible';
-            }
-
-            /* Hủy yêu cầu tham gia */
-            if (e.target.classList.contains('cancel-request-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const card = e.target.closest('.group-card');
-                const groupId = card.dataset.groupId;
-
-                if (!confirm('Bạn có chắc muốn hủy yêu cầu tham gia nhóm?')) return;
-
-                if (e.target.dataset.processing === 'true') return;
-                e.target.dataset.processing = 'true';
-                e.target.disabled = true;
-
-                try {
-                    // Lấy userId từ session/cookie hoặc có sẵn trong page
-                    const userId = '{{admin.id}}'; // Cần truyền từ server
-
-                    const response = await fetch('/page_manager/group_user/reject', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id_group: parseInt(groupId),
-                            id_user: userId,
-                            notification_value: {
-                                id: null,
-                                selectedIdChatRoom: null,
-                                selectedSenderId: null,
-                                receiver_id: null,
-                                content: `đã hủy yêu cầu tham gia nhóm`,
-                                type: 'static'
-                            }
-                        })
-                    });
-
-                    if (response.ok) {
-                        alert('Hủy yêu cầu thành công!');
-                        card.remove();
-                    } else {
-                        const error = await response.json();
-                        e.target.dataset.processing = 'false';
-                        e.target.disabled = false;
-                        alert(error.message || 'Hủy yêu cầu thất bại');
-                    }
-                } catch (err) {
-                    console.error('Error canceling request:', err);
-                    e.target.dataset.processing = 'false';
-                    e.target.disabled = false;
-                    alert('Lỗi kết nối server');
-                }
-            }
-
-            /* Rời nhóm */
-            if (e.target.classList.contains('leave-group-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const card = e.target.closest('.group-card');
-                const groupId = card.dataset.groupId;
-
-                if (!confirm('Bạn có chắc muốn rời khỏi nhóm này?')) return;
-
-                if (e.target.dataset.processing === 'true') return;
-                e.target.dataset.processing = 'true';
-                e.target.disabled = true;
-
-                try {
-                    const response = await fetch('/page_manager/group_user/leave', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id_group: parseInt(groupId) })
-                    });
-
-                    if (response.ok) {
-                        alert('Rời nhóm thành công!');
-                        card.remove();
-                    } else {
-                        const error = await response.json();
-                        e.target.dataset.processing = 'false';
-                        e.target.disabled = false;
-                        alert(error.message || 'Rời nhóm thất bại');
-                    }
-                } catch (err) {
-                    console.error('Error leaving group:', err);
-                    e.target.dataset.processing = 'false';
-                    e.target.disabled = false;
-                    alert('Lỗi kết nối server');
-                }
-            }
-
-        });
-    });
-</script>
+<link rel="stylesheet" href="/css/contens/page-manager.css">
+<script src="/js/group-user-page.js"></script>

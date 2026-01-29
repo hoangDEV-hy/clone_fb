@@ -11,7 +11,11 @@ export default function interactions(change_like, id_user, nameContainIframe, da
     const commendButtons = document.querySelectorAll('.bd_ct_news_commend_tuongTac [name="commend"]');
     commendButtons.forEach(button => {
         button.addEventListener('click', async e => {
-            functionInteractions.send_commends(e, nameContainIframe, "myIframe", '.my_profile img', id_user, data_load);
+            // Ưu tiên avatar ở navbar, fallback sang .my_profile nếu sau này có
+            const avatarSelector = document.querySelector('.navbar-profile img')
+                ? '.navbar-profile img'
+                : '.my_profile img';
+            functionInteractions.send_commends(e, nameContainIframe, "myIframe", avatarSelector, id_user, data_load);
         })
     })
     //handle_dataiframe

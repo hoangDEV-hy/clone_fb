@@ -1,1 +1,48 @@
-<a href="/main">Main</a>
+<header class="app-header">
+    <ul class="navbar">
+        <li class="navbar-left">
+            <a href="/main" class="logo">
+                <img src="/pictures/image-1754515454077-261962452.png" alt="Logo">
+            </a>
+            <span class="navbar-title">Giả Lập Facebook</span>
+        </li>
+
+        <li class="navbar-center">
+            <a href="/searches" class="navbar-link">Tìm kiếm</a>
+            <a href="/page_manager/friends/joined" class="navbar-link">Bạn bè</a>
+            <a href="/page_manager/group_user/joined" class="navbar-link">Quản lý nhóm</a>
+        </li>
+
+        <li class="navbar-right">
+            <div class="menu-btn" data-menu="thongBao">
+                <span class="navbar-link">
+                    Thông báo
+                    <span id="unreadBadge" class="navbar-badge"></span>
+                </span>
+                <ul class="thongBao menu">
+                    <li><strong>Thông Báo</strong></li>
+                    <li class="divider"></li>
+                    <li id="notificationList">Đang tải...</li>
+                </ul>
+            </div>
+
+            {{#if user}}
+            <li class="navbar-profile menu-btn" data-menu="submenu">
+                <form action="/page_manager/user" method="POST" style="display: inline;">
+                    <input type="hidden" name="selectedTargetId" value="{{user.id}}">
+                    <button type="submit" style="background: none; border: none; padding: 0; margin: 0;">
+                        <span class="navbar-profile-name">Trang cá nhân</span>
+                    </button>
+                </form>
+                <img src="{{user.avatar}}" alt="Ảnh đại diện">
+
+                <ul class="submenu menu">
+                    <li>{{user.name}}</li>
+                </ul>
+            </li>
+            {{/if}}
+
+            <a href="/logout" class="navbar-link">Đăng xuất</a>
+        </li>
+    </ul>
+</header>

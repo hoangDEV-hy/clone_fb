@@ -7,7 +7,7 @@ import { router as Friend } from './UserUsers'
 let router = express.Router();
 
 router.use('/user', user);
-router.use('/', group_user);
+router.use('/group_user', group_user);
 router.use('/Post', Post);
 router.use('/follower', Follower);
 router.use('/friends', Friend);

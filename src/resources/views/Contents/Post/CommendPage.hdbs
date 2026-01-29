@@ -1,217 +1,681 @@
-<title>Bài viết</title>
-<h1>Bài viết của Nhóm</h1>
-<button id="close">Đóng</button>
-<div id="new">
-    <input type="hidden" value="">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài viết</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #050505;
+            padding: 16px;
+        }
 
-    <div class="bd_ct_news_nguoiDang">
-        <div class="bd_ct_n_nguoiDang_anh" style="position: relative;">
-            <div style="top:0%">
-                <img name="avatar" src="" alt="avatar">
-            </div>
-        </div>
+        .post-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 16px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
 
-        <div class="bd_ct_n_nguoiDang_name">
-            <h3 name="name"></h3>
-            <h4 name="time"></h4>
-        </div>
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 12px;
+        }
 
-        <div class="conten">
-            <h2 name="think"></h2>
-            <div class="bd_ct_news_title">
-                <h3 name="text"></h3>
-                <img name="picture" src="">
-            </div>
-        </div>
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
 
-        <div class="bd_ct_news_commend">
-            <div id="bd_ct_news_commend_thongKe_news">
-                <p id="bd_ct_news_cmd_tk_text_news"></p>
-            </div>
-            <div id="bd_ct_news_commend_tuongTac">
-                <input type="checkbox">like
-                <button onclick="binhLuan('news')">Bình luận</button>
-                <form action="/Post/share" method="Post">
-                    <input type="hidden" name="id_Post" value=>
-                    <button type="submit">Chia sẻ</button>
-                </form>
-            </div>
-        </div>
-    </div>
+        .post-author-info {
+            flex: 1;
+        }
 
-    <div id="bd_ct_news_commend_congdong"></div>
+        .post-author-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #050505;
+            margin-bottom: 2px;
+            cursor: pointer;
+        }
 
-    <div id="bd_ct_news_commend_thembinhLuan">
+        .post-author-name:hover {
+            text-decoration: underline;
+        }
+
+        .post-time {
+            font-size: 13px;
+            color: #65676b;
+        }
+
+        .post-content {
+            padding: 0 16px 12px;
+        }
+
+        .post-text {
+            font-size: 15px;
+            line-height: 1.33;
+            color: #050505;
+            margin-bottom: 12px;
+            word-wrap: break-word;
+        }
+
+        .post-image-container {
+            margin-top: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .post-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .post-stats {
+            padding: 10px 16px;
+            border-top: 1px solid #e4e6eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+            color: #65676b;
+        }
+
+        .stats-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .like-icon {
+            width: 18px;
+            height: 18px;
+            background: #1877f2;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .stats-text {
+            cursor: pointer;
+        }
+
+        .stats-text:hover {
+            text-decoration: underline;
+        }
+
+        .post-actions {
+            padding: 4px 8px;
+            border-top: 1px solid #e4e6eb;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .action-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: #65676b;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background: #f2f2f2;
+        }
+
+        .action-button.liked {
+            color: #1877f2;
+        }
+
+        .action-button svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .comments-section {
+            padding: 0 16px 16px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 8px;
+            padding: 8px 0;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .comment-content-wrapper {
+            flex: 1;
+            background: #f0f2f5;
+            border-radius: 18px;
+            padding: 8px 12px;
+        }
+
+        .comment-author {
+            font-size: 13px;
+            font-weight: 600;
+            color: #050505;
+            margin-bottom: 2px;
+        }
+
+        .comment-text {
+            font-size: 15px;
+            color: #050505;
+            word-wrap: break-word;
+            line-height: 1.33;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 12px;
+            padding: 4px 0 0 12px;
+            font-size: 12px;
+            color: #65676b;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: #65676b;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 0;
+        }
+
+        .comment-action-btn:hover {
+            text-decoration: underline;
+        }
+
+        .comment-input-section {
+            display: flex;
+            gap: 8px;
+            padding: 8px 0;
+            align-items: flex-start;
+        }
+
+        .comment-input-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .comment-input-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            background: #f0f2f5;
+            border-radius: 20px;
+            padding: 8px 12px;
+            align-items: center;
+        }
+
+        .comment-input-wrapper textarea {
+            flex: 1;
+            border: none;
+            background: transparent;
+            resize: none;
+            font-size: 15px;
+            color: #050505;
+            outline: none;
+            font-family: inherit;
+            max-height: 100px;
+            line-height: 1.33;
+        }
+
+        .comment-input-wrapper textarea::placeholder {
+            color: #65676b;
+        }
+
+        .comment-send-btn {
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 6px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .comment-send-btn:hover {
+            background: #166fe5;
+        }
+
+        .close-button {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #e4e6eb;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: #050505;
+            z-index: 1000;
+            transition: background-color 0.2s;
+        }
+
+        .close-button:hover {
+            background: #d8dadf;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button id="close" class="close-button" title="Đóng">×</button>
+    
+    <div id="new" class="post-container">
         <input type="hidden" value="">
-        <img src="" alt="Ảnh đại diện của bạn">
-        <textarea placeholder="Viết bình luận..." rows="1"></textarea>
-        <button>Gửi</button>
-    </div>
-</div>
-<!-- Handlebars runtime -->
-<script>
-    // Hàm tính thời gian
-    function calculateTimeAgo(dateTime) {
-        if (!dateTime) return '';
-        const current_time = new Date(dateTime);
-        const now_time = new Date();
-        const diffMs = now_time - current_time;
 
-        const diffSeconds = Math.floor(diffMs / 1000);
-        const diffMinutes = Math.floor(diffSeconds / 60);
-        const diffHours = Math.floor(diffMinutes / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        if (diffDays > 0) return `${diffDays} day(s) ago`;
-        if (diffHours > 0) return `${diffHours} hour(s) ago`;
-        if (diffMinutes > 0) return `${diffMinutes} minute(s) ago`;
-        return `${diffSeconds} second(s) ago`;
-    }
-
-    // Hàm async để gán dữ liệu vào DOM
-    async function renderPostData(Post) {
-        document.querySelector('#new input').value = Post.id ?? '';
-
-        const avatarImg = document.querySelector('.bd_ct_n_nguoiDang_anh [name=avatar]');
-        avatarImg.src = Post.users?.avatar ? "/" + Post.users.avatar : '';
-
-        const userName = document.querySelector('.bd_ct_n_nguoiDang_name [name=name]');
-        userName.innerHTML = Post.users?.name ?? '';
-
-        const timeEl = document.querySelector('.bd_ct_n_nguoiDang_name [name=time]');
-        timeEl.innerHTML = calculateTimeAgo(Post.updatedAt);
-
-        document.querySelector('.conten [name=think]').innerHTML = Post.think ?? '';
-
-        if (Post.contens?.text) {
-            document.querySelector('.bd_ct_news_title [name=text]').innerHTML = Post.contens.text;
-        }
-
-        if (Post.contens?.image) {
-            const data = Post.contens.image;
-            document.querySelector('.bd_ct_news_title [name=picture]').src = `data:${data.mineType};base64,${data.base64}`;
-        }
-
-        document.querySelector('#bd_ct_news_commend_tuongTac input').checked = Post.like ?? false;
-
-        // For share
-        document.querySelector('input[name="id_Post"]').value = Post.id;
-    }
-
-    // Mảng lưu thao tác comment
-    let add_commends = [];
-    let updateCommends = [];
-    let deletedCommends = [];
-    let check_like;
-
-    const likeCheckbox = document.querySelector('#bd_ct_news_commend_tuongTac input');
-    likeCheckbox.addEventListener('change', () => {
-        check_like = likeCheckbox.checked;
-    });
-    // Gửi bình luận mới
-    document.querySelector('#bd_ct_news_commend_thembinhLuan button').addEventListener('click', () => {
-
-        const textarea = document.querySelector('#bd_ct_news_commend_thembinhLuan textarea');
-        const content = textarea.value.trim();
-        if (!content) return alert('Vui lòng nhập bình luận!');
-
-        const avatar = document.querySelector('#bd_ct_news_commend_thembinhLuan img').src;
-        const idUser = document.querySelector('#bd_ct_news_commend_thembinhLuan input').value;
-        const parent = document.querySelector("#bd_ct_news_commend_congdong");
-
-        parent.insertAdjacentHTML("beforeend", `
-            <div>
-              <img src="${avatar}" alt="ava">
-              <div>
-                <h3>Bạn</h3>
-                <h3 class="commend-content" contentEditable="false">${content}</h3>
-              </div>
+        <!-- Post Header -->
+        <div class="post-header">
+            <img name="avatar" src="" alt="avatar" class="post-avatar">
+            <div class="post-author-info">
+                <div class="post-author-name" name="name"></div>
+                <div class="post-time" name="time"></div>
             </div>
-        `);
+        </div>
 
-        add_commends.push({ id_user: idUser, id_Posts: id_Post, content, classify: 'commend' });
-        textarea.value = '';
-    });
+        <!-- Post Content -->
+        <div class="post-content">
+            <div class="post-text" name="think"></div>
+            <div class="bd_ct_news_title">
+                <div class="post-text" name="text"></div>
+                <div class="post-image-container">
+                    <img name="picture" src="" alt="Post image" class="hidden">
+                </div>
+            </div>
+        </div>
 
-    // Xử lý update / delete comment
-    document.querySelector("#bd_ct_news_commend_congdong").addEventListener('click', (e) => {
-        const btnDel = e.target.closest('.btn-delete');
-        const btnUp = e.target.closest('.btn-update');
+        <!-- Post Stats -->
+        <div class="post-stats">
+            <div class="stats-left" id="bd_ct_news_commend_thongKe_news">
+                <span class="like-icon">👍</span>
+                <span class="stats-text" id="bd_ct_news_cmd_tk_text_news"></span>
+            </div>
+            <div class="stats-right">
+                <span class="stats-text comment-count"></span>
+                <span class="stats-text share-count"></span>
+            </div>
+        </div>
 
-        if (btnDel) {
-            const id = btnDel.dataset.id;
-            deletedCommends.push(id);
-            document.getElementById('commend' + id)?.remove();
-        } else if (btnUp) {
-            const id = btnUp.dataset.id;
-            const parent = document.querySelector(`#commend${id}`);
-            const contentEl = parent.querySelector('.commend-content');
+        <!-- Post Actions -->
+        <div class="post-actions" id="bd_ct_news_commend_tuongTac">
+            <button class="action-button like-button" type="button">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path d="M7.493 19.5c-.425 0-.82-.189-1.09-.515L1.17 12.715c-.348-.43-.27-1.06.16-1.41.43-.348 1.06-.27 1.41.16l4.233 5.49 11.659-11.66c.39-.39 1.02-.39 1.41 0s.39 1.02 0 1.41L8.583 19.085c-.27.27-.665.415-1.09.415z"/>
+                </svg>
+                <span>Thích</span>
+            </button>
+            <button class="action-button comment-action-button" type="button">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 2.98.97 4.29L1 23l6.71-1.97C9.02 21.64 10.46 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Bình luận</span>
+            </button>
+            <form action="/Post/share" method="Post" style="flex: 1; display: flex;">
+                <input type="hidden" name="id_Post" value="">
+                <button class="action-button" type="submit">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                    </svg>
+                    <span>Chia sẻ</span>
+                </button>
+            </form>
+        </div>
 
-            if (btnUp.innerText === "Sửa") {
-                contentEl.contentEditable = true;
-                btnUp.innerText = "Xong";
+        <!-- Comments Section -->
+        <div class="comments-section">
+            <div id="bd_ct_news_commend_congdong"></div>
+
+            <!-- Comment Input -->
+            <div class="comment-input-section" id="bd_ct_news_commend_thembinhLuan">
+                <input type="hidden" value="">
+                <img src="" alt="Ảnh đại diện của bạn" class="comment-input-avatar">
+                <div class="comment-input-wrapper">
+                    <textarea placeholder="Viết bình luận..." rows="1"></textarea>
+                    <button class="comment-send-btn">Gửi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hàm tính thời gian
+        function calculateTimeAgo(dateTime) {
+            if (!dateTime) return '';
+            const current_time = new Date(dateTime);
+            const now_time = new Date();
+            const diffMs = now_time - current_time;
+
+            const diffSeconds = Math.floor(diffMs / 1000);
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            const diffWeeks = Math.floor(diffDays / 7);
+            const diffMonths = Math.floor(diffDays / 30);
+            const diffYears = Math.floor(diffDays / 365);
+
+            if (diffYears > 0) return `${diffYears} năm trước`;
+            if (diffMonths > 0) return `${diffMonths} tháng trước`;
+            if (diffWeeks > 0) return `${diffWeeks} tuần trước`;
+            if (diffDays > 0) return `${diffDays} ngày trước`;
+            if (diffHours > 0) return `${diffHours} giờ trước`;
+            if (diffMinutes > 0) return `${diffMinutes} phút trước`;
+            return `${diffSeconds} giây trước`;
+        }
+
+        // Hàm format số lượng
+        function formatCount(count) {
+            if (!count || count === 0) return '';
+            if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            }
+            return count.toString();
+        }
+
+        // Hàm async để gán dữ liệu vào DOM
+        async function renderPostData(Post) {
+            document.querySelector('#new input').value = Post.id ?? '';
+
+            const avatarImg = document.querySelector('[name=avatar]');
+            if (avatarImg) {
+                if (Post.users?.avatar) {
+                    let avatarPath = Post.users.avatar;
+                    // Đảm bảo đường dẫn có dấu / ở đầu nếu là đường dẫn tương đối
+                    if (!avatarPath.startsWith('http') && !avatarPath.startsWith('/') && !avatarPath.startsWith('data:')) {
+                        avatarPath = '/' + avatarPath;
+                    }
+                    avatarImg.src = avatarPath;
+                } else {
+                    avatarImg.src = '';
+                }
+            }
+
+            const userName = document.querySelector('[name=name]');
+            userName.innerHTML = Post.users?.name ?? '';
+
+            const timeEl = document.querySelector('[name=time]');
+            timeEl.innerHTML = calculateTimeAgo(Post.updatedAt);
+
+            const thinkEl = document.querySelector('[name=think]');
+            thinkEl.innerHTML = Post.think ?? '';
+            if (!Post.think) thinkEl.style.display = 'none';
+
+            const textEl = document.querySelector('.bd_ct_news_title [name=text]');
+            if (Post.contens?.text) {
+                textEl.innerHTML = Post.contens.text;
+                textEl.style.display = 'block';
             } else {
-                contentEl.contentEditable = false;
-                const text = contentEl.innerText.trim();
-                const index = updateCommends.findIndex(c => c.id === id);
-                if (index >= 0) updateCommends[index].content = text;
-                else updateCommends.push({ id, content: text });
-                btnUp.innerText = "Sửa";
+                textEl.style.display = 'none';
+            }
+
+            const pictureEl = document.querySelector('[name=picture]');
+            if (Post.contens?.image) {
+                const data = Post.contens.image;
+                pictureEl.src = `data:${data.mineType};base64,${data.base64}`;
+                pictureEl.classList.remove('hidden');
+            } else {
+                pictureEl.classList.add('hidden');
+            }
+
+            const likeButton = document.querySelector('.like-button');
+            const isLiked = Post.like ?? false;
+            check_like = isLiked;
+            if (isLiked) {
+                likeButton.classList.add('liked');
+            } else {
+                likeButton.classList.remove('liked');
+            }
+
+            // For share
+            document.querySelector('input[name="id_Post"]').value = Post.id;
+        }
+
+        // Mảng lưu thao tác comment
+        let add_commends = [];
+        let updateCommends = [];
+        let deletedCommends = [];
+        let check_like = false;
+
+        const likeButton = document.querySelector('.like-button');
+        likeButton.addEventListener('click', () => {
+            check_like = !check_like;
+            if (check_like) {
+                likeButton.classList.add('liked');
+            } else {
+                likeButton.classList.remove('liked');
+            }
+        });
+
+        // Gửi bình luận mới
+        document.querySelector('#bd_ct_news_commend_thembinhLuan button').addEventListener('click', () => {
+            const textarea = document.querySelector('#bd_ct_news_commend_thembinhLuan textarea');
+            const content = textarea.value.trim();
+            if (!content) return alert('Vui lòng nhập bình luận!');
+
+            const avatar = document.querySelector('#bd_ct_news_commend_thembinhLuan img').src;
+            const idUser = document.querySelector('#bd_ct_news_commend_thembinhLuan input').value;
+            const parent = document.querySelector("#bd_ct_news_commend_congdong");
+
+            parent.insertAdjacentHTML("beforeend", `
+                <div class="comment-item">
+                    <img src="${avatar}" alt="ava" class="comment-avatar">
+                    <div class="comment-content-wrapper">
+                        <div class="comment-author">Bạn</div>
+                        <div class="comment-text commend-content" contentEditable="false">${content}</div>
+                    </div>
+                </div>
+            `);
+
+            add_commends.push({ id_user: idUser, id_Posts: id_Post, content, classify: 'commend' });
+            textarea.value = '';
+        });
+
+        // Xử lý update / delete comment
+        document.querySelector("#bd_ct_news_commend_congdong").addEventListener('click', (e) => {
+            const btnDel = e.target.closest('.btn-delete');
+            const btnUp = e.target.closest('.btn-update');
+
+            if (btnDel) {
+                const id = btnDel.dataset.id;
+                deletedCommends.push(id);
+                document.getElementById('commend' + id)?.remove();
+            } else if (btnUp) {
+                const id = btnUp.dataset.id;
+                const parent = document.querySelector(`#commend${id}`);
+                const contentEl = parent.querySelector('.commend-content');
+
+                if (btnUp.innerText === "Sửa") {
+                    contentEl.contentEditable = true;
+                    contentEl.focus();
+                    btnUp.innerText = "Xong";
+                } else {
+                    contentEl.contentEditable = false;
+                    const text = contentEl.innerText.trim();
+                    const index = updateCommends.findIndex(c => c.id === id);
+                    if (index >= 0) updateCommends[index].content = text;
+                    else updateCommends.push({ id, content: text });
+                    btnUp.innerText = "Sửa";
+                }
+            }
+        });
+
+        let id_Post = "";
+        let interactionData = {};
+
+        // Lắng nghe message từ parent
+        window.addEventListener('message', async e => {
+            if (e.data.type === 'loadData') {
+                const Post = e.data.Post;
+                await renderPostData(Post);
+                id_Post = Post.id;
+            } else if (e.data.type === 'userData') {
+                const my_avatar = e.data.short_user.my_avatar;
+                const my_id = e.data.short_user.id_user;
+
+                const avatarImg = document.querySelector('#bd_ct_news_commend_thembinhLuan img');
+                if (avatarImg && my_avatar) {
+                    // Đảm bảo đường dẫn có dấu / ở đầu nếu là đường dẫn tương đối
+                    if (!my_avatar.startsWith('http') && !my_avatar.startsWith('/') && !my_avatar.startsWith('data:')) {
+                        avatarImg.src = '/' + my_avatar;
+                    } else {
+                        avatarImg.src = my_avatar;
+                    }
+                }
+                const userIdInput = document.querySelector('#bd_ct_news_commend_thembinhLuan input');
+                if (userIdInput) {
+                    userIdInput.value = my_id ?? '';
+                }
+            } else if (e.data.type === 'commend_data_array') {
+                let commend_data_array = e.data.commend_data_array;
+                const parent = document.querySelector("#bd_ct_news_commend_congdong");
+                parent.innerHTML = "";
+
+                commend_data_array.forEach(item => {
+                    const idUser = document.querySelector('#bd_ct_news_commend_thembinhLuan input').value;
+                    let actionButtons = '';
+                    if (idUser == item.id_user) {
+                        actionButtons = `
+                            <div class="comment-actions">
+                                <button class="comment-action-btn btn-update" data-id="${item.id}">Sửa</button>
+                                <button class="comment-action-btn btn-delete" data-id="${item.id}">Xóa</button>
+                            </div>
+                        `;
+                    }
+
+                    // Xử lý đường dẫn avatar an toàn
+                    let avatarPath = '';
+                    if (item.user?.avatar) {
+                        avatarPath = item.user.avatar;
+                        if (!avatarPath.startsWith('http') && !avatarPath.startsWith('/') && !avatarPath.startsWith('data:')) {
+                            avatarPath = '/' + avatarPath;
+                        } else if (!avatarPath.startsWith('/') && !avatarPath.startsWith('http') && !avatarPath.startsWith('data:')) {
+                            avatarPath = '/' + avatarPath;
+                        }
+                    }
+
+                    let insert_Html = `
+                        <div class="comment-item" id="commend${item.id}">
+                            <img src="${avatarPath}" alt="ava" class="comment-avatar">
+                            <div class="comment-content-wrapper">
+                                <div class="comment-author">${item.user.name}</div>
+                                <div class="comment-text commend-content" contentEditable="false">${item.content}</div>
+                                ${actionButtons}
+                            </div>
+                        </div>`;
+                    parent.insertAdjacentHTML("beforeend", insert_Html);
+                });
+            } else if (e.data.type === 'interactions_data') {
+                interactionData = e.data.interactions_data;
+                updateInteractionStats();
+            }
+        });
+
+        function updateInteractionStats() {
+            const statsText = document.getElementById('bd_ct_news_cmd_tk_text_news');
+            const statsLeft = document.querySelector('.stats-left');
+            const commentCountEl = document.querySelector('.comment-count');
+            const shareCountEl = document.querySelector('.share-count');
+
+            let hasLikes = false;
+            if (interactionData.sl_like_check) {
+                const likes = interactionData.sl_like_check.find(l => l.id_Posts == id_Post);
+                if (likes && likes.totalLikes > 0) {
+                    statsText.textContent = formatCount(likes.totalLikes);
+                    hasLikes = true;
+                }
+            }
+            
+            if (!hasLikes) {
+                statsText.textContent = '';
+                if (statsLeft) {
+                    const likeIcon = statsLeft.querySelector('.like-icon');
+                    if (likeIcon) likeIcon.style.display = 'none';
+                }
+            } else {
+                const likeIcon = statsLeft.querySelector('.like-icon');
+                if (likeIcon) likeIcon.style.display = 'inline-flex';
+            }
+
+            if (interactionData.commend) {
+                const comments = interactionData.commend.find(c => c.id_Posts == id_Post);
+                if (comments && comments.sl_commend > 0) {
+                    commentCountEl.textContent = `${formatCount(comments.sl_commend)} bình luận`;
+                } else {
+                    commentCountEl.textContent = '';
+                }
+            }
+
+            if (interactionData.sl_share) {
+                const shares = interactionData.sl_share.find(s => s.id_Posts == id_Post);
+                if (shares && shares.sl_share > 0) {
+                    shareCountEl.textContent = `${formatCount(shares.sl_share)} lượt chia sẻ`;
+                } else {
+                    shareCountEl.textContent = '';
+                }
             }
         }
-    });
-    let id_Post = "";
-    // Lắng nghe message từ parent
-    window.addEventListener('message', async e => {
-        if (e.data.type === 'loadData') {
-            const Post = e.data.Post;
-            await renderPostData(Post);
-            id_Post = Post.id;
-        } else if (e.data.type === 'userData') {
-            const my_avatar = e.data.short_user.my_avatar;
-            const my_id = e.data.short_user.id_user;
 
-            document.querySelector('#bd_ct_news_commend_thembinhLuan img').src = my_avatar ?? '';
-            document.querySelector('#bd_ct_news_commend_thembinhLuan input').value = my_id ?? '';
-        } else if (e.data.type === 'commend_data_array') {
-            let commend_data_array = e.data.commend_data_array;
-            const parent = document.querySelector("#bd_ct_news_commend_congdong");
-            parent.innerHTML = "";
-
-            commend_data_array.forEach(item => {
-                let insert_Html = `
-                <div id="commend${item.id}">
-                    <img src="/${item.user.avatar}" alt="ava">
-                    <div>
-                      <h3>${item.user.name}</h3>
-                      <h3 class="commend-content" contentEditable="false">${item.content}</h3>
-                    </div>
-                </div>`;
-                parent.insertAdjacentHTML("beforeend", insert_Html);
-
-                const idUser = document.querySelector('#bd_ct_news_commend_thembinhLuan input').value;
-                if (idUser == item.id_user) {
-                    const parentComment = document.querySelector(`#commend${item.id}`);
-                    const insertBtn = `
-                        <button class="btn-delete" data-id="${item.id}">delete</button>
-                        <button class="btn-update" data-id="${item.id}">update</button>
-                    `;
-                    parentComment.insertAdjacentHTML("beforeend", insertBtn);
-                }
-            });
-        }
-    });
-
-    // Gửi dữ liệu về parent khi đóng
-    document.querySelector("#close").addEventListener('click', () => {
-        window.parent.postMessage({
-            type: 'interactions_an_Post_Data',
-            id_Posts: id_Post,
-            check_like,
-            add_commends,
-            updateCommends,
-            deletedCommends
-        }, '*');
-    });
-</script>
+        // Gửi dữ liệu về parent khi đóng
+        document.querySelector("#close").addEventListener('click', () => {
+            window.parent.postMessage({
+                type: 'interactions_an_Post_Data',
+                id_Posts: id_Post,
+                check_like,
+                add_commends,
+                updateCommends,
+                deletedCommends
+            }, '*');
+        });
+    </script>
+</body>
+</html>

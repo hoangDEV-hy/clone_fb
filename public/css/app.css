@@ -394,8 +394,9 @@ h4 {
   background: #d8dadf;
 }
 
-#bd_ct_news_cmd_tuongTac_ifP {
-  /* Popup iframe */
+/* Popup iframe - hỗ trợ cả id cũ và id myIframe */
+#bd_ct_news_cmd_tuongTac_ifP,
+#myIframe {
   flex-grow: 1;
   border: none;
   width: 100%;

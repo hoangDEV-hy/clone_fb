@@ -14,9 +14,11 @@ export let methods = {
     selectFriendsDone: async (id: string): Promise<user_user[]> => {
         try {
             const selectedFriended = await friendModel.selectFriendsDone(id);
-            const idfriends = selectedFriended.map((g: any) => g.id_userB);
+            const friendIds = selectedFriended.map(
+                (f: any) => f.id_userA === id ? f.id_userB : f.id_userA
+            );
 
-            const listFriends = await userController.selectUsersWithIdsList(idfriends);
+            const listFriends = await userController.selectUsersWithIdsList(friendIds);
 
             return listFriends.map((g: any) => g.toJSON());
         } catch (err) {

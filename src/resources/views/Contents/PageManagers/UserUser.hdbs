@@ -1,178 +1,53 @@
-<div style="display: flex; gap: 20px;">
-    <div>
-        <div>
-            <a href="/page_manager/friends/joined">Đã kết bạn</a>
-        </div>
-        <div>
-            <a href="/page_manager/friends/waited">Đang chờ duyệt</a>
-        </div>
+<div class="page-manager-container">
+    <div class="page-manager-header">
+        <h1>👥 Quản lý bạn bè</h1>
+        <p>Xem và quản lý danh sách bạn bè của bạn</p>
     </div>
 
-    <div>
+    <div class="page-manager-sidebar">
+        <a href="/page_manager/friends/joined" class="sidebar-nav-link {{#if (eq currentPage 'joined')}}active{{/if}}">
+            ✅ Đã kết bạn
+        </a>
+        <a href="/page_manager/friends/waited" class="sidebar-nav-link {{#if (eq currentPage 'waited')}}active{{/if}}">
+            ⏳ Đang chờ duyệt
+        </a>
+    </div>
+
+    <div class="friends-list">
         {{#if group.length}}
         {{#each group}}
-        <div class="friend-card" data-user-id="{{this.id}}"
-            style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-            <img src="" alt="">
-            <input type="text" value="{{this.name}}" readonly>
-
-            <div style="margin-top:8px;">
-                <button type="button" class="toggle-more-btn">More</button>
-
-                <div class="more-actions" style="visibility:hidden; margin-top:6px;">
-                    <form action="http://localhost:3000/page_manager/user" method="POST" style="display:inline;">
-                        <input type="hidden" name="selectedTargetId" value="{{this.id}}">
-                        <button type="submit" style="background:none; border:none; color:blue; cursor:pointer;">
-                            Trang cá nhân
-                        </button>
-                    </form>
-
-                    {{#if this.isPending}}
-                    <button type="button" class="accept-friend-btn"
-                        style="background:none; border:none; color:green; cursor:pointer; margin-left:10px;">
-                        Accept Request
-                    </button>
-                    {{/if}}
-
-                    <button type="button" class="remove-friend-btn"
-                        style="background:none; border:none; color:red; cursor:pointer; margin-left:10px;">
-                        Remove friend
-                    </button>
+        <div class="manager-card friend-card" data-user-id="{{this.id}}">
+            <div class="card-header">
+                <img src="{{this.avatar}}" alt="{{this.name}}" class="card-avatar" onerror="this.src='/pictures/avatar.jpg'">
+                <div class="card-title">{{this.name}}</div>
+                <div class="card-actions">
+                    <button type="button" class="toggle-more-btn btn-more">Thêm</button>
                 </div>
+            </div>
+
+            <div class="more-actions hidden">
+                <form action="/page_manager/user" method="POST" style="display:inline;">
+                    <input type="hidden" name="selectedTargetId" value="{{this.id}}">
+                    <button type="submit" class="btn-primary">👤 Trang cá nhân</button>
+                </form>
+
+                {{#if this.isPending}}
+                <button type="button" class="accept-friend-btn btn-success">✅ Chấp nhận</button>
+                {{/if}}
+
+                <button type="button" class="remove-friend-btn btn-danger">
+                    {{#if this.isPending}}❌ Từ chối{{else}}🗑️ Xóa bạn bè{{/if}}
+                </button>
             </div>
         </div>
         {{/each}}
         {{else}}
-        <h1>No friend requests</h1>
+        <div class="empty-state">
+            <p>{{#if (eq currentPage 'waited')}}Không có lời mời kết bạn nào{{else}}Không có bạn bè nào{{/if}}</p>
+        </div>
         {{/if}}
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.addEventListener('click', async (e) => {
-
-            /* Toggle more */
-            if (e.target.classList.contains('toggle-more-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const card = e.target.closest('.friend-card');
-                const more = card.querySelector('.more-actions');
-
-                more.style.visibility =
-                    more.style.visibility === 'visible' ? 'hidden' : 'visible';
-            }
-
-            /* Accept friend request */
-            if (e.target.classList.contains('accept-friend-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const card = e.target.closest('.friend-card');
-                const userId = card.dataset.userId;
-
-                if (!confirm('Bạn có chắc muốn chấp nhận lời mời kết bạn?')) return;
-
-                if (e.target.dataset.processing === 'true') return;
-                e.target.dataset.processing = 'true';
-                e.target.disabled = true;
-
-                try {
-
-                    const response = await fetch('/page_manager/friends/accept', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id_userB: userId,
-                            notification_value: {
-                                id: null,
-                                selectedIdChatRoom: null,
-                                selectedSenderId: null,
-                                receiver_id: userId,
-                                content: `chấp nhận lời mời kết bạn từ ${userId}`,
-                                type: 'static'
-                            }
-                        })
-                    });
-
-                    if (response.ok) {
-                        alert('Chấp nhận lời mời thành công!');
-                        window.location.reload();
-                    } else {
-                        const error = await response.json();
-                        e.target.dataset.processing = 'false';
-                        e.target.disabled = false;
-                        alert(error.message || 'Chấp nhận thất bại');
-                    }
-                } catch (err) {
-                    console.error('Error accepting friend:', err);
-                    e.target.dataset.processing = 'false';
-                    e.target.disabled = false;
-                    alert('Lỗi kết nối server');
-                }
-            }
-
-            /* Remove friend */
-            if (e.target.classList.contains('remove-friend-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const card = e.target.closest('.friend-card');
-                const userId = card.dataset.userId;
-                const currentPath = window.location.pathname;
-
-                if (!confirm('Bạn có chắc muốn xoá bạn bè này?')) return;
-
-                if (e.target.dataset.processing === 'true') return;
-                e.target.dataset.processing = 'true';
-                e.target.disabled = true;
-
-                try {
-                    let response;
-
-                    if (currentPath.includes('/joined')) {
-                        response = await fetch('/page_manager/friends/joined', {
-                            method: 'DELETE',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id_userB: userId })
-                        });
-                    } else if (currentPath.includes('/waited')) {
-
-                        response = await fetch('/page_manager/friends/waited', {
-                            method: 'DELETE',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                id_userB: userId,
-                                notification_value: {
-                                    id: null,
-                                    selectedIdChatRoom: null,
-                                    selectedSenderId: null,
-                                    receiver_id: userId,
-                                    content: `huỷ lời mời kết bạn của ${userId}`,
-                                    type: 'static'
-                                }
-                            })
-                        });
-                    }
-
-                    if (response && response.ok) {
-                        card.remove();
-                        alert('Xoá thành công!');
-                    } else {
-                        const error = await response.json();
-                        e.target.dataset.processing = 'false';
-                        e.target.disabled = false;
-                        alert(error.message || 'Xoá thất bại');
-                    }
-                } catch (err) {
-                    console.error('Error removing friend:', err);
-                    e.target.dataset.processing = 'false';
-                    e.target.disabled = false;
-                    alert('Lỗi kết nối server');
-                }
-            }
-
-        });
-    });
-</script>
+<link rel="stylesheet" href="/css/contens/page-manager.css">
+<script src="/js/user-user-page.js"></script>

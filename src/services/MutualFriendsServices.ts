@@ -30,7 +30,8 @@ export class MutualFriendsService {
         }
 
         // Lấy danh sách bạn bè hiện tại của user
-        const currentFriends = await methodsUserUser.selectFriends({ id_userA: userId });
+        const currentFriends = await methodsUserUser.selectFriendsDone(userId);
+        console.log("currentFriend", currentFriends)
         const currentFriendIds: Set<string> = new Set(
             currentFriends.map(f =>
                 f.id_userA === userId ? f.id_userB : f.id_userA
