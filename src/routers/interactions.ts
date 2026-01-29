@@ -57,7 +57,6 @@ router.post('/interactions/load', upload.none(), async (req: Request, res: Respo
 
         // Send response
         let interactions_data = { sl_like_check, sl_share, commend };
-        console.log("interactions_data", interactions_data)
         res.json(interactions_data);
 
     } catch (err) {
@@ -125,7 +124,6 @@ router.post('/like', async (req: Request, res: Response) => {
 
     } catch (error) {
         await transaction.rollback();
-        console.error('Error in handleLikes router:', error);
         throw error;
     }
 });
@@ -197,7 +195,6 @@ router.post('/share/save', authenticate.user_auth, upload.none(), async (req: Ex
         res.status(200).json({ success: true });
     } catch (error) {
         await transaction.rollback();
-        console.error('Error in addShare router:', error);
         throw error;
     }
 })
@@ -239,9 +236,6 @@ router.post('/commend', async (req: Request, res: Response): Promise<void> => {
     const transaction = await sequelize.transaction();
     try {
         const comments = Array.isArray(req.body) ? req.body : [req.body];
-        comments.forEach(e => {
-            console.log("commend value", e);
-        })
         // Validate
         if (comments.length === 0) {
             res.status(400).json({ error: true, message: 'Missing required inputs' });
@@ -255,7 +249,18 @@ router.post('/commend', async (req: Request, res: Response): Promise<void> => {
                 return;
             }
         }
-        await interactionsController.createInteractions(req.body, transaction);
+        
+        // Loại bỏ notification_value trước khi lưu vào DB (vì không phải field của bảng interactions)
+        // Đảm bảo id_Posts là number
+        const commentsForDb = comments.map(comment => {
+            const { notification_value, ...commentData } = comment;
+            return {
+                ...commentData,
+                id_Posts: typeof commentData.id_Posts === 'string' ? parseInt(commentData.id_Posts) : commentData.id_Posts
+            };
+        });
+        
+        await interactionsController.createInteractions(commentsForDb, transaction);
         // ===== Create notifications =====
         const notificationResults = await Promise.all(
             comments.map(comment =>
@@ -281,7 +286,6 @@ router.post('/commend', async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ success: true, message: 'Comments saved successfully' });
     } catch (error) {
         await transaction.rollback();
-        console.error('Error in addComments router:', error);
         res.status(500).json({ error: true, message: 'Failed to save comments' });
     }
 })
@@ -327,7 +331,6 @@ router.post('/commend/del', async (req: Request, res: Response) => {
         });
     } catch (error) {
         await transaction.rollback();
-        console.error('Error in delCommends router:', error);
         throw error;
     }
 })

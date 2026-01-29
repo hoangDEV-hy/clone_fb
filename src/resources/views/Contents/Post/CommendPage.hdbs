@@ -501,9 +501,19 @@
             const textarea = document.querySelector('#bd_ct_news_commend_thembinhLuan textarea');
             const content = textarea.value.trim();
             if (!content) return alert('Vui lòng nhập bình luận!');
+            
+            if (!id_Post || id_Post === '') {
+                alert('Lỗi: Không tìm thấy ID bài viết');
+                return;
+            }
 
             const avatar = document.querySelector('#bd_ct_news_commend_thembinhLuan img').src;
             const idUser = document.querySelector('#bd_ct_news_commend_thembinhLuan input').value;
+            if (!idUser || idUser === '') {
+                alert('Lỗi: Không tìm thấy ID người dùng');
+                return;
+            }
+            
             const parent = document.querySelector("#bd_ct_news_commend_congdong");
 
             parent.insertAdjacentHTML("beforeend", `
@@ -516,7 +526,8 @@
                 </div>
             `);
 
-            add_commends.push({ id_user: idUser, id_Posts: id_Post, content, classify: 'commend' });
+            const newComment = { id_user: idUser, id_Posts: id_Post, content, classify: 'commend' };
+            add_commends.push(newComment);
             textarea.value = '';
         });
 

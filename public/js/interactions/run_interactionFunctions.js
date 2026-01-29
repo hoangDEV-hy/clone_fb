@@ -39,38 +39,31 @@ export default function interactions(change_like, id_user, nameContainIframe, da
             state.change_like,
             id_user,
             async (newData) => {
-                // Cập nhật state
+                // Chỉ cập nhật state, không lưu vào DB (sẽ lưu khi reload trang)
                 state.deleted_commends = newData.deleted_commends || [];
                 state.update_commends = newData.update_commends || [];
                 state.change_like = newData.change_like || {};
                 state.add_commends = newData.add_commends || [];
-                
-                // Lưu ngay lập tức khi đóng iframe để đảm bảo không mất dữ liệu khi reload
-                await functionInteractions.save_toDb(
-                    state.deleted_commends, 
-                    state.add_commends, 
-                    state.update_commends, 
-                    state.change_like
-                );
-                
-                // Reset các biến sau khi lưu thành công
-                state.add_commends = [];
-                state.deleted_commends = [];
-                state.update_commends = [];
-                state.change_like = {};
             }
         );
 
     });
 
-    //save_toDB - backup khi đóng trang
+    //save_toDB - chỉ lưu khi reload trang (dùng sendBeacon để đảm bảo gửi được khi reload)
     window.addEventListener("pagehide", () => {
-        functionInteractions.save_toDb(
-            state.deleted_commends, 
-            state.add_commends, 
-            state.update_commends, 
-            state.change_like
-        );
+        const hasData = (state.add_commends && state.add_commends.length > 0) ||
+                       (state.deleted_commends && state.deleted_commends.length > 0) ||
+                       (state.update_commends && state.update_commends.length > 0) ||
+                       (state.change_like && Object.keys(state.change_like).length > 0);
+        
+        if (hasData) {
+            functionInteractions.save_toDb_onPageHide(
+                state.deleted_commends, 
+                state.add_commends, 
+                state.update_commends, 
+                state.change_like
+            );
+        }
     });
 
     //for logic the program

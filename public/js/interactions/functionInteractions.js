@@ -5,7 +5,6 @@ const functionInteractions = {
             let id_Post = container.querySelector(nameIdPost).value;
             id_Post_load.push(id_Post);
         })
-        console.log('take_idInteractionPost done')
         return id_Post_load;
     },
     load_interactionPost: async (id_Post_load, id_user) => {
@@ -17,7 +16,6 @@ const functionInteractions = {
             method: 'Post',
             body: formData
         });
-        console.log('load_interactionPost done')
         return await res.json();
     },
     set_like: (data_load) => {
@@ -52,7 +50,6 @@ const functionInteractions = {
             }
 
         }
-        console.log('set_like done')
     },
     send_commends: async (clicked_post, nameContainIframe, nameIframe, namePicture, id_user, data_load) => {
         const iframe = document.getElementById(nameIframe);
@@ -116,7 +113,6 @@ const functionInteractions = {
             interactions_data: data_load
         }, '*');
 
-        console.log('send_commends done')
 
 
     },
@@ -143,7 +139,6 @@ const functionInteractions = {
             } : null // Không gửi notification khi unlike
         };
 
-        console.log('change_like done')
         return change_like;
 
     },
@@ -187,11 +182,11 @@ const functionInteractions = {
                 add_commends = data.add_commends.map(comment => ({
                     ...comment,
                     notification_value: {
-                        type: 'comment',
+                        type: 'static',
                         selectedIdChatRoom: null,
                         selectedSenderId: id_user,
                         receiver_id: postOwnerId,
-                        content: `${id_user} đã bình luận: "${comment.content.substring(0, 30)}${comment.content.length > 30 ? '...' : ''}" tại bài viết ${data.id_Posts} của ${postOwnerId}`
+                        content: `$đã bình luận: "${comment.content.substring(0, 30)}${comment.content.length > 30 ? '...' : ''}" tại bài viết ${data.id_Posts} của ${postOwnerId}`
                     }
                 }));
             } else {
@@ -208,12 +203,10 @@ const functionInteractions = {
             add_commends
         });
 
-        console.log('handle_dataiframe done');
 
 
     },
     save_toDb: async (deleted_commends, add_commends, update_commends, change_like) => {
-
         // Gửi like với notification
         if (change_like && Object.keys(change_like).length > 0) {
             try {
@@ -222,14 +215,15 @@ const functionInteractions = {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(change_like)
+                    body: JSON.stringify(change_like),
+                    keepalive: true
                 });
 
                 if (!response.ok) {
-                    console.error('Failed to save likes');
+                    // Failed to save likes
                 }
             } catch (error) {
-                console.error('Error saving likes:', error);
+                // Error saving likes
                 // Fallback to sendBeacon if fetch fails
                 const likeBlob = new Blob([JSON.stringify(change_like)], { type: 'application/json' });
                 navigator.sendBeacon('/Post/like', likeBlob);
@@ -244,21 +238,17 @@ const functionInteractions = {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(add_commends)
+                    body: JSON.stringify(add_commends),
+                    keepalive: true
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Failed to save comments:', response.status, errorText);
                     // Fallback to sendBeacon if fetch fails
                     const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
                     navigator.sendBeacon('/Post/commend', commendBlob);
-                } else {
-                    const result = await response.json();
-                    console.log('Comments saved successfully:', result);
                 }
             } catch (error) {
-                console.error('Error saving comments:', error);
+                // Fallback to sendBeacon
                 // Fallback to sendBeacon
                 const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
                 navigator.sendBeacon('/Post/commend', commendBlob);
@@ -273,14 +263,15 @@ const functionInteractions = {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(deleted_commends)
+                    body: JSON.stringify(deleted_commends),
+                    keepalive: true
                 });
 
                 if (!response.ok) {
-                    console.error('Failed to delete comments');
+                    // Failed to delete comments
                 }
             } catch (error) {
-                console.error('Error deleting comments:', error);
+                // Error deleting comments
                 const delCommends = new Blob([JSON.stringify(deleted_commends)], { type: 'application/json' });
                 navigator.sendBeacon('/Post/commend/del', delCommends);
             }
@@ -294,23 +285,53 @@ const functionInteractions = {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(update_commends)
+                    body: JSON.stringify(update_commends),
+                    keepalive: true
                 });
 
                 if (!response.ok) {
-                    console.error('Failed to update comments');
+                    // Failed to update comments
                 }
             } catch (error) {
-                console.error('Error updating comments:', error);
+                // Error updating comments
                 const upCommends = new Blob([JSON.stringify(update_commends)], { type: 'application/json' });
                 navigator.sendBeacon('/Post/commend/up', upCommends);
             }
         }
 
 
-        console.log('save_toDb done')
+    },
+    // Function riêng cho pagehide event - dùng sendBeacon
+    save_toDb_onPageHide: (deleted_commends, add_commends, update_commends, change_like) => {
+        // Gửi like với sendBeacon
+        if (change_like && Object.keys(change_like).length > 0) {
+            const likeBlob = new Blob([JSON.stringify(change_like)], { type: 'application/json' });
+            navigator.sendBeacon('/Post/like', likeBlob);
+        }
 
-    }
+        // Gửi comment với sendBeacon
+        if (add_commends && add_commends.length > 0) {
+            const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
+            navigator.sendBeacon('/Post/commend', commendBlob);
+        }
+
+        // Gửi deleted comments
+        if (deleted_commends && deleted_commends.length > 0) {
+            const delCommends = new Blob([JSON.stringify(deleted_commends)], { type: 'application/json' });
+            navigator.sendBeacon('/Post/commend/del', delCommends);
+        }
+
+        // Gửi updated comments
+        if (update_commends && update_commends.length > 0) {
+            const upCommends = new Blob([JSON.stringify(update_commends)], { type: 'application/json' });
+            navigator.sendBeacon('/Post/commend/up', upCommends);
+        }
+    },
 }
 
 export default functionInteractions;
+
+// Export vào window để có thể truy cập từ console
+if (typeof window !== 'undefined') {
+    window.functionInteractions = functionInteractions;
+}
