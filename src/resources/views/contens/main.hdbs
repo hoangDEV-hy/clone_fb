@@ -764,9 +764,87 @@
 
 
         //chatBox
-        let socket = io();
-        socket.onAny((event, ...args) => {
-            console.log('📡 received event:', event, args);
+        let socket = io({
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 10000
+        });
+        socket.onAny((eventName, ...args) => {
+            console.log('📤 Event nhận từ server');
+            console.log('Event:', eventName);
+            console.log('Data:', args);
+        });
+        socket.emit('register', id_user);
+
+        console.log('✅ Socket connected:', socket.id);
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+        let notificationShown = false;
+
+        // Hàm hiển thị thông báo
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background: ${type === 'error' ? '#f44336' : '#2196F3'};
+    color: white;
+    border-radius: 5px;
+    z-index: 9999;
+  `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        socket.on('connect', () => {
+            console.log('Kết nối thành công! Socket ID:', socket.id);
+            reconnectAttempts = 0;
+            notificationShown = false;
+            showNotification('Đã kết nối đến server', 'success');
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('Mất kết nối:', reason);
+            showNotification('Mất kết nối với server', 'error');
+
+            if (reason === 'io server disconnect') {
+                setTimeout(() => {
+                    window.location.href = './404.html';
+                }, 2000);
+            }
+        });
+
+        socket.on('connect_error', (error) => {
+            reconnectAttempts++;
+
+            if (!notificationShown) {
+                showNotification(`Đang thử kết nối lại... (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`, 'error');
+                notificationShown = true;
+            }
+
+            if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                showNotification('Không thể kết nối đến server. Chuyển hướng...', 'error');
+                setTimeout(() => {
+                    window.location.href = './404.html';
+                }, 2000);
+            }
+        });
+
+        socket.on('reconnect_attempt', (attemptNumber) => {
+            console.log(`Thử kết nối lại lần ${attemptNumber}`);
+        });
+
+        socket.on('reconnect_failed', () => {
+            showNotification('Kết nối thất bại. Chuyển hướng...', 'error');
+            setTimeout(() => {
+                window.location.href = '/404.html';
+            }, 2000);
         });
         let chatState = {
             receiver_id: null,

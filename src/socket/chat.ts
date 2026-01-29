@@ -1,6 +1,5 @@
 import { Socket } from 'socket.io'
 import { select_chats, create_mes } from '../constrollers/chat/chat'
-import { select_chatsType, create_chat } from "../constrollers/chat/chat"
 import { select_members, add_members } from '../constrollers/chat/chat_members'
 
 //types
