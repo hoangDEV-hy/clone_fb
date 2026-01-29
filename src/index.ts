@@ -1,18 +1,18 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import "./types/session";
+import "./Types/Session";
 
 import express, { Express } from 'express';
 import path from 'path';
 const expressHandlebars = require('express-handlebars');
-import * as sql from './configs/sql'; // giả sử bạn export connect, sequelize...
-import router from './routers'; // phải là export default từ routers/index.ts
+import * as sql from './Configs/Sql'; // giả sử bạn export connect, sequelize...
+import router from './Routers'; // phải là export default từ routers/index.ts
 //for Messenger 
 import { Server } from 'socket.io'
 import http from 'http'
-import { setup_chat } from './socket/index';
-import { sequelize } from './configs/sql';
+import { setup_chat } from './Socket/index';
+import { sequelize } from './Configs/Sql';
 
 const app: Express = express();
 //change server to ioServer

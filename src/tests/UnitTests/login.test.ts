@@ -55,8 +55,8 @@ jest.mock('../../models/user_user', () => ({
 // Set JWT_SECRET cho test environment
 process.env.JWT_SECRET = 'test-secret-key-for-jwt';
 
-import { methods as loginController } from '../../constrollers/login/login';
-import { methods as modelUser } from '../../models/user';
+import { methods as loginController } from '../../Constrollers/Login/Logins';
+import { methods as modelUser } from '../../Models/user';
 
 describe('LoginController - Unit Tests', () => {
 

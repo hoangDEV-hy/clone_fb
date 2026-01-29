@@ -1,10 +1,10 @@
 import express, { Request, Response, NextFunction, Router } from "express";
-import { chat_member } from "../models/chat/chat_members";
-import { user_user } from "../models/user_user";
+import { chat_member } from "../Models/Chats/ChatMember";
+import { user_user } from "../Models/UserUser";
 import { Op } from "sequelize";
-import { User } from "../models/user";
-import { methods as groupController } from "../constrollers/group";
-import { methods as userController } from "../constrollers/User"
+import { User } from "../Models/user";
+import { methods as groupController } from "../Constrollers/Groups";
+import { methods as userController } from "../Constrollers/User"
 
 const router: Router = express.Router();
 
@@ -177,7 +177,7 @@ router.get('/get', async (req: Request, res: Response): Promise<void> => {
 });
 
 router.get('/', (req: Request, res: Response) => {
-    res.render('contens/search')
+    res.render('Contents/Search');
 })
 
 

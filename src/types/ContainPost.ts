@@ -1,4 +1,4 @@
-import { Posts } from "../models/Posts";
+import { Posts } from "../Models/Post";
 import contentOfPost from "./ContentOfPost";
 
 

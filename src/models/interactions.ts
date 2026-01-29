@@ -1,7 +1,7 @@
-import { sequelize } from "../configs/sql";
+import { sequelize } from "../Configs/Sql";
 import { DataTypes, Model, Transaction } from "sequelize";
 import { User } from "./user";
-import throwError from "../helpers/ThrowErrorOfSqlQuery";
+import throwError from "../Helpers/ThrowErrorOfSqlQuery";
 import { QueryTypes } from "sequelize";
 import { Op } from 'sequelize';
 

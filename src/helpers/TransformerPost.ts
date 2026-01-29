@@ -1,7 +1,7 @@
-import transformPosts from "../services/FeedServices/TransformPosts";
+import transformPosts from "../Services/FeedServices/TransformPosts";
 
-import { Posts } from "../models/Posts";
-import contentOfPost from "../types/ContentOfPost";
+import { Posts } from "../Models/Post";
+import contentOfPost from "../Types/ContentOfPost";
 
 export const transformPostServices = {
     transformPosts: transformPosts,

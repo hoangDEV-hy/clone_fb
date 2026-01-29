@@ -3,8 +3,8 @@ import {
     Op,
     Model
 } from 'sequelize';
-import { sequelize as db } from '../configs/sql';
-import throwError from '../helpers/ThrowErrorOfSqlQuery';
+import { sequelize as db } from '../Configs/Sql';
+import throwError from '../Helpers/ThrowErrorOfSqlQuery';
 
 
 // 3. Khai báo class model với generic Model<UserAttributes, UserCreationAttributes>
@@ -92,7 +92,7 @@ async function getNextUsername() {
 }
 
 export { User };
-import { user_user } from './user_user';
+import { user_user } from './UserUser';
 User.hasMany(user_user, { foreignKey: 'id_userA', as: 'userA' })
 User.hasMany(user_user, { foreignKey: 'id_userB', as: 'userB' })
 

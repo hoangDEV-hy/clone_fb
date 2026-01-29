@@ -1,12 +1,12 @@
 import express, { Router, Request, Response } from 'express';
-import { authenticate } from '../middware/auth';
-import { FeedController } from '../constrollers/Ctrl_Feed';
+import { authenticate } from '../Middlewares/Auth';
+import { FeedController } from '../Constrollers/Feeds';
 
 const router: Router = express.Router();
 const feedController = new FeedController();
 
 /**
- * @route   GET /feed
+ * @router   GET /feed
  * @desc    Get user feed with view rendering
  * @access  Private
  */
@@ -58,7 +58,7 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         const friendList = await feedController.getFriendList(userId);
 
         // Render view
-        res.render('contens/main', {
+        res.render('Contents/Main', {
             allPosts: feedResult.posts,
             user: user.toJSON(),
             friend_array: friendList,
@@ -66,7 +66,7 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         });
 
     } catch (error: any) {
-        console.error('Feed route error:', error);
+        console.error('Feed router error:', error);
         res.status(500).json({
             success: false,
             error: error.message || 'Failed to fetch feed'
@@ -75,7 +75,7 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
 });
 
 /**
- * @route   GET /feed/json
+ * @router   GET /feed/json
  * @desc    Get user feed as JSON (for AJAX/API requests)
  * @access  Private
  */
@@ -119,7 +119,7 @@ router.get('/json', authenticate.user_auth, async (req: Request, res: Response):
         });
 
     } catch (error: any) {
-        console.error('Feed JSON route error:', error);
+        console.error('Feed JSON router error:', error);
         res.status(500).json({
             success: false,
             error: error.message || 'Failed to fetch feed'
@@ -128,7 +128,7 @@ router.get('/json', authenticate.user_auth, async (req: Request, res: Response):
 });
 
 /**
- * @route   POST /feed/clear-cache
+ * @router   POST /feed/clear-cache
  * @desc    Clear user feed cache for reload
  * @access  Private
  */
@@ -156,7 +156,7 @@ router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Re
         });
 
     } catch (error: any) {
-        console.error('Clear cache route error:', error);
+        console.error('Clear cache router error:', error);
         res.status(500).json({
             success: false,
             error: error.message || 'Failed to clear cache'
@@ -164,4 +164,4 @@ router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Re
     }
 });
 
-export { router as route };
+export { router as router };

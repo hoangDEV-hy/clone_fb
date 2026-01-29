@@ -1,16 +1,16 @@
 import express from "express";
-import { authenticate } from "../middware/auth";
+import { authenticate } from "../Middlewares/Auth";
 import { Response, Request } from "express";
-import { methods as postController } from "../constrollers/Posts";
-import { methods as groupController } from "../constrollers/group"
-import throwError from "../helpers/ThrowErrorOfRouter";
-import { addNotification, sendNotification } from '../services/FollowerService';
+import { methods as postController } from "../Constrollers/Posts";
+import { methods as groupController } from "../Constrollers/Groups"
+import throwError from "../Helpers/ThrowErrorOfRouter";
+import { addNotification, sendNotification } from '../Services/FollowerService';
 
 
-import ExtendRequest from "../types/Type_ExtendRequest";
-let route = express.Router();
+import ExtendRequest from "../Types/ExtendRequest";
+let router = express.Router();
 
-route.get(
+router.get(
     '/',
     authenticate.user_auth,
     async (req: ExtendRequest, res: Response): Promise<void> => {
@@ -27,7 +27,7 @@ route.get(
                 res.status(401).send('Unauthorized');
                 return;
             } else {
-                res.render('contens/Post/Post', {
+                res.render('Contents/Post/Post', {
                     user: user.toJSON(),
                     group_id: selectedGroupId
                 });
@@ -40,7 +40,7 @@ route.get(
 );
 
 
-route.post('/update', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+router.post('/update', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
 
         const { PostId_curtain } = req.body;
@@ -66,14 +66,14 @@ route.post('/update', authenticate.user_auth, async (req: Request, res: Response
         };
         post!.contens = contens;
         let Post = post?.toJSON();
-        if (Post.PostId_origin) res.render('contens/Post/Extend_Post', { Post: Post })
-        else res.render('contens/Post/Post', { Post: Post })
+        if (Post.PostId_origin) res.render('Contents/Post/ExtendPost', { Post: Post })
+        else res.render('Contents/Post/Post', { Post: Post })
     } catch (err) {
         throwError(err, res);
     }
 })
 
-route.post('/delete', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
+router.post('/delete', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
 
         const { PostId_curtain } = req.body;
@@ -98,10 +98,10 @@ route.post('/delete', authenticate.user_auth, async (req: Request, res: Response
 
 
 import multer from 'multer';
-import NotificationServerTake from "../types/Type_Notification";
+import NotificationServerTake from "../Types/Notification";
 let uploadfile = multer({ storage: multer.memoryStorage() });
 
-route.post('/upload', uploadfile.single('file'), (req: any, res) => {
+router.post('/upload', uploadfile.single('file'), (req: any, res) => {
     const mimeType = req.file.mimetype;
     const base64 = req.file.buffer.toString('base64');
 
@@ -121,7 +121,7 @@ let uploadForm = multer({
     }
 });
 
-route.post('/save', authenticate.user_auth, uploadForm.none(), async (req: ExtendRequest, res: Response): Promise<void> => {
+router.post('/save', authenticate.user_auth, uploadForm.none(), async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const selectedUserId = req.admin?.id;
         if (!selectedUserId) {
@@ -165,4 +165,4 @@ route.post('/save', authenticate.user_auth, uploadForm.none(), async (req: Exten
         throwError(error, res);
     }
 });
-export { route };
+export { router };

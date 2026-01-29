@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../configs/sql'; // adjust the path
+import { sequelize } from '../Configs/Sql'; // adjust the path
 import { Transaction, Op } from 'sequelize';
 
 class Group extends Model {
@@ -35,14 +35,14 @@ Group.init({
         tableName: 'groups'
     }
 );
-import { group_user } from './group_user';
+import { group_user } from './GroupUser';
 Group.hasMany(group_user, { foreignKey: 'id_group', as: 'groups' });
 export { Group };
 
 
 
 import { Request, Response } from 'express';
-import throwError from '../helpers/ThrowErrorOfSqlQuery';
+import throwError from '../Helpers/ThrowErrorOfSqlQuery';
 import { User } from './user';
 
 async function check(req: Request, res: Response): Promise<any> {

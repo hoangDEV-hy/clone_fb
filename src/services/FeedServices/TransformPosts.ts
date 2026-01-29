@@ -1,6 +1,6 @@
-import { Posts } from "../../models/Posts";
-import contentOfPost from '../../types/ContentOfPost';
-import contain_posts from '../../types/ContainPost';
+import { Posts } from "../../Models/Post";
+import contentOfPost from '../../Types/ContentOfPost';
+import contain_posts from '../../Types/ContainPost';
 
 export default function transformPosts(posts: Posts[]): contain_posts[] {
     const tranPosts = posts.map((p: contain_posts) => p.toJSON ? p.toJSON() : p);

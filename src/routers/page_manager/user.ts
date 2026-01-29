@@ -1,13 +1,13 @@
 import express, { Request, Response } from 'express'
-import { authenticate } from '../../middware/auth'
-import { upload } from '../../middware/updateImage';
-import throwError from '../../helpers/ThrowErrorOfRouter';
-import handleUpload from '../../middware/HandleUpload'
-import { methods as page_managerUserController } from '../../constrollers/page_manager/user'
-import { methods as userController } from '../../constrollers/User'
+import { authenticate } from '../../Middlewares/Auth'
+import { upload } from '../../Middlewares/UpdateImage';
+import throwError from '../../Helpers/ThrowErrorOfRouter';
+import handleUpload from '../../Middlewares/HandleUpload'
+import { methods as page_managerUserController } from '../../Constrollers/Users'
+import { methods as userController } from '../../Constrollers/User'
 
 
-import ExtendRequest from '../../types/Type_ExtendRequest';
+import ExtendRequest from '../../Types/ExtendRequest';
 
 let route = express.Router();
 //for sorting
@@ -21,7 +21,7 @@ route.get('/sort', authenticate.user_auth, async (req: ExtendRequest, res: Respo
         const user = await userController.selectUser(selectedTargetId);
         console.log(tranAllPosts?.map(e => { return e }));
         const config_interface = String(id) === String(selectedTargetId);
-        return res.render('contens/page_manager/user', {
+        return res.render('Contents/PageManagers/User', {
             Posts: tranAllPosts,
             user: user?.toJSON(),
             config_interface
@@ -50,7 +50,7 @@ route.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Response
 
 
         const config_interface = String(id) === String(selectedTargetId);
-        return res.render('contens/page_manager/user', {
+        return res.render('Contents/PageManagers/User', {
             Posts: tranAllPosts,
             user: user?.toJSON(),
             config_interface

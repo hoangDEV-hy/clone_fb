@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import { config_dataChat } from "./chat"
-import { sendNotificationWhenOnline } from '../services/SendNotificationServices/WhenOnline'
+import { config_dataChat } from "./Chat"
+import { sendNotificationWhenOnline } from '../Services/SendNotificationServices/WhenOnline'
 
-import NotificationServerTake from "../types/Type_Notification";
+import NotificationServerTake from "../Types/Notification";
 let active_users: any = [];
 let ioInstance: Server;
 export function setup_chat(io: Server) {

@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
-import { authenticate } from '../../middware/auth';
-import { groupAuthMiddleware } from '../../middware/GroupAuths';
-import { methods as groupController } from '../../constrollers/page_manager/Ctrl_GroupUser';
-import ExtendRequest from '../../types/Type_ExtendRequest';
-import throwError from '../../helpers/ThrowErrorOfRouter';
-import NotificationServerTake from '../../types/Type_Notification';
+import { authenticate } from '../../Middlewares/Auth';
+import { groupAuthMiddleware } from '../../Middlewares/GroupAuths';
+import { methods as groupController } from '../../Constrollers/PageManagers/GroupUsers';
+import ExtendRequest from '../../Types/ExtendRequest';
+import throwError from '../../Helpers/ThrowErrorOfRouter';
+import NotificationServerTake from '../../Types/Notification';
 
 let router = express.Router();
 
@@ -18,7 +18,7 @@ router.get('/joined', authenticate.user_auth, async (req: ExtendRequest, res: Re
         }
 
         const plainGroups = await groupController.selectGroupsJoined(userId);
-        res.render('contens/page_manager/group_user', { group: plainGroups });
+        res.render('Contents/PageManagers/GroupUser', { group: plainGroups });
     } catch (error) {
         throwError(error, res);
     }
@@ -41,7 +41,7 @@ router.get('/pending', authenticate.user_auth, async (req: ExtendRequest, res: R
             isPending: true
         }));
 
-        res.render('contens/page_manager/group_user', { group: groupsWithPending });
+        res.render('Contents/PageManagers/GroupUser', { group: groupsWithPending });
     } catch (error) {
         throwError(error, res);
     }

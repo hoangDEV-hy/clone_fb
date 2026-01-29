@@ -1,11 +1,11 @@
 import express from 'express'
-import { authenticate } from '../../middware/auth'
-import { methods } from '../../models/group';
-import { methods as group } from '../../constrollers/group'
+import { authenticate } from '../../Middlewares/Auth'
+import { methods } from '../../Models/Group';
+import { methods as group } from '../../Constrollers/Groups'
 const router = express.Router();
 
 router.get('/create', authenticate.user_auth, (req: any, res: any) => {
-    res.render('contens/groups/register');
+    res.render('Contents/Groups/register');
 });
 
 
@@ -36,7 +36,7 @@ router.get('/main', authenticate.user_auth, authenticate.currentGroup, async (re
         console.log(joinGroup)
 
 
-        res.render('contens/groups/main', { groups: joinGroup, Posts: tranAllPosts })
+        res.render('Contents/Groups/Main', { groups: joinGroup, Posts: tranAllPosts })
 
     } catch (error) {
         console.log(error);

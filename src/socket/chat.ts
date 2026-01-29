@@ -1,9 +1,9 @@
 import { Socket } from 'socket.io'
-import { select_chats, create_mes } from '../constrollers/chat/chat'
-import { select_members, add_members } from '../constrollers/chat/chat_members'
+import { select_chats, create_mes } from '../Constrollers/Chats/Chats'
+import { select_members, add_members } from '../Constrollers/Chats/ChatMembers'
 
 //types
-import { notifications } from '../models/notifications'
+import { notifications } from '../Models/Notifications'
 
 
 export let config_dataChat = {

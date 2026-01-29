@@ -1,4 +1,4 @@
-import { methods as notificationMethods, notifications } from '../models/notifications'
+import { methods as notificationMethods, notifications } from '../Models/Notifications'
 
 
 

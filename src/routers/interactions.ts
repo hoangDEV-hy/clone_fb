@@ -1,18 +1,18 @@
 import express from "express";
-import { authenticate } from "../middware/auth";
+import { authenticate } from "../Middlewares/Auth";
 import { Request, Response } from "express";
 import multer from "multer";
-import { methods as interactionsController } from '../constrollers/Ctrl_Interactions'
-import throwError from "../helpers/ThrowErrorOfRouter";
-import { methods as postController } from '../constrollers/Posts'
-import { transformPostServices } from "../helpers/TransformerPost";
-import { addNotification, sendNotification } from '../services/FollowerService';
-import { sequelize } from '../configs/sql';
+import { methods as interactionsController } from '../Constrollers/Interactions'
+import throwError from "../Helpers/ThrowErrorOfRouter";
+import { methods as postController } from '../Constrollers/Posts'
+import { transformPostServices } from "../Helpers/TransformerPost";
+import { addNotification, sendNotification } from '../Services/FollowerService';
+import { sequelize } from '../Configs/Sql';
 
 
-import NotificationServerTake from "../types/Type_Notification";
-import ExtendRequest from "../types/Type_ExtendRequest";
-import { interactions } from "../models/interactions";
+import NotificationServerTake from "../Types/Notification";
+import ExtendRequest from "../Types/ExtendRequest";
+import { interactions } from "../Models/Interactions";
 
 
 const upload = multer();
@@ -146,7 +146,7 @@ router.post(
 
         const postTransformer = transformPostServices.transformPostReturnContent(post);
         console.log('post', post.toJSON());
-        res.render('contens/Post/Extend_Post', {
+        res.render('Contents/Post/ExtendPost', {
             Post: post.toJSON(),
             conten: postTransformer,
         });
@@ -232,7 +232,7 @@ router.post('/Post/load', authenticate.user_auth, upload.none(), async (req: Req
     res.json({ Post });
 })
 router.get('/iframe/commend', (req, res) => {
-    res.render('contens/Post/commend_page', { layout: false }); // view sẵn có HTML + CSS
+    res.render('Contents/Post/CommendPage', { layout: false }); // view sẵn có HTML + CSS
 });
 
 router.post('/commend', upload.none(), async (req: Request, res: Response): Promise<void> => {

@@ -1,6 +1,6 @@
-import { methods as postController } from '../../constrollers/Posts'
+import { methods as postController } from '../../Constrollers/Posts'
 import transformPosts from './TransformPosts'
-import { methods as followerMethods } from '../../models/Model_Follower'
+import { methods as followerMethods } from '../../Models/Follower'
 import CacheManager from './ReloadTimingControl'
 
 import { WhereOptions, Op } from 'sequelize';

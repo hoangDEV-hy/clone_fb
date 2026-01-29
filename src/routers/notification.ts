@@ -1,13 +1,13 @@
 import express, { Request, Response } from "express"
-import { methods as methodsNotifications } from "../models/notifications"
-import { sendNotification } from '../socket/index';
-import { getNotificationCenter } from '../constrollers/Ctrl_Notification'
+import { methods as methodsNotifications } from "../Models/Notifications"
+import { sendNotification } from '../Socket/index';
+import { getNotificationCenter } from '../Constrollers/Ctrl_Notification'
 
-let route = express.Router();
+let router = express.Router();
 
 
 //post add a notification to notifications
-route.post('/chat_members', async (req: Request, res: Response) => {
+router.post('/chat_members', async (req: Request, res: Response) => {
     const { notification_value } = req.body || {};
 
     if (!notification_value) {
@@ -51,7 +51,7 @@ route.post('/chat_members', async (req: Request, res: Response) => {
 
 
 
-route.post("/admins", async (req: Request, res: Response): Promise<void> => {
+router.post("/admins", async (req: Request, res: Response): Promise<void> => {
     try {
         const { selectedValueNotificationAdmin } = req.body;
 
@@ -90,7 +90,7 @@ route.post("/admins", async (req: Request, res: Response): Promise<void> => {
 });
 
 //take all notifications
-route.post('/notificationcenter', async (req: Request, res: Response): Promise<void> => {
+router.post('/notificationcenter', async (req: Request, res: Response): Promise<void> => {
     try {
         const { selectedUserID, page } = req.body as {
             selectedUserID: string;
@@ -101,13 +101,13 @@ route.post('/notificationcenter', async (req: Request, res: Response): Promise<v
 
         res.json({ success: true, result });
     } catch (error) {
-        console.error('Route /notificationcenter error:', error);
+        console.error('router /notificationcenter error:', error);
         res.status(500).json({ success: false });
     }
 });
 
 //for click to delete notification
-route.delete('/notification', async (req: Request, res: Response): Promise<any> => {
+router.delete('/notification', async (req: Request, res: Response): Promise<any> => {
     try {
         const { notificationId } = req.body as { notificationId: number };
 
@@ -119,4 +119,4 @@ route.delete('/notification', async (req: Request, res: Response): Promise<any> 
     }
 });
 
-export { route };
+export { router };

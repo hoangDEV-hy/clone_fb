@@ -1,8 +1,8 @@
-import { methods as methodsNotifications } from '../models/notifications';
-import { sendNotification as sendNotificationBySocket } from '../socket/index';
+import { methods as methodsNotifications } from '../Models/Notifications';
+import { sendNotification as sendNotificationBySocket } from '../Socket/index';
 import { Transaction } from 'sequelize';
 
-import NotificationServerTake from '../types/Type_Notification';
+import NotificationServerTake from '../Types/Notification';
 /* ===== Add notification (DB) ===== */
 export async function addNotification(
     notification_value: NotificationServerTake,

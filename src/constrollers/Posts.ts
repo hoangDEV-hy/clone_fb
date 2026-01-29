@@ -1,11 +1,11 @@
-import { methods as postModel, Posts } from "../models/Posts";
-import throwError from "../helpers/ThrowErrorOfController";
-import { methods as userController } from "../constrollers/User"
+import { methods as postModel, Posts } from "../Models/Post";
+import throwError from "../Helpers/ThrowErrorOfController";
+import { methods as userController } from "./User"
 
-import { User } from "../models/user";
+import { User } from "../Models/user";
 import { WhereOptions } from "sequelize";
-import { user_user } from "../models/user_user";
-import { group_user } from "../models/group_user";
+import { user_user } from "../Models/UserUser";
+import { group_user } from "../Models/GroupUser";
 
 
 export let methods = {

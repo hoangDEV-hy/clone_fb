@@ -34,7 +34,7 @@ const loadHandleConfig_chat = {
                         chatState.chat_id.value = data.chat.data[0].id;
                         socket.emit('defaultLeaveChatRoom', data.chat.data[0].id);
                         socket.emit('defaultJoinChatRoom', data.chat.data[0].id);
-                        loadHandleConfig_chat.handleChatData(data.chat.data[0].contensChat, myChat, otherChat, chatState.receiver_id);
+                        loadHandleConfig_chat.handleChatData(data.chat.data[0].contentsChat, myChat, otherChat, chatState.receiver_id);
                     } else {
                         chatState.chat_id.value = data.chatId;
                     }

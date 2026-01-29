@@ -1,5 +1,5 @@
-import { User, methods as userModel } from "../models/user";
-import throwError from "../helpers/ThrowErrorOfController";
+import { User, methods as userModel } from "../Models/user";
+import throwError from "../Helpers/ThrowErrorOfController";
 
 export const methods = {
     selectUser: async (selectedIdUser: string): Promise<User | null> => {

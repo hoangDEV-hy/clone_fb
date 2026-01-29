@@ -1,8 +1,8 @@
-import { sequelize } from "../configs/sql";
+import { sequelize } from "../Configs/Sql";
 import { DataTypes, Model } from "sequelize";
 import { Transaction } from 'sequelize';
 
-import NotificationServerTake from "../types/Type_Notification";
+import NotificationServerTake from "../Types/Notification";
 export class notifications extends Model {
     declare id: number;
     declare sender_id: string;

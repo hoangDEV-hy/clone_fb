@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { authenticate } from '../../middware/auth'
+import { authenticate } from '../../Middlewares/Auth'
 import express from "express"
-import { methods as pageManagerPostController } from '../../constrollers/page_manager/Post'
-import { transformPostServices } from "../../helpers/TransformerPost";
+import { methods as pageManagerPostController } from '../../Constrollers/PageManagers/Posts'
+import { transformPostServices } from "../../Helpers/TransformerPost";
 
-import ExtendRequest from "../../types/Type_ExtendRequest";
-import throwError from "../../helpers/ThrowErrorOfRouter";
+import ExtendRequest from "../../Types/ExtendRequest";
+import throwError from "../../Helpers/ThrowErrorOfRouter";
 
 
 let route = express.Router();
@@ -43,7 +43,7 @@ route.get('/', authenticate.user_auth, async (req: ExtendRequest, res: Response)
             );
 
         // 5. Render view
-        return res.render('contens/page_manager/Post', {
+        return res.render('Contents/PageManages/Post', {
             groups: selectedGroup.toJSON(),
             Posts: transformer_post,
             isAdmin: isAdmin
@@ -138,7 +138,7 @@ route.get(
             // ===== Transform =====
             const tranAllPosts = transformPostServices.transformPosts(post);
 
-            res.render('contens/page_manager/Post', {
+            res.render('Contents/PageManagers/Post', {
                 Posts: tranAllPosts,
                 group: group.toJSON()
             });
@@ -173,7 +173,7 @@ route.get('/admin/Post/sort', async (req: ExtendRequest, res: Response): Promise
         // ===== Transform =====
         const tranAllPosts = transformPostServices.transformPosts(post);
 
-        return res.render('contens/page_manager/Post', {
+        return res.render('Contents/PageManagers/Post', {
             Posts: tranAllPosts,
             group: group?.toJSON(),
             isAdmin: isAdmin

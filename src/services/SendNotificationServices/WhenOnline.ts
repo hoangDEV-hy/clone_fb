@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
-import { methods as methodsNotifications } from '../../models/notifications';
-import NotificationServerTake from '../../types/Type_Notification';
+import { methods as methodsNotifications } from '../../Models/Notifications';
+import NotificationServerTake from '../../Types/Notification';
 
 export async function sendNotificationWhenOnline(
     ioInstance: Server,

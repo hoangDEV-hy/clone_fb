@@ -1,17 +1,17 @@
 // routes/index.ts
-import { router as login } from './login';
-import { route as page_manager } from './page_manager'
-import { route as Posts } from './Post'
+import { router as login } from './Logins';
+import { router as page_manager } from './PageManagers'
+import { router as Posts } from './Post'
 import cors from 'cors';
-import { route as main } from './main'
-import { router as interactions } from './interactions'
-import { route as upload } from './upload'
-import { route as chat } from './chat'
-import { route as notification } from './notification'
-import { router as follow } from './Router_Follower'
-import { router as mutualFriend } from './Router_MutualFriend'
-import { router as searches } from './search'
-import { router as group } from './Router_Group'
+import { router as main } from './Main'
+import { router as interactions } from './Interactions'
+import { router as upload } from './Uploads'
+import { router as chat } from './Chats'
+import { router as notification } from './Notification'
+import { router as follow } from './Follower'
+import { router as mutualFriend } from './MutualFriend'
+import { router as searches } from './Search'
+import { router as group } from './Group'
 
 import { Express } from 'express';
 
