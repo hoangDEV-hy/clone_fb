@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mất kết nối - 404</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 72px;
+            margin: 0;
+        }
+
+        p {
+            font-size: 24px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <p>Không thể kết nối đến server</p>
+        <p>Vui lòng kiểm tra kết nối mạng hoặc thử lại sau</p>
+        <button onclick="window.location.href='/'">Quay lại trang chủ</button>
+        <button onclick="location.reload()">Thử lại</button>
+    </div>
+</body>
+
+</html>
