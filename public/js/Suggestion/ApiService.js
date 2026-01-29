@@ -30,9 +30,19 @@ const apiService = {
     },
 
     async sendFriendRequest(targetUserId) {
-        return this.fetchWithAuth(`${this.baseURL}/friends/request`, {
+        return this.fetchWithAuth(`${this.baseURL}/page_manager/friends`, {
             method: 'POST',
-            body: JSON.stringify({ targetUserId })
+            body: JSON.stringify({
+                id_userB: targetUserId,
+                notification_value: {
+                    receiver_id: targetUserId,
+                    content: "gửi lời mời kết bạn đến" + targetUserId,
+                    type: "static"
+                }
+            })
         });
     }
 };
+
+// Expose to window for module access
+window.apiService = apiService;

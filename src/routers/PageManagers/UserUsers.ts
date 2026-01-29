@@ -148,9 +148,11 @@ router.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Respons
             res.status(403).send('Không có quyền');
             return;
         }
+        notification_value.selectedSenderId = id_userA;
+        notification_value.content = id_userA + " " + notification_value.content;
 
         // Validation
-        if (!id_userA || !id_userB || notification_value === undefined) {
+        if (!id_userB || notification_value === undefined) {
             res.status(400).json({
                 error: true,
                 message: 'Missing required inputs'

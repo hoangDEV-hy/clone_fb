@@ -248,7 +248,14 @@ const functionInteractions = {
                 });
 
                 if (!response.ok) {
-                    console.error('Failed to save comments');
+                    const errorText = await response.text();
+                    console.error('Failed to save comments:', response.status, errorText);
+                    // Fallback to sendBeacon if fetch fails
+                    const commendBlob = new Blob([JSON.stringify(add_commends)], { type: 'application/json' });
+                    navigator.sendBeacon('/Post/commend', commendBlob);
+                } else {
+                    const result = await response.json();
+                    console.log('Comments saved successfully:', result);
                 }
             } catch (error) {
                 console.error('Error saving comments:', error);

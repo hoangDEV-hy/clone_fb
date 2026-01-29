@@ -1,23 +1,26 @@
 const suggestionActions = {
     async addFriend(userId) {
         try {
-            const result = await apiService.sendFriendRequest(userId);
+            const result = await window.apiService.sendFriendRequest(userId);
 
             if (result.success) {
-                toastService.success('Đã gửi lời mời kết bạn');
-                uiService.updateAddFriendButton(userId);
+                window.toastService.success('Đã gửi lời mời kết bạn');
+                window.uiService.updateAddFriendButton(userId);
             } else {
-                toastService.error('Không thể gửi lời mời kết bạn');
+                window.toastService.error('Không thể gửi lời mời kết bạn');
             }
         } catch (error) {
             console.error('Error adding friend:', error);
-            toastService.error('Đã có lỗi xảy ra');
+            window.toastService.error('Đã có lỗi xảy ra');
         }
     },
 
     removeSuggestion(userId) {
-        uiService.removeSuggestionCard(userId, () => {
-            scrollService.updateButtons();
+        window.uiService.removeSuggestionCard(userId, () => {
+            window.scrollService.updateButtons();
         });
     }
 };
+
+// Expose to window for module access
+window.suggestionActions = suggestionActions;

@@ -18,7 +18,7 @@ const suggestionsController = {
 
     async loadSuggestions() {
         try {
-            const result = await apiService.getSuggestions(10, 'all');
+            const result = await window.apiService.getSuggestions(10, 'all');
 
             if (result.success) {
                 this.suggestions = result.data.users;
@@ -29,29 +29,29 @@ const suggestionsController = {
                     this.loadMutualFriendsCount(user.id);
                 });
 
-                scrollService.updateButtons();
+                window.scrollService.updateButtons();
             } else {
-                uiService.showError(this.container, 'Không thể tải gợi ý kết bạn');
+                window.uiService.showError(this.container, 'Không thể tải gợi ý kết bạn');
             }
         } catch (error) {
             console.error('Error loading suggestions:', error);
-            uiService.showError(this.container, 'Đã có lỗi xảy ra');
+            window.uiService.showError(this.container, 'Đã có lỗi xảy ra');
         }
     },
 
     renderSuggestions() {
         this.container.innerHTML = this.suggestions
-            .map(user => uiService.renderSuggestionCard(user))
+            .map(user => window.uiService.renderSuggestionCard(user))
             .join('');
     },
 
     async loadMutualFriendsCount(targetUserId) {
         try {
-            const result = await apiService.getMutualFriends(targetUserId, 3, 'all');
+            const result = await window.apiService.getMutualFriends(targetUserId, 3, 'all');
 
             if (result.success) {
                 this.mutualFriendsCache[targetUserId] = result.data;
-                uiService.updateMutualFriendsText(
+                window.uiService.updateMutualFriendsText(
                     targetUserId,
                     result.data.total,
                     (userId) => this.showMutualFriends(userId)
@@ -66,24 +66,27 @@ const suggestionsController = {
         const user = this.suggestions.find(u => u.id === targetUserId);
         if (!user) return;
 
-        modalService.setTitle(`Bạn chung với ${user.name}`);
-        modalService.showLoading();
-        modalService.show();
+        window.modalService.setTitle(`Bạn chung với ${user.name}`);
+        window.modalService.showLoading();
+        window.modalService.show();
 
         try {
-            const result = await apiService.getMutualFriends(targetUserId, 50, 'all');
+            const result = await window.apiService.getMutualFriends(targetUserId, 50, 'all');
 
             if (result.success && result.data.users.length > 0) {
                 const html = result.data.users
-                    .map(friend => uiService.renderMutualFriendItem(friend))
+                    .map(friend => window.uiService.renderMutualFriendItem(friend))
                     .join('');
-                modalService.setContent(html);
+                window.modalService.setContent(html);
             } else {
-                modalService.setContent('<div class="loading">Không có bạn chung</div>');
+                window.modalService.setContent('<div class="loading">Không có bạn chung</div>');
             }
         } catch (error) {
             console.error('Error loading mutual friends:', error);
-            modalService.setContent('<div class="error">Không thể tải danh sách bạn chung</div>');
+            window.modalService.setContent('<div class="error">Không thể tải danh sách bạn chung</div>');
         }
     }
 };
+
+// Expose to window for module access
+window.suggestionsController = suggestionsController;

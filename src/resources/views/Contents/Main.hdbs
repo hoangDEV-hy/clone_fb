@@ -4,7 +4,6 @@
         <div class="suggestions-container">
             <div class="suggestions-header">
                 <h2>Những người bạn có thể biết</h2>
-                <a href="#" class="view-all">Xem tất cả</a>
             </div>
 
             <div class="suggestions-wrapper">

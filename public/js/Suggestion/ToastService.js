@@ -59,3 +59,6 @@ const toastService = {
         document.head.appendChild(style);
     }
 };
+
+// Expose to window for module access
+window.toastService = toastService;

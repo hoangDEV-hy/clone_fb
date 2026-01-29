@@ -1,10 +1,18 @@
 import functionInteractions from '/js/interactions/functionInteractions.js'
 
 export default function interactions(change_like, id_user, nameContainIframe, data_load, add_commends, deleted_commends, update_commends) {
+    // Sử dụng object để lưu trữ state và có thể cập nhật được
+    const state = {
+        change_like: change_like || {},
+        add_commends: add_commends || [],
+        deleted_commends: deleted_commends || [],
+        update_commends: update_commends || []
+    };
+
     //change like
     document.querySelectorAll('.like-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', (e) => {
-            change_like = functionInteractions.change_like(e, change_like, id_user);
+            state.change_like = functionInteractions.change_like(e, state.change_like, id_user);
         })
     });
     //send_commends
@@ -19,30 +27,50 @@ export default function interactions(change_like, id_user, nameContainIframe, da
         })
     })
     //handle_dataiframe
-    window.addEventListener('message', e => {
+    window.addEventListener('message', async e => {
         if (!e.data || e.data.type !== 'interactions_an_Post_Data') return;
 
         functionInteractions.handle_dataiframe(
             e,
-            add_commends,
-            deleted_commends,
-            update_commends,
+            state.add_commends,
+            state.deleted_commends,
+            state.update_commends,
             nameContainIframe,
-            change_like,
+            state.change_like,
             id_user,
-            (newData) => {
-                deleted_commends = newData.deleted_commends;
-                update_commends = newData.update_commends;
-                change_like = newData.change_like;
-                add_commends = newData.add_commends;
+            async (newData) => {
+                // Cập nhật state
+                state.deleted_commends = newData.deleted_commends || [];
+                state.update_commends = newData.update_commends || [];
+                state.change_like = newData.change_like || {};
+                state.add_commends = newData.add_commends || [];
+                
+                // Lưu ngay lập tức khi đóng iframe để đảm bảo không mất dữ liệu khi reload
+                await functionInteractions.save_toDb(
+                    state.deleted_commends, 
+                    state.add_commends, 
+                    state.update_commends, 
+                    state.change_like
+                );
+                
+                // Reset các biến sau khi lưu thành công
+                state.add_commends = [];
+                state.deleted_commends = [];
+                state.update_commends = [];
+                state.change_like = {};
             }
         );
 
     });
 
-    //save_toDB
+    //save_toDB - backup khi đóng trang
     window.addEventListener("pagehide", () => {
-        functionInteractions.save_toDb(deleted_commends, add_commends, update_commends, change_like);
+        functionInteractions.save_toDb(
+            state.deleted_commends, 
+            state.add_commends, 
+            state.update_commends, 
+            state.change_like
+        );
     });
 
     //for logic the program

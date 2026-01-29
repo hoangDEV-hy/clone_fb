@@ -56,3 +56,6 @@ const modalService = {
         this.setContent('<div class="loading">Đang tải...</div>');
     }
 };
+
+// Expose to window for module access
+window.modalService = modalService;

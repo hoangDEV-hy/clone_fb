@@ -235,11 +235,13 @@ router.get('/iframe/commend', (req, res) => {
     res.render('Contents/Post/CommendPage', { layout: false }); // view sẵn có HTML + CSS
 });
 
-router.post('/commend', upload.none(), async (req: Request, res: Response): Promise<void> => {
+router.post('/commend', async (req: Request, res: Response): Promise<void> => {
     const transaction = await sequelize.transaction();
     try {
         const comments = Array.isArray(req.body) ? req.body : [req.body];
-
+        comments.forEach(e => {
+            console.log("commend value", e);
+        })
         // Validate
         if (comments.length === 0) {
             res.status(400).json({ error: true, message: 'Missing required inputs' });
@@ -274,14 +276,17 @@ router.post('/commend', upload.none(), async (req: Request, res: Response): Prom
                 );
             }
         });
+
+        // Trả về response thành công
+        res.status(200).json({ success: true, message: 'Comments saved successfully' });
     } catch (error) {
         await transaction.rollback();
         console.error('Error in addComments router:', error);
-        throw error;
+        res.status(500).json({ error: true, message: 'Failed to save comments' });
     }
 })
 
-router.post('/commend/del', upload.none(), async (req: Request, res: Response) => {
+router.post('/commend/del', async (req: Request, res: Response) => {
     const transaction = await sequelize.transaction();
     try {
         const comments = Array.isArray(req.body) ? req.body : [req.body];
@@ -327,7 +332,7 @@ router.post('/commend/del', upload.none(), async (req: Request, res: Response) =
     }
 })
 
-router.post('/commend/up', upload.none(), async (req: Request) => {
+router.post('/commend/up', async (req: Request) => {
     //using the function 
     const updatedCommends = req.body;
     await Promise.all(updatedCommends.map((c: any) =>

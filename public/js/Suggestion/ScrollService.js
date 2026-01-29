@@ -38,3 +38,6 @@ const scrollService = {
         this.nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 1;
     }
 };
+
+// Expose to window for module access
+window.scrollService = scrollService;

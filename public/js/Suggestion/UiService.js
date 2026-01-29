@@ -14,10 +14,10 @@ const uiService = {
                     <div class="card-name">${user.name}</div>
                     <div class="mutual-friends">Đang tải...</div>
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="suggestionActions.addFriend('${user.id}')">
+                        <button class="btn btn-primary" onclick="window.suggestionActions.addFriend('${user.id}')">
                             Thêm bạn bè
                         </button>
-                        <button class="btn btn-secondary" onclick="suggestionActions.removeSuggestion('${user.id}')">
+                        <button class="btn btn-secondary" onclick="window.suggestionActions.removeSuggestion('${user.id}')">
                             Gỡ
                         </button>
                     </div>
@@ -90,3 +90,6 @@ const uiService = {
         container.innerHTML = `<div class="error">${message}</div>`;
     }
 };
+
+// Expose to window for module access
+window.uiService = uiService;

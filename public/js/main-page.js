@@ -367,13 +367,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            toastService.addAnimations();
-            modalService.init();
-            scrollService.init('suggestionsScroll', 'prevBtn', 'nextBtn');
-            await suggestionsController.init(userId);
+            window.toastService.addAnimations();
+            window.modalService.init();
+            window.scrollService.init('suggestionsScroll', 'prevBtn', 'nextBtn');
+            await window.suggestionsController.init(userId);
         }
 
         initFriendSuggestions().catch(console.error);
+    } else {
+        console.warn('Friend suggestions services not loaded. Check if all suggestion scripts are loaded.');
     }
 }
 );

@@ -37,6 +37,8 @@ export class MutualFriendsService {
                 f.id_userA === userId ? f.id_userB : f.id_userA
             )
         );
+        console.log("currentFriendIds", currentFriendIds)
+
 
         const [friendsOfFriends, groupMembers, followings] = await Promise.all([
             this.getFriendsOfFriends(userId, currentFriendIds),
@@ -89,7 +91,7 @@ export class MutualFriendsService {
         userId: string,
         currentFriendIds: Set<string>
     ): Promise<string[]> {
-        const userFriends = await methodsUserUser.selectFriends({ id_userA: userId });
+        const userFriends = await methodsUserUser.selectFriendsDone(userId);
 
         const friendIds = userFriends.map(f =>
             f.id_userA === userId ? f.id_userB : f.id_userA
@@ -99,7 +101,7 @@ export class MutualFriendsService {
 
         // Lấy bạn của từng người bạn
         const friendsOfFriendsPromises = friendIds.map(friendId =>
-            methodsUserUser.selectFriends({ id_userA: friendId })
+            methodsUserUser.selectFriendsDone(friendId)
         );
 
         const friendsOfFriendsResults = await Promise.all(friendsOfFriendsPromises);
