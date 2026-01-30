@@ -1,7 +1,7 @@
 import { methods as postController } from '../../Constrollers/Posts'
 import transformPosts from './TransformPosts'
 import { methods as followerMethods } from '../../Models/Follower'
-import CacheManager from './ReloadTimingControl'
+import CacheManager, { CacheRegistry } from './ReloadTimingControl'
 
 import { WhereOptions, Op } from 'sequelize';
 export class PostService {
@@ -11,7 +11,8 @@ export class PostService {
      */
     private feedCache: CacheManager;
     constructor() {
-        this.feedCache = new CacheManager()
+        this.feedCache = new CacheManager();
+        CacheRegistry.register(this.feedCache); // Đăng ký cache vào registry
     }
     private calculateEngagementScore(post: any): number {
         const now = Date.now();

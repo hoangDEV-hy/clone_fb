@@ -52,18 +52,7 @@
             </div>
         </div>
 
-        <!-- Modal hiển thị bạn chung -->
-        <div class="mutual-friends-modal" id="mutualFriendsModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitle">Bạn chung</h3>
-                    <button class="close-modal" id="closeModal">✕</button>
-                </div>
-                <div class="modal-body" id="modalBody">
-                    <!-- Nội dung bạn chung sẽ được load ở đây -->
-                </div>
-            </div>
-        </div>
+        
         <div id="think">
             <textarea placeholder="Bạn đang nghĩ gì?"></textarea>
             <a href="/Posts">Tạo tin</a>

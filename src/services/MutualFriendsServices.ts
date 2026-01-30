@@ -1,4 +1,4 @@
-import CacheManager from "./FeedServices/ReloadTimingControl";
+import CacheManager, { CacheRegistry } from "./FeedServices/ReloadTimingControl";
 import { methods as methodsUserUser } from "../Models/UserUser";
 import { methods as methodsGroupUser } from "../Models/GroupUser";
 import { methods as methodsFollower } from "../Models/Follower";
@@ -12,6 +12,7 @@ export class MutualFriendsService {
 
     constructor() {
         this.mutualFriends = new CacheManager();
+        CacheRegistry.register(this.mutualFriends); // Đăng ký cache vào registry
     }
 
     /**
@@ -263,13 +264,14 @@ export class MutualFriendsService {
      */
     async invalidateCache(userId: string, targetUserId?: string): Promise<void> {
         if (targetUserId) {
-            this.mutualFriends.clearPattern(`suggested_friends:${userId}`);
-            this.mutualFriends.clearPattern(`suggested_friends:${targetUserId}`);
-            this.mutualFriends.clearPattern(`mutual_with:${userId}:${targetUserId}`);
-            this.mutualFriends.clearPattern(`mutual_with:${targetUserId}:${userId}`);
+            // Sử dụng CacheRegistry để clear pattern trên tất cả caches
+            CacheRegistry.clearPattern(`suggested_friends:${userId}`);
+            CacheRegistry.clearPattern(`suggested_friends:${targetUserId}`);
+            CacheRegistry.clearPattern(`mutual_with:${userId}:${targetUserId}`);
+            CacheRegistry.clearPattern(`mutual_with:${targetUserId}:${userId}`);
         } else {
-            this.mutualFriends.clearPattern(`suggested_friends:${userId}`);
-            this.mutualFriends.clearPattern(`mutual_with:${userId}`);
+            CacheRegistry.clearPattern(`suggested_friends:${userId}`);
+            CacheRegistry.clearPattern(`mutual_with:${userId}`);
         }
     }
 }

@@ -48,5 +48,50 @@ class CacheManager {
     }
 }
 
+// Cache Registry để quản lý nhiều cache instances
+class CacheRegistry {
+    private static caches: Set<CacheManager> = new Set();
+    
+    /**
+     * Đăng ký cache instance vào registry
+     */
+    static register(cache: CacheManager): void {
+        this.caches.add(cache);
+    }
+    
+    /**
+     * Xóa đăng ký cache instance khỏi registry
+     */
+    static unregister(cache: CacheManager): void {
+        this.caches.delete(cache);
+    }
+    
+    /**
+     * Clear pattern trên tất cả registered caches
+     */
+    static clearPattern(pattern: string): void {
+        console.log(`Clearing pattern "${pattern}" across ${this.caches.size} cache instances`);
+        for (const cache of this.caches) {
+            cache.clearPattern(pattern);
+        }
+    }
+    
+    /**
+     * Clear tất cả caches
+     */
+    static clearAll(): void {
+        for (const cache of this.caches) {
+            cache.clear();
+        }
+    }
+    
+    /**
+     * Lấy số lượng cache instances đã đăng ký
+     */
+    static getRegisteredCount(): number {
+        return this.caches.size;
+    }
+}
 
 export default CacheManager;
+export { CacheRegistry };

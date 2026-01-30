@@ -1,5 +1,5 @@
 import { PostService } from "./PostService";
-import CacheManager from "./ReloadTimingControl";
+import CacheManager, { CacheRegistry } from "./ReloadTimingControl";
 
 import FeedConfig from "../../Types/FeedConfig";
 import { Posts } from "../../Models/Post";
@@ -10,6 +10,7 @@ export class FeedAggregatorService {
     constructor() {
         this.postService = new PostService();
         this.feedCache = new CacheManager();
+        CacheRegistry.register(this.feedCache); // Đăng ký cache vào registry
     }
 
     async aggregateFeed(config: FeedConfig): Promise<{
@@ -93,6 +94,7 @@ export class FeedAggregatorService {
     }
 
     clearUserCache(userId: string): void {
-        this.feedCache.clearPattern(userId);
+        // Sử dụng CacheRegistry để clear pattern trên tất cả caches
+        CacheRegistry.clearPattern(userId);
     }
 }
