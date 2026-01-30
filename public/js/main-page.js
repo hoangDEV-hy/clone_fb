@@ -271,7 +271,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     menus.forEach(menu => {
         menu.addEventListener('click', (e) => {
-            e.stopPropagation();
+            // Không chặn bubbling đối với post-menu để các handler
+            // document-level (follow-toggle-btn, hide-post-btn, report-post-btn)
+            // vẫn bắt được sự kiện click
+            if (!menu.classList.contains('post-menu')) {
+                e.stopPropagation();
+            }
         });
     });
 
