@@ -1,6 +1,6 @@
 import { notifications } from "../Models/Notifications";
 
-import { sequelize } from '../Configs/Sql'; // chỉnh path
+import { sequelize } from '../Configs/Sql';
 import { methods as followerMethods } from '../Models/Follower';
 import { addNotification, sendNotification } from '../Services/FollowerService';
 
