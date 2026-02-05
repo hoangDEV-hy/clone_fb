@@ -1,4 +1,4 @@
-import { chat } from "../../Models/Chats/Chat";
+import { chat, methods as chatModel } from "../../Models/Chats/Chat";
 import { contentsChat } from "../../Models/Chats/ContentsChat"
 import { Op } from "sequelize";
 import { config_chatFunc } from "../../Models/Configs/ConfigsChat";
@@ -19,19 +19,7 @@ export interface create_chat {
     chatId: number
 }
 export async function select_chats(sender_id: string, receiver_id: string): Promise<create_chat | select_chatsType[]> {
-    let chatResult: chat[] = await chat.findAll({
-        where: {
-            [Op.or]: [
-                { [Op.and]: [{ sender_id }, { receiver_id }] },
-                { [Op.and]: [{ sender_id: receiver_id }, { receiver_id: sender_id }] }
-            ]
-        },
-        include: {
-            model: contentsChat,
-            required: false,//left-join
-            as: "contentsChat"
-        }
-    })
+    let chatResult: chat[] = await chatModel.selectedChatsContentsWithSendAndReceive(sender_id, receiver_id);
     if (chatResult.length === 0) {
         const newChat = await chat.create({ receiver_id: receiver_id, sender_id: sender_id });
         return { created: true, chatId: newChat.id };
