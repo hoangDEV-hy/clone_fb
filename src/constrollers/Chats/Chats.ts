@@ -21,7 +21,7 @@ export interface create_chat {
 export async function select_chats(sender_id: string, receiver_id: string): Promise<create_chat | select_chatsType[]> {
     let chatResult: chat[] = await chatModel.selectedChatsContentsWithSendAndReceive(sender_id, receiver_id);
     if (chatResult.length === 0) {
-        const newChat = await chat.create({ receiver_id: receiver_id, sender_id: sender_id });
+        const newChat = await chatModel.createChat(sender_id, receiver_id);
         return { created: true, chatId: newChat.id };
     }
     // return [chatInstance as unknown as select_chatsType, created as unknown as select_chatsType]

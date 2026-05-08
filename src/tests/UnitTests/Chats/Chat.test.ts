@@ -1,10 +1,8 @@
-import { methods as chatModel } from ""
-import { methods as chatController } from ""
-import { methods as contentsChatModel } from ""
-import { methods as configChatModel } from ""
+import { methods as chatModel } from "../../../Models/Chats/Chat"
+import { config_chatFunc as configChatModel } from "../../../Models/Configs/ConfigsChat"
 
-import { contentsChat } from '../../Models/contentsChat';
-import * as chatController from '../../Controllers/chatController';
+import { contentsChat } from '../../../Models/Chats/ContentsChat';
+import * as chatController from '../../../Constrollers/Chats/Chats';
 
 jest.mock('../../Models/contentsChat', () => ({
     contentsChat: {
@@ -18,8 +16,28 @@ jest.mock('../../Models/contentsChat', () => ({
 
 describe("chatController lay danh sach", () => {
     //input dung
-    it("selected susscesfully", async () => {
+    it("selected successfully", async () => {
         (chatModel.selectedChatsContentsWithSendAndReceive as jest.Mock).mockResolvedValue([
+            {
+                toJson: () => ({
+                    id: 1,
+                    sender_id: "user 1",
+                    receiver_id: "user 2",
+                    admin: null,
+                    contentsChat: [
+                        {
+                            id: 1,
+                            chatID: 1,
+                            content: "abcdefg",
+                            author: "user 2",
+                            type: "text"
+                        }
+                    ]
+                })
+            }
+        ])
+        let value = await chatController.select_chats("user 1", "user 2");
+        expect(value).toEqual(
             {
                 id: 1,
                 sender_id: "user 1",
@@ -35,50 +53,34 @@ describe("chatController lay danh sach", () => {
                     }
                 ]
             }
-        ])
-        let value = await chatController.select_chats("user 1", "user 2");
-        expect(value).toBe(
-            `{id:1,
-        sender_id:"user 1",
-        receiver_id:"user 2",
-        admin:null,
-        contentsChat:[
-            {
-                id:1,
-                chatID:1,
-                content:"abcdefg",
-                author:"user 2",
-                type:"text"
-            }
-        ]}`
         )
-        expect(chatMethods.selectedChatsContentsWithSendAndReceive).toHaveBeenCalled(
-            expect.objectContaining({
-                sender_id: "user 1", receiver_id: "user 2"
-            })
-        )
+        expect(chatModel.selectedChatsContentsWithSendAndReceive)
+            .toHaveBeenCalledWith("user 1", "user 2");
     });
 
-    it("create successfull", async () => {
-        (chatModel.createChat as jest.Mock).mockResolvedValue(
-            {
-                id: 1,
-                sender_id: "user 1",
-                receiver_id: "user 2",
-                admin: null
-            }
+    it("create successfully", async () => {
+        (chatModel.selectedChatsContentsWithSendAndReceive as jest.Mock).mockResolvedValue(
+            []
         )
-        let vaule = await chatController.select_chats("user 1", "user 2");
+            (chatModel.createChat as jest.Mock).mockResolvedValue(
+                {
+                    toJson: () => ({
+                        id: 1,
+                        sender_id: "user 1",
+                        receiver_id: "user 2",
+                        admin: null
+                    })
+                }
+            )
+        let value = await chatController.select_chats("user 1", "user 2");
         expect(value).toEqual({
             created: true,
             chatId: 1
         })
-        expect(chatModel.createChat).toHaveBeenCalled(
-            expect.objectContaining({
-                sender_id: "user 1", receiver_id: "user 2"
-            })
-        )
+        expect(chatModel.createChat)
+            .toHaveBeenCalledWith("user 1", "user 2");
     })
+
     //throw error: input sai( input không có trong db, input sai định dạng)
     it("throw error selected", async () => {
         (chatModel.selectedChatsContentsWithSendAndReceive as jest.Mock).mockResolvedValue(
@@ -89,6 +91,17 @@ describe("chatController lay danh sach", () => {
             error
         })
     })
+    it("throw error selected", async () => {
+
+        const error = new Error("DB error");
+
+        (chatModel.selectedChatsContentsWithSendAndReceive as jest.Mock)
+            .mockRejectedValue(error);
+
+        await expect(
+            chatController.select_chats("user 3", "user 4")
+        ).rejects.toThrow("DB error");
+    });
 
     it("throw error create", async () => {
         (chatModel.createChat as jest.mock).mockResolvedValue(
