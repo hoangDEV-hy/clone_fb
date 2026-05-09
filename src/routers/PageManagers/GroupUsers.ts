@@ -1,13 +1,18 @@
-import express, { Request, Response } from 'express';
+import express, { Response } from 'express';
 import { authenticate } from '../../Middlewares/Auth';
-import { methods as groupController } from '../../Constrollers/PageManagers/GroupUsers';
+import { PageManagerGroupController } from '../../Constrollers/PageManagers/PageManagerGroupController';
 import ExtendRequest from '../../Types/ExtendRequest';
 import throwError from '../../Helpers/ThrowErrorOfRouter';
 import NotificationServerTake from '../../Types/Notification';
 
-let router = express.Router();
+// ============================================================
+// PAGE MANAGER GROUP ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
 
-// Lấy danh sách nhóm đã tham gia (status: 'active')
+const router = express.Router();
+
+// Get joined groups (status: 'active')
 router.get('/joined', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const userId = req.admin!.id;
@@ -16,14 +21,14 @@ router.get('/joined', authenticate.user_auth, async (req: ExtendRequest, res: Re
             return;
         }
 
-        const plainGroups = await groupController.selectGroupsJoined(userId);
+        const plainGroups = await PageManagerGroupController.selectGroupsJoined(userId);
         res.render('Contents/PageManagers/GroupUser', { group: plainGroups });
     } catch (error) {
         throwError(error, res);
     }
 });
 
-// Lấy danh sách nhóm đang chờ duyệt (status: 'pending')
+// Get pending groups (status: 'pending')
 router.get('/pending', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const id = req.admin?.id;
@@ -32,9 +37,8 @@ router.get('/pending', authenticate.user_auth, async (req: ExtendRequest, res: R
             return;
         }
 
-        const plainGroups = await groupController.selectGroupsPending(id);
+        const plainGroups = await PageManagerGroupController.selectGroupsPending(id);
 
-        // Thêm isPending flag
         const groupsWithPending = plainGroups.map(group => ({
             ...group,
             isPending: true
@@ -46,7 +50,7 @@ router.get('/pending', authenticate.user_auth, async (req: ExtendRequest, res: R
     }
 });
 
-// Tạo nhóm mới
+// Create new group
 router.post('/create', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const adminId = req.admin?.id;
@@ -65,7 +69,7 @@ router.post('/create', authenticate.user_auth, async (req: ExtendRequest, res: R
             return;
         }
 
-        await groupController.createGroup(adminId, name, hastag);
+        await PageManagerGroupController.createGroup(adminId, name, hastag);
 
         res.status(201).json({
             success: true,
@@ -91,134 +95,7 @@ router.post('/create', authenticate.user_auth, async (req: ExtendRequest, res: R
     }
 });
 
-// // Gửi yêu cầu tham gia nhóm (từ user)
-// router.post('/join', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
-//     try {
-//         const userId = req.admin?.id;
-//         const {
-//             id_group,
-//             notification_value
-//         } = req.body as {
-//             id_group: number;
-//             notification_value: NotificationServerTake;
-//         };
-
-//         if (!userId) {
-//             res.status(403).send('Không có quyền');
-//             return;
-//         }
-
-//         if (!id_group || notification_value === undefined) {
-//             res.status(400).json({
-//                 error: true,
-//                 message: 'Missing required inputs'
-//             });
-//             return;
-//         }
-
-//         notification_value.selectedSenderId = userId;
-//         notification_value.content = `${userId} ${notification_value.content}`;
-
-//         await groupController.joinGroupRequest(userId, id_group, notification_value);
-
-//         res.status(200).json({
-//             success: true,
-//             message: 'Join request sent successfully'
-//         });
-//     } catch (error) {
-//         console.error('Error in POST /group/join route:', error);
-
-//         if (error instanceof Error) {
-//             if (error.message === 'ALREADY_MEMBER') {
-//                 res.status(400).json({
-//                     error: true,
-//                     message: 'Already a member or request pending'
-//                 });
-//                 return;
-//             }
-//             if (error.message === 'GROUP_NOT_FOUND') {
-//                 res.status(404).json({
-//                     error: true,
-//                     message: 'Group not found'
-//                 });
-//                 return;
-//             }
-//         }
-
-//         res.status(500).json({
-//             error: true,
-//             message: 'Internal server error'
-//         });
-//     }
-// });
-
-// // Chấp nhận yêu cầu tham gia (chỉ admin nhóm)
-// router.put('/accept',
-//     authenticate.user_auth,
-//     groupAuthMiddleware.checkGroupAdmin,
-//     async (req: ExtendRequest, res: Response): Promise<void> => {
-//         try {
-//             const adminId = req.admin?.id;
-//             const {
-//                 id_group,
-//                 id_user,
-//                 notification_value
-//             } = req.body as {
-//                 id_group: number;
-//                 id_user: string;
-//                 notification_value: NotificationServerTake;
-//             };
-
-//             if (!adminId) {
-//                 res.status(403).send('Không có quyền');
-//                 return;
-//             }
-
-//             if (!id_group || !id_user || notification_value === undefined) {
-//                 res.status(400).json({
-//                     error: true,
-//                     message: 'Missing required inputs'
-//                 });
-//                 return;
-//             }
-
-//             notification_value.selectedSenderId = adminId;
-//             notification_value.content = `${adminId} ${notification_value.content}`;
-
-//             await groupController.acceptJoinRequest(adminId, id_group, id_user, notification_value);
-
-//             res.status(200).json({
-//                 success: true,
-//                 message: 'Join request accepted successfully'
-//             });
-//         } catch (error) {
-//             console.error('Error in PUT /group/accept route:', error);
-
-//             if (error instanceof Error) {
-//                 if (error.message === 'NOT_GROUP_ADMIN') {
-//                     res.status(403).json({
-//                         error: true,
-//                         message: 'Only group admin can accept requests'
-//                     });
-//                     return;
-//                 }
-//                 if (error.message === 'REQUEST_NOT_FOUND') {
-//                     res.status(404).json({
-//                         error: true,
-//                         message: 'Join request not found'
-//                     });
-//                     return;
-//                 }
-//             }
-
-//             res.status(500).json({
-//                 error: true,
-//                 message: 'Internal server error'
-//             });
-//         }
-//     });
-
-// Xóa yêu cầu tham gia (admin từ chối hoặc user hủy yêu cầu)
+// Reject join request (admin) or cancel request (user)
 router.delete('/reject', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const currentUserId = req.admin?.id;
@@ -245,7 +122,6 @@ router.delete('/reject', authenticate.user_auth, async (req: ExtendRequest, res:
             return;
         }
 
-        // Kiểm tra quyền: phải là admin (từ session) hoặc chính user đó
         const isAdmin = req.session.admin === true;
         const isSelf = currentUserId === id_user;
 
@@ -260,7 +136,7 @@ router.delete('/reject', authenticate.user_auth, async (req: ExtendRequest, res:
         notification_value.selectedSenderId = currentUserId;
         notification_value.content = `${currentUserId} ${notification_value.content}`;
 
-        await groupController.rejectJoinRequest(currentUserId, id_group, id_user, notification_value);
+        await PageManagerGroupController.rejectJoinRequest(currentUserId, id_group, id_user, notification_value);
 
         res.status(200).json({
             success: true,
@@ -293,7 +169,7 @@ router.delete('/reject', authenticate.user_auth, async (req: ExtendRequest, res:
     }
 });
 
-// Rời nhóm
+// Leave group
 router.delete('/leave', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const userId = req.admin?.id;
@@ -312,7 +188,7 @@ router.delete('/leave', authenticate.user_auth, async (req: ExtendRequest, res: 
             return;
         }
 
-        await groupController.leaveGroup(userId, id_group);
+        await PageManagerGroupController.leaveGroup(userId, id_group);
 
         res.status(200).json({
             success: true,
@@ -345,7 +221,7 @@ router.delete('/leave', authenticate.user_auth, async (req: ExtendRequest, res: 
     }
 });
 
-// Kiểm tra trạng thái thành viên trong nhóm
+// Check membership status
 router.post('/check', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
         const userId = req.admin?.id;
@@ -364,7 +240,7 @@ router.post('/check', authenticate.user_auth, async (req: ExtendRequest, res: Re
             return;
         }
 
-        const result = await groupController.checkMembershipStatus(userId, id_group);
+        const result = await PageManagerGroupController.checkMembershipStatus(userId, id_group);
 
         let data = null;
         if (result.status === 'active') {
@@ -386,5 +262,4 @@ router.post('/check', authenticate.user_auth, async (req: ExtendRequest, res: Re
     }
 });
 
-
-export { router };
+export default router;

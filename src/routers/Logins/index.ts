@@ -1,9 +1,13 @@
 import express from 'express';
-import { methods as loginController } from '../../Constrollers/Login/Logins';
+import { AuthController } from '../../Constrollers/AuthController';
 import { authenticate } from '../../Middlewares/Auth';
 import throwError from '../../Helpers/ThrowErrorOfRouter';
-
 import { Response, Request } from 'express';
+
+// ============================================================
+// AUTH ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
 
 const router = express.Router();
 
@@ -24,14 +28,12 @@ router.get('/logout', authenticate.user_auth, (req: Request, res: Response) => {
         res.clearCookie('token');
         res.redirect('/login');
     });
-
 })
-
 
 router.get('/login/setPass', async (req: Request, res: Response) => {
     try {
         const selectedInputPhone = req.query.phone as string;
-        const result = await loginController.getPass(selectedInputPhone);
+        const result = await AuthController.getPass(selectedInputPhone);
         if (!result) {
             res.send({ error: "Account does not exist." });
             return;
@@ -42,13 +44,13 @@ router.get('/login/setPass', async (req: Request, res: Response) => {
     } catch (err) {
         throwError(err, res);
     }
-
 });
+
 router.post('/login/setPass', async (req: Request, res: Response): Promise<void> => {
     try {
         const { id, password } = req.body;
 
-        const result = await loginController.setPass(id, password);
+        const result = await AuthController.setPass(id, password);
 
         if (result !== 0) {
             res.redirect('/');
@@ -60,14 +62,14 @@ router.post('/login/setPass', async (req: Request, res: Response): Promise<void>
     }
 });
 
-
 router.get('/login/register', (req: Request, res: Response) => {
     res.render('Contents/Logins/DangKi');
 })
+
 router.post('/login/register', async (req: Request, res: Response): Promise<void> => {
     try {
         const { phone, password } = req.body;
-        const selectedUser = await loginController.createUser(phone, password);
+        const selectedUser = await AuthController.createUser(phone, password);
         if (selectedUser) {
             res.redirect('/main')
         } else {
@@ -78,5 +80,4 @@ router.post('/login/register', async (req: Request, res: Response): Promise<void
     }
 })
 
-export { router };
-
+export default router;

@@ -1,7 +1,12 @@
-import { Router, Request, Response } from 'express';
-import { mutualFriendsController } from '../Constrollers/MutualFriends';
+import { Router, Response } from 'express';
+import { MutualFriendsController } from '../Constrollers/MutualFriendsController';
 import { authenticate } from '../Middlewares/Auth';
 import ExtendRequest from '../Types/ExtendRequest';
+
+// ============================================================
+// MUTUAL FRIEND ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
 
 const router = Router();
 
@@ -16,12 +21,12 @@ router.get(
                 throw new Error('Unauthorized. User not authenticated.');
             }
 
-            const limit = mutualFriendsController.validateLimit(req.query.limit);
-            const type = mutualFriendsController.validateType(req.query.type);
+            const limit = MutualFriendsController.validateLimit(req.query.limit);
+            const type = MutualFriendsController.validateType(req.query.type);
             const cursor = req.query.cursor as string | undefined;
             const targetUserId = "";
 
-            const result = await mutualFriendsController.getAllSuggestions({
+            const result = await MutualFriendsController.getAllSuggestions({
                 userId,
                 targetUserId,
                 cursor,
@@ -34,7 +39,6 @@ router.get(
                 data: result,
                 message: 'Suggested friends retrieved successfully.',
             });
-            return;
         } catch (error) {
             console.error('Error in getSuggestedFriends route:', error);
 
@@ -71,18 +75,10 @@ router.get(
             res.status(500).json({
                 success: false,
                 message: 'An error occurred while retrieving suggested friends.',
-                error:
-                    process.env.NODE_ENV === 'development'
-                        ? error instanceof Error
-                            ? "An error occurred while retrieving suggested friends."
-                            : 'Unknown error'
-                        : undefined,
             });
-            return;
         }
     }
 );
-
 
 router.get(
     '/friends',
@@ -95,14 +91,12 @@ router.get(
                 throw new Error('Unauthorized. User not authenticated.');
             }
 
-            const targetUserId = mutualFriendsController.validateTargetUserId(
-                req.query.targetUserId
-            );
-            const limit = mutualFriendsController.validateLimit(req.query.limit);
-            const type = mutualFriendsController.validateType(req.query.type);
+            const targetUserId = MutualFriendsController.validateTargetUserId(req.query.targetUserId);
+            const limit = MutualFriendsController.validateLimit(req.query.limit);
+            const type = MutualFriendsController.validateType(req.query.type);
             const cursor = req.query.cursor as string | undefined;
 
-            const result = await mutualFriendsController.getMutualFriendsWithUser({
+            const result = await MutualFriendsController.getMutualFriendsWithUser({
                 userId,
                 targetUserId,
                 cursor,
@@ -115,7 +109,6 @@ router.get(
                 data: result,
                 message: 'Mutual friends retrieved successfully.',
             });
-            return;
         } catch (error) {
             console.error('Error in getMutualFriends route:', error);
 
@@ -153,24 +146,11 @@ router.get(
             res.status(500).json({
                 success: false,
                 message: 'An error occurred while retrieving mutual friends.',
-                error:
-                    process.env.NODE_ENV === 'development'
-                        ? error instanceof Error
-                            ? "An error occurred while retrieving mutual friends."
-                            : 'Unknown error'
-                        : undefined,
             });
-            return;
         }
     }
 );
 
-
-/**
- * @route   DELETE /api/mutual-friends/cache/:targetUserId
- * @desc    Xóa cache mutual friends của một cặp user cụ thể
- * @access  Private
- */
 router.delete(
     '/cache',
     authenticate.user_auth,
@@ -186,17 +166,12 @@ router.delete(
                 return;
             }
 
-            // const targetUserId = mutualFriendsController.validateTargetUserId(
-            //     req.params.targetUserId
-            // );
-
-            await mutualFriendsController.clearCache(userId);
+            await MutualFriendsController.clearCache(userId);
 
             res.status(200).json({
                 success: true,
                 message: 'Cache invalidated successfully.',
             });
-            return;
         } catch (error) {
             console.error('Error in invalidateCache route:', error);
 
@@ -213,61 +188,9 @@ router.delete(
             res.status(500).json({
                 success: false,
                 message: 'An error occurred while invalidating cache.',
-                error:
-                    process.env.NODE_ENV === 'development'
-                        ? error instanceof Error
-                            ? "An error occurred while invalidating cache."
-                            : 'Unknown error'
-                        : undefined,
             });
-            return;
         }
     }
 );
 
-/**
- * @route   DELETE /api/mutual-friends/cache
- * @desc    Xóa toàn bộ cache mutual friends của user hiện tại
- * @access  Private
- */
-router.delete(
-    '/cache',
-    authenticate.user_auth,
-    async (req: ExtendRequest, res: Response): Promise<void> => {
-        try {
-            const userId = req.admin?.id;
-
-            if (!userId) {
-                res.status(401).json({
-                    success: false,
-                    message: 'Unauthorized. User not authenticated.',
-                });
-                return;
-            }
-
-            await mutualFriendsController.clearCache(userId);
-
-            res.status(200).json({
-                success: true,
-                message: 'All cache invalidated successfully.',
-            });
-            return;
-        } catch (error) {
-            console.error('Error in invalidateAllCache route:', error);
-
-            res.status(500).json({
-                success: false,
-                message: 'An error occurred while invalidating cache.',
-                error:
-                    process.env.NODE_ENV === 'development'
-                        ? error instanceof Error
-                            ? "An error occurred while invalidating cache."
-                            : 'Unknown error'
-                        : undefined,
-            });
-            return;
-        }
-    }
-);
-
-export { router };
+export default router;

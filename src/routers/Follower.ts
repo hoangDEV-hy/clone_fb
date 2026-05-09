@@ -1,9 +1,13 @@
 import express, { Request, Response } from "express";
-import FollowerController from '../Constrollers/Followers';
-
+import { FollowerController } from '../Constrollers/FollowerController';
 import NotificationServerTake from "../Types/Notification";
 
-let router = express.Router();
+// ============================================================
+// FOLLOWER ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
+
+const router = express.Router();
 
 router.get('/followers', async (req: Request, res: Response): Promise<void> => {
     try {
@@ -38,7 +42,6 @@ router.post(
                 notification_value: NotificationServerTake;
             };
 
-            // Missing input
             if (
                 !selectedFollowerID ||
                 !additionedFollowingsID ||
@@ -47,7 +50,6 @@ router.post(
                 throw new Error('MISSING_INPUT');
             }
 
-            // Self follow is not allowed
             if (additionedFollowingsID.includes(selectedFollowerID)) {
                 throw new Error('SELF_FOLLOW_NOT_ALLOWED');
             }
@@ -143,11 +145,8 @@ router.post('/existingfollowing', async (req: Request, res: Response): Promise<v
         });
     } catch (error) {
         console.error('existingfollowing error:', error);
-
-        res.status(500).json({
-            message: 'Lỗi server',
-        });
+        res.status(500).json({ message: 'Lỗi server' });
     }
 });
 
-export { router };
+export default router;

@@ -1,14 +1,20 @@
 import express from "express";
 import { authenticate } from "../Middlewares/Auth";
 import { Response, Request } from "express";
-import { methods as postController } from "../Constrollers/Posts";
-import { methods as groupController } from "../Constrollers/Groups"
+import { PostsController } from "../Constrollers/PostsController";
+import { GroupController } from "../Constrollers/GroupController";
 import throwError from "../Helpers/ThrowErrorOfRouter";
 import { addNotification, sendNotification } from '../Services/FollowerService';
-
-
+import multer from 'multer';
+import NotificationServerTake from "../Types/Notification";
 import ExtendRequest from "../Types/ExtendRequest";
-let router = express.Router();
+
+// ============================================================
+// POST ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
+
+const router = express.Router();
 
 router.get(
     '/',
@@ -22,7 +28,7 @@ router.get(
                 return;
             }
 
-            const user = await postController.selectUser(selectedIdUser);
+            const user = await PostsController.selectUser(selectedIdUser);
             if (!user) {
                 res.status(401).send('Unauthorized');
                 return;
@@ -39,29 +45,22 @@ router.get(
     }
 );
 
-
 router.post('/update', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
-
         const { PostId_curtain } = req.body;
         if (!PostId_curtain) {
-            res.status(400).json({
-                message: 'PostId_curtain is required'
-            });
+            res.status(400).json({ message: 'PostId_curtain is required' });
             return;
         }
-        const post = await postController.selectPostWithUserAndGroup(PostId_curtain);
+        const post = await PostsController.selectPostWithUserAndGroup(PostId_curtain);
         if (!post) {
-            res.status(404).json({
-                message: 'Post not found'
-            });
+            res.status(404).json({ message: 'Post not found' });
             return;
         }
         let contens = JSON.parse(post!.contens);
 
         contens = {
             text: contens.text,
-            //image: JSON.stringify(contens.image) // giữ nguyên object/array thay vì stringify
             image: contens.image
         };
         post!.contens = contens;
@@ -75,19 +74,14 @@ router.post('/update', authenticate.user_auth, async (req: Request, res: Respons
 
 router.post('/delete', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
-
         const { PostId_curtain } = req.body;
         if (!PostId_curtain) {
-            res.status(400).json({
-                message: 'PostId_curtain is required'
-            });
+            res.status(400).json({ message: 'PostId_curtain is required' });
             return;
         }
-        const result = await postController.delPost(PostId_curtain);
+        const result = await PostsController.delPost(PostId_curtain);
         if (result === 0) {
-            res.status(500).json({
-                message: 'Post not found'
-            });
+            res.status(500).json({ message: 'Post not found' });
             return;
         }
         res.redirect('/main');
@@ -96,10 +90,7 @@ router.post('/delete', authenticate.user_auth, async (req: Request, res: Respons
     }
 })
 
-
-import multer from 'multer';
-import NotificationServerTake from "../Types/Notification";
-let uploadfile = multer({ storage: multer.memoryStorage() });
+const uploadfile = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload', uploadfile.single('file'), (req: any, res) => {
     const mimeType = req.file.mimetype;
@@ -111,13 +102,10 @@ router.post('/upload', uploadfile.single('file'), (req: any, res) => {
     });
 });
 
-
-
-
 let uploadForm = multer({
     limits: {
-        fieldSize: 10 * 1024 * 1024, // 10MB giới hạn cho mỗi field text
-        fileSize: 20 * 1024 * 1024   // 20MB giới hạn cho mỗi file
+        fieldSize: 10 * 1024 * 1024,
+        fileSize: 20 * 1024 * 1024
     }
 });
 
@@ -134,12 +122,12 @@ router.post('/save', authenticate.user_auth, uploadForm.none(), async (req: Exte
         let { PostId_original, PostId_curtain, groupId, content, scope, think } = req.body;
         if (PostId_original === '') PostId_original = null;
         if (groupId === "") groupId = null;
-        if (!PostId_curtain) await postController.create(PostId_original, selectedUserId, groupId, content, scope, think);
+        if (!PostId_curtain) await PostsController.create(PostId_original, selectedUserId, groupId, content, scope, think);
         else {
-            await postController.update(PostId_original, PostId_curtain, content, scope, think);
+            await PostsController.update(PostId_original, PostId_curtain, content, scope, think);
         }
         if (scope === "group") {
-            const idAdminGroup = await groupController.getIdAdmin(groupId);
+            const idAdminGroup = await GroupController.getIdAdmin(groupId);
             if (!idAdminGroup) {
                 throw new Error("dữ liệu group không hợp lệ");
             }
@@ -165,4 +153,5 @@ router.post('/save', authenticate.user_auth, uploadForm.none(), async (req: Exte
         throwError(error, res);
     }
 });
-export { router };
+
+export default router;

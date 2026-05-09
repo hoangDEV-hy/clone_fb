@@ -1,13 +1,16 @@
-import express, { Request, Response } from "express";
+import express, { Response } from 'express';
 import { authenticate } from '../../Middlewares/Auth';
-import { methods as friendController } from '../../Constrollers/PageManagers/UserUsers'
-
+import { FriendController } from '../../Constrollers/PageManagers/FriendController';
 import ExtendRequest from "../../Types/ExtendRequest";
 import throwError from "../../Helpers/ThrowErrorOfRouter";
 import NotificationServerTake from "../../Types/Notification";
 
+// ============================================================
+// FRIEND ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
 
-let router = express.Router();
+const router = express.Router();
 
 router.get('/joined', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
@@ -16,7 +19,7 @@ router.get('/joined', authenticate.user_auth, async (req: ExtendRequest, res: Re
             res.status(403).send('Không có quyền');
             return;
         }
-        const plainFriend = await friendController.selectFriendsDone(id);
+        const plainFriend = await FriendController.selectFriendsDone(id);
         res.render('Contents/PageManagers/UserUser', { group: plainFriend });
     } catch (error) {
         throwError(error, res);
@@ -30,8 +33,7 @@ router.get('/waited', authenticate.user_auth, async (req: ExtendRequest, res: Re
             res.status(403).send('Không có quyền');
             return;
         }
-        const plainFriend = await friendController.selectFriendsRequest(id);
-        // Thêm isPending vào mỗi friend object
+        const plainFriend = await FriendController.selectFriendsRequest(id);
         const friendsWithPending = plainFriend.map(friend => ({
             ...friend,
             isPending: true
@@ -43,96 +45,83 @@ router.get('/waited', authenticate.user_auth, async (req: ExtendRequest, res: Re
     }
 });
 
-router.delete(
-    '/joined',
-    authenticate.user_auth,
-    async (req: ExtendRequest, res: Response): Promise<void> => {
-        try {
-            const id = req.admin?.id;
-            const { id_userB } = req.body as { id_userB: string };
+router.delete('/joined', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
+    try {
+        const id = req.admin?.id;
+        const { id_userB } = req.body as { id_userB: string };
 
-            if (!id) {
-                res.status(403).send('Không có quyền');
-                return;
-            }
+        if (!id) {
+            res.status(403).send('Không có quyền');
+            return;
+        }
 
-            const result = await friendController.delFriend(id, id_userB);
+        const result = await FriendController.delFriend(id, id_userB);
 
-            if (!result) {
-                res.status(500).json({ error: 'error server' }); // Đổi thành json
-                return;
-            }
+        if (!result) {
+            res.status(500).json({ error: 'error server' });
+            return;
+        }
 
-            // Trả về success response thay vì redirect
-            res.status(200).json({
-                success: true,
-                message: 'Xoá bạn bè thành công'
+        res.status(200).json({
+            success: true,
+            message: 'Xoá bạn bè thành công'
+        });
+    } catch (err) {
+        throwError(err, res);
+    }
+});
+
+router.delete('/waited', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
+    try {
+        const {
+            id_userB,
+            notification_value,
+        } = req.body as {
+            id_userB: string;
+            notification_value: NotificationServerTake;
+        };
+        const id_userA = req.admin?.id;
+        if (!id_userA) {
+            res.status(403).send('Không có quyền');
+            return;
+        }
+
+        if (!id_userA || !id_userB || notification_value === undefined) {
+            res.status(400).json({
+                error: true,
+                message: 'Missing required inputs',
             });
             return;
-        } catch (err) {
-            throwError(err, res);
         }
-    }
-);
 
-router.delete(
-    '/waited', authenticate.user_auth,
-    async (req: ExtendRequest, res: Response): Promise<void> => {
-        try {
-            const {
-                id_userB,
-                notification_value,
-            } = req.body as {
-                id_userB: string;
-                notification_value: NotificationServerTake;
-            };
-            const id_userA = req.admin?.id;
-            if (!id_userA) {
-                res.status(403).send('Không có quyền');
-                return;
-            }
+        notification_value.selectedSenderId = id_userA;
+        notification_value.content = `${id_userA} ${notification_value.content}`;
 
-            if (!id_userA || !id_userB || notification_value === undefined) {
-                res.status(400).json({
+        await FriendController.deleteFriendRequest(id_userA, id_userB, notification_value);
+
+        res.status(200).json({
+            success: true,
+            message: 'Friend deleted successfully',
+        });
+    } catch (error: unknown) {
+        console.error('Error in DELETE /friends route:', error);
+
+        if (error instanceof Error) {
+            if (error.message === 'FRIENDSHIP_NOT_FOUND') {
+                res.status(404).json({
                     error: true,
-                    message: 'Missing required inputs',
+                    message: 'Friendship not found',
                 });
                 return;
             }
-
-            notification_value.selectedSenderId = id_userA;
-            notification_value.content = `${id_userA} ${notification_value.content}`;
-
-            await friendController.deleteFriendRequest(
-                id_userA,
-                id_userB,
-                notification_value
-            );
-
-            res.status(200).json({
-                success: true,
-                message: 'Friend deleted successfully',
-            });
-        } catch (error: unknown) {
-            console.error('Error in DELETE /friends route:', error);
-
-            if (error instanceof Error) {
-                if (error.message === 'FRIENDSHIP_NOT_FOUND') {
-                    res.status(404).json({
-                        error: true,
-                        message: 'Friendship not found',
-                    });
-                    return;
-                }
-            }
-
-            res.status(500).json({
-                error: true,
-                message: 'Internal server error',
-            });
         }
+
+        res.status(500).json({
+            error: true,
+            message: 'Internal server error',
+        });
     }
-);
+});
 
 router.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Response): Promise<void> => {
     try {
@@ -151,7 +140,6 @@ router.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Respons
         notification_value.selectedSenderId = id_userA;
         notification_value.content = id_userA + " " + notification_value.content;
 
-        // Validation
         if (!id_userB || notification_value === undefined) {
             res.status(400).json({
                 error: true,
@@ -160,7 +148,6 @@ router.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Respons
             return;
         }
 
-        // Không cho phép kết bạn với chính mình
         if (id_userA === id_userB) {
             res.status(400).json({
                 error: true,
@@ -170,11 +157,7 @@ router.post('/', authenticate.user_auth, async (req: ExtendRequest, res: Respons
         }
         notification_value.selectedSenderId = id_userA;
         notification_value.content = `${id_userA} ${notification_value.content}`;
-        await friendController.sendFriendRequest(
-            id_userA,
-            id_userB,
-            notification_value
-        );
+        await FriendController.sendFriendRequest(id_userA, id_userB, notification_value);
 
         res.status(200).json({
             success: true,
@@ -224,11 +207,7 @@ router.put('/accept', authenticate.user_auth, async (req: ExtendRequest, res: Re
         notification_value.selectedSenderId = id_userA;
         notification_value.content = `${id_userA} ${notification_value.content}`;
 
-        await friendController.acceptFriendRequest(
-            id_userA,
-            id_userB,
-            notification_value
-        );
+        await FriendController.acceptFriendRequest(id_userA, id_userB, notification_value);
 
         res.status(200).json({
             success: true,
@@ -271,10 +250,7 @@ router.post('/check', authenticate.user_auth, async (req: ExtendRequest, res: Re
             return;
         }
 
-        let result = await friendController.checkFriendship(
-            id_userA,
-            id_userB
-        );
+        const result = await FriendController.checkFriendship(id_userA, id_userB);
         let data = null;
         if (result.status === 'done') data = { isFriend: true }
         else if (result.status === 'pending') data = { isPending: true }
@@ -292,6 +268,4 @@ router.post('/check', authenticate.user_auth, async (req: ExtendRequest, res: Re
     }
 });
 
-
-
-export { router }
+export default router;

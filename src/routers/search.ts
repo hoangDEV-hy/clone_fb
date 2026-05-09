@@ -1,12 +1,12 @@
-import express, { Request, Response, NextFunction, Router } from "express";
-import { chat_member } from "../Models/Chats/ChatMember";
-import { user_user } from "../Models/UserUser";
-import { Op } from "sequelize";
-import { User } from "../Models/user";
-import { methods as groupController } from "../Constrollers/Groups";
-import { methods as userController } from "../Constrollers/User"
+import express, { Request, Response, NextFunction } from "express";
+import { SearchController } from "../Constrollers/SearchController";
 
-const router: Router = express.Router();
+// ============================================================
+// SEARCH ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
+
+const router = express.Router();
 
 router.get('/chatmember', async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -14,172 +14,28 @@ router.get('/chatmember', async (req: Request, res: Response, next: NextFunction
         const idUser = req.query.idUser as string;
         const idChatRoom = Number(req.query.chat_roomId);
 
-
-        // ============================
-        // 1. LẤY DANH SÁCH CHAT MEMBERS
-        // ============================
-        const chatMembers = await chat_member.findAll({
-            where: { chat_id: idChatRoom },
-            include: [
-                {
-                    model: User,
-                    as: 'users',
-                    required: true,
-                    attributes: ['id', 'name', 'avatar'],
-                    where: {
-                        name: { [Op.like]: `${name}%` }
-                    }
-                }
-            ]
-        });
-
-        const existingUserIds = chatMembers.map(m => { return m.idUser });
-
-        // ============================
-        // 2. LẤY DANH SÁCH BẠN BÈ
-        // ============================
-        const friends = await user_user.findAll({
-            where: {
-                status: 'done',
-                [Op.or]: [
-                    { id_userA: idUser },
-                    { id_userB: idUser }
-                ]
-            },
-            attributes: ['id_userB', 'id_userA'],
-            include: [
-                {
-                    model: User,
-                    as: 'userA',
-                    attributes: ['id', 'name', 'avatar']
-                },
-                {
-                    model: User,
-                    as: 'userB',
-                    attributes: ['id', 'name', 'avatar']
-                }
-            ]
-        });
-
-        // ============================
-        // 3. LỌC DANH SÁCH BẠN THEO NAME GIỐNG TÌM KIẾM
-        // ============================
-        const searchedFriends = friends
-            .map((f: any) => {
-                // nếu userA = mình → bạn là userB
-                if (f.id_userA === idUser) return f.userB;
-                // nếu userB = mình → bạn là userA
-                return f.userA;
-            })
-            .filter(friend =>
-                friend.name.toLowerCase().startsWith(name.toLowerCase())
-            );
-
-
-        // ============================
-        // 4. LOẠI BỎ BẠN ĐÃ CÓ TRONG CHAT
-        // ============================
-        const filteredFriendList = searchedFriends.filter(friend =>
-            !existingUserIds.includes(friend.id)
-        );
+        const result = await SearchController.searchChatMembersAndFriends(name, idUser, idChatRoom);
 
         res.json({
-            chatMembers,
-            friendList: filteredFriendList
+            chatMembers: result.chatMembers,
+            friendList: result.friendList
         });
-
     } catch (error) {
         console.error(error);
         next(error);
     }
 });
-// router.get('/profileUser', async (req: Request, res: Response) => {
-//     const targetId = req.query.userId;
-//     let config_interface = false;
 
-//     const user = await User.findOne({ where: { id: targetId }, attributes: ['name', 'avatar', 'thumbnail'] });
-
-//     let posts = await Posts.findAll({
-//         where: { user_id: targetId, scope: 'public' },
-//         include: [
-//             { model: Group, as: 'groups', required: false },
-//             { model: User, as: 'users', required: false }
-//         ]
-//     })
-//     posts = posts.map((post: any) => {
-//         const obj = post.toJSON ? post.toJSON() : post;
-
-//         try {
-//             let parsed = JSON.parse(obj.contens);
-
-//             // Nếu parsed là string → parse lại
-//             if (typeof parsed === "string") {
-//                 parsed = JSON.parse(parsed);
-//             }
-
-//             // Lấy image
-//             let imageValue = parsed?.image;
-
-//             // Nếu image là object → stringify
-//             if (imageValue && typeof imageValue === "object") {
-//                 imageValue = JSON.stringify(imageValue);
-//             }
-
-//             obj.contens = {
-//                 text: parsed?.text ?? "",
-//                 image: imageValue ?? ""
-//             };
-//         } catch (err) {
-//             // JSON lỗi → fallback
-//             obj.contens = { text: "", image: "" };
-//         }
-
-//         return obj;
-//     });
-
-//     return res.render('contens/page_manager/user', {
-//         Posts: posts,
-//         user: user?.toJSON(),
-//         config_interface
-//     });
-// })
 router.get('/get', async (req: Request, res: Response): Promise<void> => {
     const selectedName = req.query.name as string;
 
-    const selectedGroups = await groupController.selectGroupsWithName(selectedName) || [];
-    const selectedUsers = await userController.selectUsersWithName(selectedName) || [];
+    const result = await SearchController.searchGroupsAndUsers(selectedName);
 
-    const groupsWithType = selectedGroups.map(g => ({
-        ...(g.toJSON ? g.toJSON() : g),
-        type: 'group'
-    }));
-
-    const usersWithType = selectedUsers.map(u => ({
-        ...(u.toJSON ? u.toJSON() : u),
-        type: 'user'
-    }))
-    // Gộp 2 mảng
-    const merged = [...groupsWithType, ...usersWithType];
-
-    // Lọc trùng theo name
-    const uniqueList = Array.from(
-        new Map(merged.map(item => [item.name, item])).values()
-    );
-
-    // Convert sang JSON thuần (Sequelize safe)
-    const result = uniqueList.map(item =>
-        item.toJSON ? item.toJSON() : item
-    );
-
-    res.send({
-        list: result
-    });
+    res.send({ list: result });
 });
 
 router.get('/', (req: Request, res: Response) => {
     res.render('Contents/Search');
-})
+});
 
-
-
-export { router };
+export default router;

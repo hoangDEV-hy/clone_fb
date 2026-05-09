@@ -1,12 +1,14 @@
 import express, { Request, Response } from "express"
-import { methods as methodsNotifications } from "../Models/Notifications"
+import { NotificationController } from '../Constrollers/NotificationController';
 import { sendNotification } from '../Socket/index';
-import { getNotificationCenter } from '../Constrollers/Ctrl_Notification'
 
-let router = express.Router();
+// ============================================================
+// NOTIFICATION ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
 
+const router = express.Router();
 
-//post add a notification to notifications
 router.post('/chat_members', async (req: Request, res: Response) => {
     const { notification_value } = req.body || {};
 
@@ -18,8 +20,7 @@ router.post('/chat_members', async (req: Request, res: Response) => {
     }
 
     try {
-        // Tạo notification trong DB
-        const result = await methodsNotifications.create(notification_value);
+        const result = await NotificationController.create(notification_value);
 
         const notificationValue = {
             id: result.id,
@@ -29,7 +30,6 @@ router.post('/chat_members', async (req: Request, res: Response) => {
             content: notification_value.content
         };
 
-        // Gửi realtime notification
         try {
             //sendNotification(notificationValue);
         } catch (err) {
@@ -46,10 +46,6 @@ router.post('/chat_members', async (req: Request, res: Response) => {
         });
     }
 });
-//bat req( gui thong bao cho admin)-dung sendNotification gui lai cho admin
-
-
-
 
 router.post("/admins", async (req: Request, res: Response): Promise<void> => {
     try {
@@ -60,10 +56,7 @@ router.post("/admins", async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Create notification in database
-        const result = await methodsNotifications.create(
-            selectedValueNotificationAdmin
-        );
+        const result = await NotificationController.create(selectedValueNotificationAdmin);
 
         const notificationValue = {
             id: result.id,
@@ -73,7 +66,6 @@ router.post("/admins", async (req: Request, res: Response): Promise<void> => {
             content: selectedValueNotificationAdmin.content
         }
 
-        // Send realtime notification
         try {
             //sendNotification(notificationValue);
         } catch (err) {
@@ -89,7 +81,6 @@ router.post("/admins", async (req: Request, res: Response): Promise<void> => {
     }
 });
 
-//take all notifications
 router.post('/notificationcenter', async (req: Request, res: Response): Promise<void> => {
     try {
         const { selectedUserID, page } = req.body as {
@@ -97,7 +88,7 @@ router.post('/notificationcenter', async (req: Request, res: Response): Promise<
             page: number;
         };
 
-        const result = await getNotificationCenter(selectedUserID, page);
+        const result = await NotificationController.getNotificationCenter(selectedUserID, page);
 
         res.json({ success: true, result });
     } catch (error) {
@@ -106,12 +97,11 @@ router.post('/notificationcenter', async (req: Request, res: Response): Promise<
     }
 });
 
-//for click to delete notification
 router.delete('/notification', async (req: Request, res: Response): Promise<any> => {
     try {
         const { notificationId } = req.body as { notificationId: number };
 
-        const result = await methodsNotifications.delete(notificationId);
+        const result = await NotificationController.delete(notificationId);
 
         return res.json({ success: true, result });
     } catch (error) {
@@ -119,4 +109,4 @@ router.delete('/notification', async (req: Request, res: Response): Promise<any>
     }
 });
 
-export { router };
+export default router;

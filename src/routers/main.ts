@@ -1,22 +1,18 @@
 import express, { Router, Request, Response } from 'express';
 import { authenticate } from '../Middlewares/Auth';
-import { FeedController } from '../Constrollers/Feeds';
+import { FeedController } from '../Constrollers/FeedController';
+
+// ============================================================
+// FEED ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
 
 const router: Router = express.Router();
-const feedController = new FeedController();
 
-/**
- * @router   GET /feed
- * @desc    Get user feed with view rendering
- * @access  Private
- */
-
-//cursor: respone đầu trả về nextcursor, đưa nextcursor vào req thứ 2 thì sẽ lấy dc các bản ghi phía sau bản ghi cuối cùng
 router.get('/', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).admin?.id;
 
-        // Check authentication
         if (!userId) {
             res.status(401).json({
                 success: false,
@@ -25,10 +21,9 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
             return;
         }
 
-        // Validate and parse parameters
         let limit: number;
         try {
-            limit = feedController.validateLimit(req.query.limit);
+            limit = FeedController.validateLimit(req.query.limit);
         } catch (error: any) {
             res.status(400).json({
                 success: false,
@@ -39,25 +34,20 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
 
         const cursor = req.query.cursor as string;
 
-        // Get user data
-        const user = await feedController.getUser(userId);
+        const user = await FeedController.getUser(userId);
         if (!user) {
-            res.status(400).json({
-                success: false
-            });
+            res.status(400).json({ success: false });
             return;
         }
-        // Get feed posts
-        const feedResult = await feedController.getFeed({
+
+        const feedResult = await FeedController.getFeed({
             userId: user.id,
             limit,
             cursor
         });
 
-        // Get friend list
-        const friendList = await feedController.getFriendList(userId);
+        const friendList = await FeedController.getFriendList(userId);
 
-        // Render view
         res.render('Contents/Main', {
             allPosts: feedResult.posts,
             user: user.toJSON(),
@@ -69,16 +59,11 @@ router.get('/', authenticate.user_auth, async (req: Request, res: Response): Pro
         console.error('Feed router error:', error);
         res.status(500).json({
             success: false,
-            error:'Failed to fetch feed'
+            error: 'Failed to fetch feed'
         });
     }
 });
 
-/**
- * @router   GET /feed/json
- * @desc    Get user feed as JSON (for AJAX/API requests)
- * @access  Private
- */
 router.get('/json', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).admin?.id;
@@ -91,10 +76,9 @@ router.get('/json', authenticate.user_auth, async (req: Request, res: Response):
             return;
         }
 
-        // Validate limit
         let limit: number;
         try {
-            limit = feedController.validateLimit(req.query.limit);
+            limit = FeedController.validateLimit(req.query.limit);
         } catch (error: any) {
             res.status(400).json({
                 success: false,
@@ -105,14 +89,12 @@ router.get('/json', authenticate.user_auth, async (req: Request, res: Response):
 
         const cursor = req.query.cursor as string;
 
-        // Get feed
-        const feedResult = await feedController.getFeed({
+        const feedResult = await FeedController.getFeed({
             userId,
             limit,
             cursor
         });
 
-        // Return JSON
         res.json({
             success: true,
             data: feedResult
@@ -127,14 +109,6 @@ router.get('/json', authenticate.user_auth, async (req: Request, res: Response):
     }
 });
 
-/**
- * @router   POST /feed/clear-cache
- * @desc    Clear user feed cache for reload
- * @access  Private
- */
-
-//cache-luu lai 10 bai, khi reload lai không cần truy vấn nữa
-//clear all cache cua admin( pattern co userId)
 router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Response): Promise<void> => {
     try {
         const userId = (req as any).admin?.id;
@@ -147,8 +121,7 @@ router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Re
             return;
         }
 
-        // Clear cache
-        await feedController.clearCache(userId);
+        await FeedController.clearCache(userId);
 
         res.json({
             success: true,
@@ -164,4 +137,4 @@ router.post('/clear-cache', authenticate.user_auth, async (req: Request, res: Re
     }
 });
 
-export { router as router };
+export default router;

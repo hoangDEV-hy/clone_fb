@@ -1,10 +1,16 @@
 import express from "express"
 import multer from "multer";
-let router = express.Router();
-//for creating file in a disk
+
+// ============================================================
+// UPLOAD ROUTES
+// Responsibility: Define endpoints, attach middleware, call controller
+// ============================================================
+
+const router = express.Router();
+
 const storage: any = multer.diskStorage({
     destination: (req, file, cb) => {
-        let folder = 'upload/others'; // mặc định
+        let folder = 'upload/others';
         if (file.fieldname === 'img') folder = 'upload/images';
         if (file.fieldname === 'audio') folder = 'upload/voices';
         cb(null, folder);
@@ -14,12 +20,13 @@ const storage: any = multer.diskStorage({
         cb(null, uniqueName);
     }
 })
-//for reading files
+
 const upload = multer({ storage });
 const uploadMiddleware = upload.fields([
     { name: 'img' },
     { name: 'audio' }
 ])
+
 router.post('/data', uploadMiddleware, (req: any, res: any): void => {
     const file = req.files;
     let resuilt: any = {};
@@ -28,4 +35,4 @@ router.post('/data', uploadMiddleware, (req: any, res: any): void => {
     return res.json(resuilt)
 })
 
-export { router }
+export default router;

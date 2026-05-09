@@ -1,14 +1,21 @@
 import express from 'express'
-import { router as user } from './Users'
-import { router as group_user } from './GroupUsers'
-import { router as Post } from './Posts'
-import { router as Follower } from './Router_Follower'
-import { router as Friend } from './UserUsers'
-let router = express.Router();
+import userRoutes from './Users'
+import group_userRoutes from './GroupUsers'
+import postRoutes from './Posts'
+import followerRoutes from './Router_Follower'
+import friendRoutes from './UserUsers'
 
-router.use('/user', user);
-router.use('/group_user', group_user);
-router.use('/Post', Post);
-router.use('/follower', Follower);
-router.use('/friends', Friend);
-export { router }
+// ============================================================
+// PAGE MANAGER ROUTES INDEX
+// Responsibility: Aggregate all page manager routes
+// ============================================================
+
+const router = express.Router();
+
+router.use('/user', userRoutes);
+router.use('/group_user', group_userRoutes);
+router.use('/Post', postRoutes);
+router.use('/follower', followerRoutes);
+router.use('/friends', friendRoutes);
+
+export default router;
